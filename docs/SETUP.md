@@ -91,7 +91,7 @@
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    ```
 6. **Settings → Networking → Public Networking → Generate Domain** → скопируйте адрес вида `https://da-zby-production-xxxx.up.railway.app`.
-7. `NEXT_PUBLIC_SITE_URL` менять не нужно: на Railway адрес сайта берётся из сгенерированного домена автоматически (DAZBY-42). Задайте его явно, только когда появится свой домен.
+7. `NEXT_PUBLIC_SITE_URL` менять не нужно: на Railway адрес сайта берётся из сгенерированного домена автоматически (DAZBY-42). Задайте его явно, только когда появится свой домен (схема `https://` добавится сама, если забыть).
 8. **Deployments** → дождитесь статуса **Active** (зелёный). Откройте адрес — должна открыться главная.
 9. Supabase → **Authentication → URL Configuration → Redirect URLs → Add URL** → `<адрес>/auth/callback` → **Save** (понадобится для входа в E3).
 10. Пришлите Claude адрес стенда (это не секрет) — он сам прогонит health и e2e по нему и закроет DAZBY-42.
