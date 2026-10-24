@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 
 // Internal design showcase (docs/design). Dev-only, so its sample texts live here, not in ru.ts.
-export const metadata: Metadata = { title: "Стайлгайд — Да забей", robots: { index: false } };
+export const metadata: Metadata = { title: "Стайлгайд", robots: { index: false } };
 
 const palette = [
   ["bg", "bg-bg"],

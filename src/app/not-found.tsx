@@ -4,7 +4,7 @@ import { buttonClasses } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ru } from "@/messages/ru";
 
-export const metadata: Metadata = { title: `${ru.notFound.title} — ${ru.site.name}` };
+export const metadata: Metadata = { title: ru.notFound.title };
 
 export default function NotFound() {
   return (
