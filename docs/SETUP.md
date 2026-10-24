@@ -69,7 +69,8 @@
 3. Раздел **Audience / Publishing status**: пока приложение в режиме **Testing**, войти могут только добавленные **Test users** — добавьте `wayreadberg@gmail.com` и тестировщиков; перед публичным запуском нажмите **Publish app** (запрашиваются только базовые данные профиля — проверка Google не нужна).
 4. **Clients → Create client** (или **Credentials → Create credentials → OAuth client ID**) → тип **Web application** → имя «da-zby web» → **Authorized redirect URIs → Add URI**: `https://lrybmorjxxbogbmmpddj.supabase.co/auth/v1/callback` → **Create**. Скопируйте **Client ID** и **Client secret**.
 5. Supabase → **Authentication → Sign In / Providers → Google** → включите → вставьте Client ID и Client secret → **Save**.
-6. Проверка: на странице входа кнопка «Войти через Google» ведёт на окно Google и возвращает на сайт.
+6. Включите кнопку: в Railway → Variables добавьте `NEXT_PUBLIC_GOOGLE_AUTH=1` (и в `.env.local` для локальной проверки), дождитесь деплоя. Без флага кнопка скрыта.
+7. Проверка: на странице входа кнопка «Войти через Google» ведёт на окно Google и возвращает на сайт.
 
 ## 🟡 F. Почта для писем входа (SMTP) (≈15 минут, когда начнёте тесты с другими людьми)
 

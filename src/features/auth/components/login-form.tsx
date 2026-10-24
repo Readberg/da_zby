@@ -8,12 +8,25 @@ import { isPlausibleEmail } from "@/lib/email";
 import { createClient } from "@/lib/supabase/client";
 import { ru } from "@/messages/ru";
 
+// Hidden until Google is configured in Supabase and Google Cloud (docs/SETUP.md, section E).
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH === "1";
+
 type Status = "idle" | "sending" | "sent";
 
 export function LoginForm({ next, linkError }: { next: string; linkError?: boolean }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(linkError ? ru.auth.errors.link : null);
+
+  async function onGoogle() {
+    setError(null);
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+    const { error: authError } = await createClient().auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+    if (authError) setError(ru.auth.errors.generic);
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,6 +81,14 @@ export function LoginForm({ next, linkError }: { next: string; linkError?: boole
       <Button type="submit" disabled={status === "sending"}>
         {status === "sending" ? ru.auth.sending : ru.auth.send}
       </Button>
+      {GOOGLE_ENABLED && (
+        <>
+          <p className="text-center text-sm text-muted">{ru.auth.or}</p>
+          <Button type="button" variant="secondary" onClick={onGoogle}>
+            {ru.auth.google}
+          </Button>
+        </>
+      )}
     </form>
   );
 }
