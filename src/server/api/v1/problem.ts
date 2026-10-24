@@ -5,10 +5,14 @@ export const ERROR_CODES = {
   versionUnsupported: "api.version_unsupported",
   notFound: "api.not_found",
   validationFailed: "api.validation_failed",
+  invalidJson: "api.invalid_json",
   internal: "api.internal_error",
   authRequired: "auth.required",
   forbidden: "auth.forbidden",
   videosUnavailable: "videos.unavailable",
+  profileNotFound: "profile.not_found",
+  nicknameTaken: "profile.nickname_taken",
+  nicknameLocked: "profile.nickname_locked",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});

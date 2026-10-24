@@ -1,5 +1,11 @@
 import { defineEndpoint } from "./endpoint";
 import { healthSchema, openApiDocumentSchema, versionSchema } from "./schemas/system";
+import { profilePatchSchema } from "@/lib/profile-schema";
+import {
+  nicknameAvailabilityQuerySchema,
+  nicknameAvailabilitySchema,
+  profileMeSchema,
+} from "./schemas/profile";
 import { listMetaSchema, videoListSchema, videosQuerySchema } from "./schemas/videos";
 
 /** Registry of all API v1 endpoints: route handlers and the OpenAPI document both read it. */
@@ -31,6 +37,40 @@ export const endpoints = {
     auth: "public",
     output: openApiDocumentSchema,
     cacheControl: "public, max-age=300",
+  }),
+  meGet: defineEndpoint({
+    method: "get",
+    path: "/me",
+    summary: "Own profile",
+    tags: ["profile"],
+    auth: "user",
+    output: profileMeSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404],
+  }),
+  mePatch: defineEndpoint({
+    method: "patch",
+    path: "/me",
+    summary: "Update own profile",
+    description:
+      "Partial update. The nickname can be set once (onboarding) and is locked afterwards; an empty string clears optional text fields. Role and e-mail cannot be changed here.",
+    tags: ["profile"],
+    auth: "user",
+    body: profilePatchSchema,
+    output: profileMeSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 404, 409, 422],
+  }),
+  nicknameAvailability: defineEndpoint({
+    method: "get",
+    path: "/nickname-availability",
+    summary: "Check whether a nickname is valid and free",
+    tags: ["profile"],
+    auth: "public",
+    query: nicknameAvailabilityQuerySchema,
+    output: nicknameAvailabilitySchema,
+    cacheControl: "no-store",
+    errors: [422],
   }),
   videos: defineEndpoint({
     method: "get",

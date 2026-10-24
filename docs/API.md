@@ -75,6 +75,17 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 Последние обычные видео канала (без Shorts), новые первыми. `?limit=1..100` (по умолчанию 20; RSS отдаёт максимум 15). Элемент: `id`, `title`, `publishedAt` (UTC), `thumbnailUrl` (480×360), `url`. `meta: { limit, nextCursor: null }`.
 Источник — RSS (D-027, D-045): плейлист длинных видео `UULF…`, при сбое — фид канала с фильтром Shorts. Кеш в памяти процесса 1 час; при недоступности YouTube отдаётся последний удачный список, без него — `503 videos.unavailable`. `Cache-Control: public, max-age=300`.
 
+### Профиль (DAZBY-47)
+
+| Эндпоинт | Доступ | Что делает |
+|---|---|---|
+| `GET /me` | user | Свой профиль: ник, имя, контакт, о себе, `avatarUrl`, страна (ISO), город, `utcOffsetMinutes`, роль, `email` (виден только владельцу), даты |
+| `PATCH /me` | user | Частичное обновление. Поля: `nickname`, `fullName`, `contact`, `about` (≤ 1000), `countryCode` (из списка ISO или `null`), `city`, `utcOffsetMinutes` (−720…840). Пустая строка очищает текстовое поле. Роль и email изменить нельзя (лишние поля игнорируются). **Ник задаётся один раз** (онбординг) и затем закреплён: другой ник → `409 profile.nickname_locked`; занятый → `409 profile.nickname_taken` |
+| `GET /nickname-availability?nickname=` | public | `{ valid, available }`; проверка без учёта регистра |
+
+Тело запроса описано в OpenAPI (`requestBody`); невалидный JSON → `400 api.invalid_json`, нарушение схемы → `422 api.validation_failed` с `errors[]`. Ответы `/me` — `Cache-Control: private, no-store`.
+Новые коды: `api.invalid_json`, `profile.not_found`, `profile.nickname_taken`, `profile.nickname_locked`.
+
 ## Отложено (не делать без задачи)
 
 Rate limiting (когда появится публичный доступ и трафик), ключи API для внешних клиентов, webhooks, GraphQL, SDK-генерация. Заглушки и «на вырост» не писать.

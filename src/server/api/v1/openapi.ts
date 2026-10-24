@@ -56,6 +56,12 @@ function operation(name: string, endpoint: EndpointDef) {
 
   const errorStatuses = [...new Set([...(endpoint.errors ?? []), 500])].sort();
   const parameters = queryParameters(endpoint);
+  const requestBody = endpoint.body
+    ? {
+        required: true,
+        content: { "application/json": { schema: toSchema(endpoint.body, "input") } },
+      }
+    : undefined;
 
   return {
     operationId: name,
@@ -63,6 +69,7 @@ function operation(name: string, endpoint: EndpointDef) {
     ...(endpoint.description ? { description: endpoint.description } : {}),
     tags: endpoint.tags,
     ...(parameters ? { parameters } : {}),
+    ...(requestBody ? { requestBody } : {}),
     ...(endpoint.auth === "public" ? { security: [] } : {}),
     "x-auth-level": endpoint.auth,
     responses: {
