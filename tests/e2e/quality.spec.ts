@@ -91,6 +91,9 @@ test("home with videos has no horizontal scroll", async ({ page }) => {
 });
 
 test("styleguide is hidden in production", async ({ request }) => {
-  test.skip(!process.env.CI, "CI serves the production build; locally the dev server shows it");
+  test.skip(
+    !process.env.CI && !process.env.E2E_BASE_URL,
+    "production build only (CI or a deployed stand); the local dev server shows it",
+  );
   expect((await request.get("/styleguide")).status()).toBe(404);
 });
