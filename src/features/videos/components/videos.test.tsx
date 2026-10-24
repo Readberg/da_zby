@@ -41,7 +41,6 @@ describe("VideoShowcase", () => {
   });
 
   it("switches the player to a video from the grid", async () => {
-    window.HTMLElement.prototype.scrollIntoView = vi.fn();
     render(<VideoShowcase videos={videos} />);
     await userEvent.click(screen.getByRole("button", { name: /Выпуск 3/ }));
 
