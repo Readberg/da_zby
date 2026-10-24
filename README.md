@@ -21,3 +21,7 @@ pnpm dev                     # http://localhost:3000
 |---|---|
 | `pnpm dev` | Режим разработки |
 | `pnpm build` / `pnpm start` | Production-сборка и запуск |
+| `pnpm lint` | ESLint + проверка форматирования Prettier (`pnpm format` — исправить) |
+| `pnpm typecheck` | Генерация типов маршрутов и проверка TypeScript |
+| `pnpm test` | Unit-тесты (Vitest) |
+| `pnpm test:e2e` | E2E smoke (Playwright; один раз: `pnpm exec playwright install chromium`) |
