@@ -9,6 +9,7 @@ export type AuthLevel = "public" | "user" | "admin";
 export type EndpointDef<
   Query extends z.ZodObject = z.ZodObject,
   Output extends z.ZodType = z.ZodType,
+  Body extends z.ZodType = z.ZodType,
 > = {
   method: "get" | "post" | "put" | "patch" | "delete";
   /** Path relative to `/api/v1`, e.g. `/health`. */
@@ -18,6 +19,8 @@ export type EndpointDef<
   tags: string[];
   auth: AuthLevel;
   query?: Query;
+  /** JSON request body (POST/PUT/PATCH); invalid JSON is 400, schema violations are 422. */
+  body?: Body;
   /** Schema of `data` in the success envelope. */
   output: Output;
   /** Schema of `meta` in the success envelope (defaults to an empty object). */
@@ -27,8 +30,10 @@ export type EndpointDef<
   errors?: number[];
 };
 
-export function defineEndpoint<Query extends z.ZodObject, Output extends z.ZodType>(
-  def: EndpointDef<Query, Output>,
-): EndpointDef<Query, Output> {
+export function defineEndpoint<
+  Query extends z.ZodObject,
+  Output extends z.ZodType,
+  Body extends z.ZodType = z.ZodType,
+>(def: EndpointDef<Query, Output, Body>): EndpointDef<Query, Output, Body> {
   return def;
 }

@@ -47,4 +47,31 @@ test.describe("API v1", () => {
       expect(body.errors[0].field).toBe("limit");
     });
   }
+
+  test("own profile endpoints require sign-in", async ({ request }) => {
+    for (const response of [
+      await request.get("/api/v1/me"),
+      await request.patch("/api/v1/me", { data: { city: "Минск" } }),
+    ]) {
+      expect(response.status()).toBe(401);
+      expect(response.headers()["content-type"]).toMatch(/^application\/problem\+json/);
+      expect((await response.json()).code).toBe("auth.required");
+    }
+  });
+
+  test("nickname availability talks to the real database", async ({ request }) => {
+    const check = async (nickname: string) =>
+      (
+        await (
+          await request.get(
+            `/api/v1/nickname-availability?nickname=${encodeURIComponent(nickname)}`,
+          )
+        ).json()
+      ).data;
+    expect(await check("a b")).toEqual({ valid: false, available: false });
+    expect(await check("Свободный_ник_" + Date.now().toString().slice(-4))).toEqual({
+      valid: true,
+      available: true,
+    });
+  });
 });
