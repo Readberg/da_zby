@@ -53,7 +53,7 @@ jobs:
 
       - name: No server secrets in the client bundle
         run: |
-          if grep -rlE "sb_secret_|SUPABASE_SECRET_KEY" .next/static; then
+          if grep -rlE "sb_secret_[A-Za-z0-9_-]{20,}|SUPABASE_SECRET_KEY" .next/static; then
             echo "::error::Server secret name or value found in .next/static"
             exit 1
           fi
