@@ -233,6 +233,575 @@
         }
       }
     },
+    "/me": {
+      "get": {
+        "operationId": "meGet",
+        "summary": "Own profile",
+        "tags": [
+          "profile"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "User id (UUID)."
+                        },
+                        "nickname": {
+                          "description": "Null until onboarding is completed.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "fullName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "contact": {
+                          "description": "Public contact (Telegram, Instagram…).",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "about": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "avatarUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "uri"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Public URL of the photo."
+                        },
+                        "countryCode": {
+                          "description": "ISO 3166-1 alpha-2.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "city": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "utcOffsetMinutes": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Display time zone as a fixed UTC offset."
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "admin"
+                          ]
+                        },
+                        "email": {
+                          "description": "Visible only to the owner of the profile.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "ISO 8601, UTC."
+                        },
+                        "lastLoginAt": {
+                          "description": "ISO 8601, UTC.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "nickname",
+                        "fullName",
+                        "contact",
+                        "about",
+                        "avatarUrl",
+                        "countryCode",
+                        "city",
+                        "utcOffsetMinutes",
+                        "role",
+                        "email",
+                        "createdAt",
+                        "lastLoginAt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "mePatch",
+        "summary": "Update own profile",
+        "description": "Partial update. The nickname can be set once (onboarding) and is locked afterwards; an empty string clears optional text fields. A photo is uploaded straight to storage (own folder, RLS) and then attached with `avatarPath`; `null` removes it. Role and e-mail cannot be changed here.",
+        "tags": [
+          "profile"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nickname": {
+                    "type": "string",
+                    "pattern": "^[A-Za-zА-Яа-яЁё0-9_]{3,20}$"
+                  },
+                  "fullName": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "contact": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "about": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "countryCode": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "city": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "avatarPath": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f-]{36}\\/[\\w-]{1,64}\\.(jpg|png|webp)$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "utcOffsetMinutes": {
+                    "type": "integer",
+                    "minimum": -720,
+                    "maximum": 840
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "User id (UUID)."
+                        },
+                        "nickname": {
+                          "description": "Null until onboarding is completed.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "fullName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "contact": {
+                          "description": "Public contact (Telegram, Instagram…).",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "about": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "avatarUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "uri"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Public URL of the photo."
+                        },
+                        "countryCode": {
+                          "description": "ISO 3166-1 alpha-2.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "city": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "utcOffsetMinutes": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Display time zone as a fixed UTC offset."
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "admin"
+                          ]
+                        },
+                        "email": {
+                          "description": "Visible only to the owner of the profile.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "ISO 8601, UTC."
+                        },
+                        "lastLoginAt": {
+                          "description": "ISO 8601, UTC.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "nickname",
+                        "fullName",
+                        "contact",
+                        "about",
+                        "avatarUrl",
+                        "countryCode",
+                        "city",
+                        "utcOffsetMinutes",
+                        "role",
+                        "email",
+                        "createdAt",
+                        "lastLoginAt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nickname-availability": {
+      "get": {
+        "operationId": "nicknameAvailability",
+        "summary": "Check whether a nickname is valid and free",
+        "tags": [
+          "profile"
+        ],
+        "parameters": [
+          {
+            "name": "nickname",
+            "in": "query",
+            "required": true,
+            "description": "Nickname to check (case-insensitive).",
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Nickname to check (case-insensitive)."
+            }
+          }
+        ],
+        "security": [],
+        "x-auth-level": "public",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "valid": {
+                          "type": "boolean",
+                          "description": "Matches the nickname rules (3–20 letters, digits, _)."
+                        },
+                        "available": {
+                          "type": "boolean",
+                          "description": "Valid and not taken by anyone."
+                        }
+                      },
+                      "required": [
+                        "valid",
+                        "available"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/videos": {
       "get": {
         "operationId": "videos",

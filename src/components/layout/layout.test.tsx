@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("./user-menu", () => ({ UserMenu: () => null }));
 
 const { SiteHeader } = await import("./site-header");
 const { SiteFooter } = await import("./site-footer");

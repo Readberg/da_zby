@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { Avatar } from "@/components/ui/avatar";
 import { ResultBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
-import { TextField } from "@/components/ui/field";
+import { SelectField, TextField, TextareaField } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 
@@ -94,6 +95,25 @@ export default function StyleguidePage() {
             error="Введите корректный email"
           />
           <TextField id="sg-disabled" label="Недоступно" defaultValue="Нельзя менять" disabled />
+          <TextareaField
+            id="sg-about"
+            label="О себе"
+            hint="0/1000"
+            defaultValue="Люблю белорусский футбол"
+          />
+          <SelectField id="sg-country" label="Страна" defaultValue="BY">
+            <option value="">Не выбрана</option>
+            <option value="BY">Беларусь</option>
+            <option value="PL">Польша</option>
+          </SelectField>
+        </div>
+      </Section>
+
+      <Section id="avatar" title="Аватар">
+        <div className="flex flex-wrap items-center gap-4">
+          <Avatar name="Readberg" size="sm" />
+          <Avatar name="Баранки" size="md" />
+          <Avatar name="Prognozist" size="lg" />
         </div>
       </Section>
 

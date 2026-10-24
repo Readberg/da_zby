@@ -6,17 +6,7 @@ export const publicEnvSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
 });
 
-export const serverEnvSchema = z.object({
-  // Not used by any 0.1.0 feature yet, so it stays optional until the first admin operation needs it.
-  SUPABASE_SECRET_KEY: z
-    .string()
-    .regex(/^(sb_secret_|eyJ)/, "expected an sb_secret_… key (or the legacy service_role JWT)")
-    .optional(),
-  YOUTUBE_CHANNEL_ID: z.string().regex(/^UC[\w-]{22}$/, "expected a channel id like UC…"),
-});
-
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
-export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
 /** Parses env values and throws one readable error that names every bad variable. */
 export function parseEnv<S extends z.ZodType>(

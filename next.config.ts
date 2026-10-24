@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { resolveSiteUrl } from "./src/lib/site-url";
+
+const siteUrl = resolveSiteUrl(process.env);
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -7,11 +10,16 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   images: {
     // YouTube video previews.
-    remotePatterns: [new URL("https://i.ytimg.com/vi/**")],
+    remotePatterns: [
+      new URL("https://i.ytimg.com/vi/**"),
+      // User photos from the public Supabase Storage bucket "avatars".
+      new URL("https://*.supabase.co/storage/v1/object/public/avatars/**"),
+    ],
   },
   env: {
     // Exposed by GET /api/v1/version.
     APP_BUILD_DATE: new Date().toISOString(),
+    ...(siteUrl ? { NEXT_PUBLIC_SITE_URL: siteUrl } : {}),
   },
   turbopack: {
     rules: {

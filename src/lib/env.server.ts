@@ -1,5 +1,6 @@
 import "server-only";
-import { parseEnv, serverEnvSchema } from "./env-schema";
+import { parseEnv } from "./env-schema";
+import { serverEnvSchema } from "./env-server-schema";
 
 export const serverEnv = parseEnv(serverEnvSchema, {
   SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,

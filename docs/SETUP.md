@@ -69,15 +69,37 @@
 3. Раздел **Audience / Publishing status**: пока приложение в режиме **Testing**, войти могут только добавленные **Test users** — добавьте `wayreadberg@gmail.com` и тестировщиков; перед публичным запуском нажмите **Publish app** (запрашиваются только базовые данные профиля — проверка Google не нужна).
 4. **Clients → Create client** (или **Credentials → Create credentials → OAuth client ID**) → тип **Web application** → имя «da-zby web» → **Authorized redirect URIs → Add URI**: `https://lrybmorjxxbogbmmpddj.supabase.co/auth/v1/callback` → **Create**. Скопируйте **Client ID** и **Client secret**.
 5. Supabase → **Authentication → Sign In / Providers → Google** → включите → вставьте Client ID и Client secret → **Save**.
-6. Проверка: на странице входа кнопка «Войти через Google» ведёт на окно Google и возвращает на сайт.
+6. Включите кнопку: в Railway → Variables добавьте `NEXT_PUBLIC_GOOGLE_AUTH=1` (и в `.env.local` для локальной проверки), дождитесь деплоя. Без флага кнопка скрыта.
+7. Проверка: на странице входа кнопка «Войти через Google» ведёт на окно Google и возвращает на сайт.
 
 ## 🟡 F. Почта для писем входа (SMTP) (≈15 минут, когда начнёте тесты с другими людьми)
 
 Выберите сервис (Resend, Brevo и т.п. — это ключевое решение, Claude заведёт задачу «Анализ» с вариантами). Далее: зарегистрируйтесь → создайте API-ключ/SMTP-доступ → Supabase → **Authentication → Emails → SMTP Settings** (в старом интерфейсе **Project Settings → Authentication → SMTP**) → **Enable custom SMTP** → вставьте хост, порт, логин, пароль, адрес отправителя → **Save**. Проверка: письмо входа приходит быстро и не в спам.
 
+## 🟡 R. Тестовый стенд на Railway (DAZBY-42, ≈15 минут)
+
+Сайт по публичному адресу, который сам обновляется после каждого мержа в `dev`. Сборка и запуск уже описаны в `railway.json` — в интерфейсе их задавать не нужно.
+
+1. https://railway.com → **Login** → **Continue with GitHub** (тот же аккаунт Readberg).
+2. Тариф: пробный период даёт стартовый кредит; для постоянной работы нужен платный план (на момент планирования Hobby ≈ $5/мес — актуальную цену проверьте на https://railway.com/pricing перед привязкой карты). Карту вводите сами.
+3. **New Project → Deploy from GitHub repo** → если репозитория нет в списке: **Configure GitHub App** → доступ к `Readberg/da_zby` → **Save** → вернуться и выбрать `Readberg/da_zby`.
+4. Откроется сервис. Сразу **Settings → Source → Branch** → выберите **`dev`** (это тестовый стенд; прод из `main` — позже, E8).
+5. **Variables → Raw Editor** → вставьте (это публичные значения, не секреты) → **Update Variables**:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://lrybmorjxxbogbmmpddj.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GgweOwuWyidSPX_uWXpcvQ_uJgnxI0K
+   YOUTUBE_CHANNEL_ID=UCsfcA6cY0bSL781TE3XMEPA
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   ```
+6. **Settings → Networking → Public Networking → Generate Domain** → скопируйте адрес вида `https://da-zby-production-xxxx.up.railway.app`.
+7. `NEXT_PUBLIC_SITE_URL` менять не нужно: на Railway адрес сайта берётся из сгенерированного домена автоматически (DAZBY-42). Задайте его явно, только когда появится свой домен (схема `https://` добавится сама, если забыть).
+8. **Deployments** → дождитесь статуса **Active** (зелёный). Откройте адрес — должна открыться главная.
+9. Supabase → **Authentication → URL Configuration → Redirect URLs → Add URL** → `<адрес>/auth/callback` → **Save** (понадобится для входа в E3).
+10. Пришлите Claude адрес стенда (это не секрет) — он сам прогонит health и e2e по нему и закроет DAZBY-42.
+
 ## 🟢 G. В самом конце
 
-- **Railway:** https://railway.app → **New project → Deploy from GitHub repo** → `Readberg/da_zby` → ветка `main` → **Variables**: перенесите значения из `.env.local` (без `JIRA_*`) → **Deploy**. Временный адрес Railway добавьте в Supabase → URL Configuration (Redirect URLs).
+- **Прод на Railway:** отдельный сервис/окружение из ветки `main` с прод-Supabase (E8).
 - **Telegram-вход (эпик E7):** в Telegram откройте @BotFather → `/newbot` → имя и username → получите токен бота (секрет!) → `/setdomain` → укажите домен сайта. Домен нужен заранее, поэтому этап после покупки домена.
 - **Прод-проект Supabase:** создать отдельный проект, применить те же миграции, заменить ключи и адреса.
 - **Домен:** купить, привязать в Railway, добавить в Supabase и Google (Authorized domains/Redirect URIs).

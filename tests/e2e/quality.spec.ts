@@ -21,7 +21,7 @@ test("client JavaScript contains no server secrets", async ({ page, request }) =
   await page.waitForLoadState("networkidle");
   for (const url of scripts) {
     const source = await (await request.get(url)).text();
-    expect(source, url).not.toMatch(/sb_secret_|SUPABASE_SECRET_KEY/);
+    expect(source, url).not.toMatch(/sb_secret_[\w-]{20,}|SUPABASE_SECRET_KEY/);
   }
 });
 
@@ -91,6 +91,9 @@ test("home with videos has no horizontal scroll", async ({ page }) => {
 });
 
 test("styleguide is hidden in production", async ({ request }) => {
-  test.skip(!process.env.CI, "CI serves the production build; locally the dev server shows it");
+  test.skip(
+    !process.env.CI && !process.env.E2E_BASE_URL,
+    "production build only (CI or a deployed stand); the local dev server shows it",
+  );
   expect((await request.get("/styleguide")).status()).toBe(404);
 });

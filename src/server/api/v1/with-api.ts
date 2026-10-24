@@ -8,10 +8,11 @@ import type { EndpointDef } from "./endpoint";
 import { jsonResponse, problemResponse, resolveRequestId } from "./http";
 import { ApiError, ERROR_CODES, type FieldError } from "./problem";
 
-export type ApiContext<Query> = {
+export type ApiContext<Query, Body = undefined> = {
   request: NextRequest;
   requestId: string;
   query: Query;
+  body: Body;
   supabase: SupabaseClient<Database>;
   /** Present for `user` and `admin` endpoints. */
   user: User | null;
@@ -62,9 +63,15 @@ async function authenticate(
  * output contract check, `{ data, meta }` envelope and problem+json errors.
  * Business logic stays in `src/server/services`.
  */
-export function withApi<Query extends z.ZodObject, Output extends z.ZodType>(
-  endpoint: EndpointDef<Query, Output>,
-  handler: (ctx: ApiContext<z.infer<Query>>) => Promise<HandlerResult<z.infer<Output>>>,
+export function withApi<
+  Query extends z.ZodObject,
+  Output extends z.ZodType,
+  Body extends z.ZodType = z.ZodType,
+>(
+  endpoint: EndpointDef<Query, Output, Body>,
+  handler: (
+    ctx: ApiContext<z.infer<Query>, z.infer<Body>>,
+  ) => Promise<HandlerResult<z.infer<Output>>>,
 ) {
   return async function route(request: NextRequest): Promise<Response> {
     const requestId = resolveRequestId(request.headers);
@@ -88,9 +95,35 @@ export function withApi<Query extends z.ZodObject, Output extends z.ZodType>(
         query = parsed.data;
       }
 
+      let body = undefined as z.infer<Body>;
+      if (endpoint.body) {
+        let raw: unknown;
+        try {
+          raw = await request.json();
+        } catch {
+          throw new ApiError(
+            400,
+            ERROR_CODES.invalidJson,
+            "Bad Request",
+            "Request body must be valid JSON.",
+          );
+        }
+        const parsed = endpoint.body.safeParse(raw);
+        if (!parsed.success) {
+          throw new ApiError(
+            422,
+            ERROR_CODES.validationFailed,
+            "Unprocessable Content",
+            "Request body is invalid.",
+            issuesToFieldErrors(parsed.error.issues),
+          );
+        }
+        body = parsed.data;
+      }
+
       const supabase = await createClient();
       const user = await authenticate(endpoint.auth, request, supabase);
-      const result = await handler({ request, requestId, query, supabase, user });
+      const result = await handler({ request, requestId, query, body, supabase, user });
 
       // The handler must honour the published contract; a mismatch is a server bug, not a client error.
       const data = endpoint.output.parse(result.data);
