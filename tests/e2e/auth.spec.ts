@@ -45,6 +45,20 @@ test.describe("onboarding", () => {
   });
 });
 
+test.describe("profile pages", () => {
+  test("a guest on /profile is sent to login and returns after signing in", async ({ page }) => {
+    await page.goto("/profile");
+    await expect(page).toHaveURL(/\/login\?next=%2Fprofile$/);
+  });
+
+  test("an unknown nickname shows the not-found page", async ({ page }) => {
+    // The profile streams in behind a Suspense boundary, so the HTTP status is already 200 when
+    // the lookup fails (D-052); the visitor still gets the regular not-found page.
+    await page.goto("/u/net_takogo_nika_123456");
+    await expect(page.getByRole("heading", { name: "Страница не найдена" })).toBeVisible();
+  });
+});
+
 test.describe("auth routes", () => {
   test("a callback without a code sends the guest back with an error message", async ({ page }) => {
     await page.goto("/auth/callback");
