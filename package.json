@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "db:push": "npx -y supabase@2 db push",
     "db:types": "npx -y supabase@2 gen types typescript --linked --schema public > src/types/database.ts && prettier --write src/types/database.ts",
-    "api:openapi": "tsx scripts/generate-openapi.ts"
+    "api:openapi": "tsx scripts/generate-openapi.ts",
+    "design:snap": "playwright test -c playwright.design.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

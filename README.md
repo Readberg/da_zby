@@ -28,3 +28,4 @@ pnpm dev                     # http://localhost:3000
 | `pnpm db:push` | Применить миграции к dev-Supabase (нужны `supabase login` и `supabase link --project-ref lrybmorjxxbogbmmpddj`) |
 | `pnpm db:types` | Перегенерировать `src/types/database.ts` из привязанного проекта |
 | `pnpm api:openapi` | Перегенерировать снимок `docs/api/openapi.v1.json` |
+| `pnpm design:snap` | Снимки компонентов и экранов в `docs/design/` |
