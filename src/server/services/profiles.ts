@@ -82,6 +82,19 @@ export async function updateOwnProfile(
   if (patch.about !== undefined) update.about = patch.about;
   if (patch.countryCode !== undefined) update.country_code = patch.countryCode;
   if (patch.city !== undefined) update.city = patch.city;
+  if (patch.avatarPath !== undefined) {
+    // Storage RLS lets users write only into their own folder; refuse to point at anyone else's file.
+    if (patch.avatarPath !== null && !patch.avatarPath.startsWith(`${user.id}/`)) {
+      throw new ApiError(
+        422,
+        ERROR_CODES.validationFailed,
+        "Unprocessable Content",
+        "Photo path is not yours.",
+        [{ field: "avatarPath", message: "Фото должно быть загружено вами" }],
+      );
+    }
+    update.avatar_path = patch.avatarPath;
+  }
   if (patch.utcOffsetMinutes !== undefined) update.utc_offset_minutes = patch.utcOffsetMinutes;
 
   if (Object.keys(update).length === 0) return toDto(current, user.email ?? null);

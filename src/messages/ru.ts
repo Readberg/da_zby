@@ -58,6 +58,20 @@ export const ru = {
       generic: "Не удалось отправить письмо. Попробуйте позже.",
     },
   },
+  avatar: {
+    title: "Фото",
+    choose: "Выбрать фото",
+    replace: "Заменить фото",
+    remove: "Удалить фото",
+    uploading: "Загружаем…",
+    hint: "JPEG, PNG или WebP, до 2 МБ.",
+    errors: {
+      type: "Подходят только JPEG, PNG и WebP.",
+      size: "Файл больше 2 МБ.",
+      empty: "Файл пустой.",
+      upload: "Не удалось загрузить фото. Попробуйте ещё раз.",
+    },
+  },
   publicProfile: {
     title: "Профиль участника",
     contact: "Контакт",

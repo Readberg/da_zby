@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AvatarUploader } from "@/features/profile/components/avatar-uploader";
 import { ProfileForm } from "@/features/profile/components/profile-form";
 import { countryOptions } from "@/lib/countries";
 import { createClient } from "@/lib/supabase/server";
@@ -38,6 +39,12 @@ async function ProfileContent() {
       >
         {ru.profile.publicLink}
       </Link>
+      <AvatarUploader
+        userId={user.id}
+        nickname={user.nickname}
+        currentUrl={profile.avatarUrl}
+        currentPath={user.avatarPath}
+      />
       <ProfileForm
         countries={countryOptions()}
         initial={{

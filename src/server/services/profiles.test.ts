@@ -135,6 +135,34 @@ describe("updateOwnProfile", () => {
   });
 });
 
+describe("updateOwnProfile — photo", () => {
+  it("attaches a photo from the user's own folder", async () => {
+    const { db, calls } = fakeDb({
+      current: row({ nickname: "Readberg" }),
+      updated: row({ nickname: "Readberg", avatar_path: "u1/a.png" }),
+    });
+    await updateOwnProfile(db, user, { avatarPath: "u1/a.png" });
+    expect(calls.update).toEqual({ avatar_path: "u1/a.png" });
+  });
+
+  it("refuses a path in somebody else's folder", async () => {
+    const { db, calls } = fakeDb({ current: row({ nickname: "Readberg" }) });
+    await expect(updateOwnProfile(db, user, { avatarPath: "other/a.png" })).rejects.toMatchObject({
+      status: 422,
+    });
+    expect(calls.update).toBeUndefined();
+  });
+
+  it("removes the photo with null", async () => {
+    const { db, calls } = fakeDb({
+      current: row({ nickname: "Readberg", avatar_path: "u1/a.png" }),
+      updated: row({ nickname: "Readberg" }),
+    });
+    await updateOwnProfile(db, user, { avatarPath: null });
+    expect(calls.update).toEqual({ avatar_path: null });
+  });
+});
+
 describe("checkNickname", () => {
   it("rejects invalid nicknames without touching the database", async () => {
     const { db } = fakeDb({});

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AVATAR_PATH_PATTERN } from "./avatar-file";
 import { isCountryCode } from "./countries";
 
 /** Shared by the API (server) and the forms (browser): one definition of a valid profile. */
@@ -26,6 +27,8 @@ export const profilePatchSchema = z
     about: optionalText(1000),
     countryCode: z.string().refine(isCountryCode, "Выберите страну из списка").nullable(),
     city: optionalText(100),
+    /** Storage path of an already uploaded photo (`<user id>/<file>`), or null to remove it. */
+    avatarPath: z.string().regex(AVATAR_PATH_PATTERN, "Некорректный путь к фото").nullable(),
     /** Fixed UTC offset in minutes, e.g. 180 = UTC+3. */
     utcOffsetMinutes: z.number().int().min(-720, "Не меньше UTC−12").max(840, "Не больше UTC+14"),
   })

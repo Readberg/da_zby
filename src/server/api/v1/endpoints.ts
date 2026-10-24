@@ -53,7 +53,7 @@ export const endpoints = {
     path: "/me",
     summary: "Update own profile",
     description:
-      "Partial update. The nickname can be set once (onboarding) and is locked afterwards; an empty string clears optional text fields. Role and e-mail cannot be changed here.",
+      "Partial update. The nickname can be set once (onboarding) and is locked afterwards; an empty string clears optional text fields. A photo is uploaded straight to storage (own folder, RLS) and then attached with `avatarPath`; `null` removes it. Role and e-mail cannot be changed here.",
     tags: ["profile"],
     auth: "user",
     body: profilePatchSchema,

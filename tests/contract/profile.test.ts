@@ -93,6 +93,7 @@ describe("PATCH /api/v1/me", () => {
     [{ countryCode: "ZZ" }, "countryCode"],
     [{ utcOffsetMinutes: 9999 }, "utcOffsetMinutes"],
     [{ nickname: "a b" }, "nickname"],
+    [{ avatarPath: "../../etc/passwd" }, "avatarPath"],
   ])("rejects %j with 422 naming the field", async (body, field) => {
     signedIn();
     const problem = await expectProblem(await me.PATCH(patch(body)), 422, "api.validation_failed");
