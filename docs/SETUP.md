@@ -41,9 +41,14 @@
 
 1. Войдите на https://supabase.com/dashboard → откройте проект (ссылка вида `…/project/lrybmorjxxbogbmmpddj`).
 2. **Секретный ключ.** Левое меню **Project Settings → API Keys** → блок **Secret keys** (ключ вида `sb_secret_…`; в старом интерфейсе — `service_role` на вкладке Legacy API keys) → **Reveal / Create new secret key** → скопируйте. Впишите в `.env.local`: `SUPABASE_SECRET_KEY=…`. Этот ключ обходит все права — никому не показывайте и в браузерный код он не попадает.
-3. **Применить схему БД** — один из способов:
-   - **Через панель (проще, не нужен CLI):** левое меню **SQL Editor → New query** → откройте файл `supabase/migrations/20261024000000_init.sql`, вставьте весь текст → **Run** (должно быть «Success»). Затем **New query** → тот же шаг для `20261024000100_bootstrap_admin_and_kind.sql`.
-   - **Через CLI (если Claude на вашем компьютере):** сначала `supabase login` (токен создаётся на https://supabase.com/dashboard/account/tokens → **Generate new token**); затем Claude выполнит `supabase link --project-ref lrybmorjxxbogbmmpddj`; пароль БД берётся в **Project Settings → Database → Database password** (если забыли — **Reset database password**, новый вставьте в терминал по запросу, в файлы не сохраняйте).
+3. **Автоприменение миграций (D-047, делается один раз ≈5 минут).** Дальше миграции применяет GitHub Actions при мерже в `dev` — SQL Editor не нужен.
+   - **Токен доступа:** https://supabase.com/dashboard/account/tokens → **Generate new token** → имя «da_zby GitHub Actions» → скопируйте.
+   - **Пароль БД:** проект → **Project Settings → Database → Database password** → если не помните — **Reset database password** → скопируйте новый.
+   - **Положить в GitHub** (в терминале, значение вставляется в скрытый ввод и никуда больше не попадает):
+     `gh secret set SUPABASE_ACCESS_TOKEN` → вставить токен → Enter;
+     `gh secret set SUPABASE_DB_PASSWORD` → вставить пароль → Enter.
+     (Или в браузере: репозиторий → **Settings → Secrets and variables → Actions → New repository secret**.)
+   - Напишите Claude «секреты Supabase на месте» — он запустит workflow `db-migrate` и проверит схему сам.
 4. **Проверка схемы:** **Table Editor** → видны таблицы `profiles`, `tournaments`, `seasons`, `clubs`, `season_clubs`, `tours`, `matches`, `predictions`, `season_standings`, `profile_private`, `admin_bootstrap`. **Storage** → бакеты `avatars` и `club-logos`.
 5. **Вход по email.** **Authentication → Sign In / Providers** (в старом интерфейсе **Providers**) → **Email** включён; **Confirm email** включён. Вход «по ссылке из письма» работает без дополнительных настроек.
 6. **Адреса возврата.** **Authentication → URL Configuration**: **Site URL** = `http://localhost:3000`; **Redirect URLs** → **Add URL** → `http://localhost:3000/auth/callback` → **Save**. (Позже добавите адрес Railway и домен.)
