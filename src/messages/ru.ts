@@ -40,6 +40,7 @@ export const ru = {
     emailLabel: "Почта",
     emailPlaceholder: "name@example.com",
     send: "Получить ссылку",
+    or: "или",
     sending: "Отправляем…",
     sentTitle: "Проверьте почту",
     sentText: "Мы отправили ссылку для входа на {email}. Откройте письмо на этом устройстве.",

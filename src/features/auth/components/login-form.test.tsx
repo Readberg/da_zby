@@ -53,3 +53,28 @@ describe("LoginForm", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Ссылка недействительна");
   });
 });
+
+describe("LoginForm — Google", () => {
+  beforeEach(() => vi.resetModules());
+
+  it("hides the Google button unless the flag is on", () => {
+    render(<LoginForm next="/" />);
+    expect(screen.queryByRole("button", { name: "Войти через Google" })).not.toBeInTheDocument();
+  });
+
+  it("starts Google sign-in that returns through /auth/callback", async () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_AUTH", "1");
+    const signInWithOAuth = vi.fn().mockResolvedValue({ error: null });
+    vi.doMock("@/lib/supabase/client", () => ({
+      createClient: () => ({ auth: { signInWithOtp, signInWithOAuth } }),
+    }));
+    const { LoginForm: Enabled } = await import("./login-form");
+    render(<Enabled next="/profile" />);
+    await userEvent.click(screen.getByRole("button", { name: "Войти через Google" }));
+
+    const arg = signInWithOAuth.mock.calls[0]![0];
+    expect(arg.provider).toBe("google");
+    expect(arg.options.redirectTo).toMatch(/\/auth\/callback\?next=%2Fprofile$/);
+    vi.unstubAllEnvs();
+  });
+});
