@@ -26,6 +26,19 @@ describe("SiteHeader", () => {
 });
 
 describe("SiteFooter", () => {
+  it("shows every confirmed social link", () => {
+    render(<SiteFooter />);
+    const nav = screen.getByRole("navigation", { name: "Мы в соцсетях" });
+    const names = within(nav)
+      .getAllByRole("link")
+      .map((link) => link.textContent?.replace(/\s*\(.*\)$/, "").trim());
+    expect(names).toEqual(["YouTube", "Telegram", "Instagram", "TikTok", "Threads"]);
+    expect(within(nav).getByRole("link", { name: /Telegram/ })).toHaveAttribute(
+      "href",
+      "https://t.me/da_zby",
+    );
+  });
+
   it("shows YouTube and hides socials without a URL", () => {
     render(<SiteFooter />);
     const nav = screen.getByRole("navigation", { name: "Мы в соцсетях" });

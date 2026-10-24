@@ -1,13 +1,13 @@
 /**
- * Site-wide links. An empty URL hides the link: Telegram, Instagram and TikTok
- * stay hidden until the owner confirms the addresses (DAZBY-25).
+ * Site-wide links (confirmed by the owner, DAZBY-25). An empty URL hides the link.
  */
 export const siteConfig = {
   social: [
     { id: "youtube", url: "https://www.youtube.com/@da_zby" },
-    { id: "telegram", url: "" },
-    { id: "instagram", url: "" },
-    { id: "tiktok", url: "" },
+    { id: "telegram", url: "https://t.me/da_zby" },
+    { id: "instagram", url: "https://www.instagram.com/da_zby" },
+    { id: "tiktok", url: "https://www.tiktok.com/@da_zby" },
+    { id: "threads", url: "https://www.threads.com/@da_zby" },
   ],
   /** Header navigation: only pages that already exist. */
   nav: [{ id: "home", href: "/" }],

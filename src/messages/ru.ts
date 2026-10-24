@@ -20,6 +20,7 @@ export const ru = {
       telegram: "Telegram",
       instagram: "Instagram",
       tiktok: "TikTok",
+      threads: "Threads",
     },
   },
   home: {
