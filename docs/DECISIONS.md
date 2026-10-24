@@ -111,6 +111,8 @@
 
 **D-047 · 2026-10-24 · ✅ Миграции к dev-Supabase применяет GitHub Actions (`db-migrate`) при мерже в `dev`.** Решение владельца (DAZBY-39): секреты `SUPABASE_ACCESS_TOKEN`/`SUPABASE_DB_PASSWORD` хранятся в GitHub, Claude их не видит; миграции попадают в БД только через PR и зелёный CI; CI запрещает править существующие миграции. Прямой доступ Claude к БД (MCP) не используется. Прод — отдельным workflow с ручным подтверждением (E8). DAZBY-40.
 
+**D-048 · 2026-10-24 · 🛠 Тестовый стенд Railway (ветка dev) проверяется автоматически:** после каждого успешного деплоя workflow `stand-check` гоняет health и весь e2e по `https://dazby-production.up.railway.app`. Адрес сайта на Railway берётся из `RAILWAY_PUBLIC_DOMAIN`, значение без схемы нормализуется (инцидент: голый хост в `NEXT_PUBLIC_SITE_URL` ронял запуск). Диагностика падений — Railway Project Token в `.env.local` (`RAILWAY_TOKEN`). DAZBY-42.
+
 ## Шаблон новой записи
 
 ```
