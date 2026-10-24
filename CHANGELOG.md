@@ -23,6 +23,9 @@
 - Главная «Свежие видео»: ленивый плеер `youtube-nocookie`, 5 предыдущих видео, скелетон, запасной блок при недоступности YouTube (DAZBY-22).
 - SEO: метаданные, Open Graph 1200×630, иконки из логотипа, `sitemap.xml`, `robots.txt` (DAZBY-23).
 
+### Исправлено
+- Нестабильный unit-тест плеера в CI: заглушка `scrollIntoView` для jsdom перенесена в общий setup (DAZBY-22).
+
 ### API
 - Внутренний API v1 (`/api/v1`): `withApi`, конверт `{ data, meta }`, ошибки problem+json, `X-Request-Id`, `API-Version: 1`; `GET /health`, `/version`, `/openapi.json`; неизвестная версия → `404 api.version_unsupported` (DAZBY-16).
 - `GET /api/v1/videos?limit=` — последние видео канала без Shorts, кеш 1 ч, `503 videos.unavailable` (DAZBY-21).
