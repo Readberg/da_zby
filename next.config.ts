@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { resolveSiteUrl } from "./src/lib/site-url";
+
+const siteUrl = resolveSiteUrl(process.env);
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -12,6 +15,7 @@ const nextConfig: NextConfig = {
   env: {
     // Exposed by GET /api/v1/version.
     APP_BUILD_DATE: new Date().toISOString(),
+    ...(siteUrl ? { NEXT_PUBLIC_SITE_URL: siteUrl } : {}),
   },
   turbopack: {
     rules: {
