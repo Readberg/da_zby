@@ -26,6 +26,18 @@ describe("resolveSiteUrl", () => {
     );
   });
 
+  it("adds https:// to a bare host (the DAZBY-42 outage)", () => {
+    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "dazby-production.up.railway.app" })).toBe(
+      "https://dazby-production.up.railway.app",
+    );
+  });
+
+  it("trims spaces and trailing slashes", () => {
+    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: " https://dazby.by/ " })).toBe(
+      "https://dazby.by",
+    );
+  });
+
   it("leaves local development untouched", () => {
     expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "http://localhost:3000" })).toBe(
       "http://localhost:3000",
