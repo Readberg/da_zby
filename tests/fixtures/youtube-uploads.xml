@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?playlist_id=UULFsfcA6cY0bSL781TE3XMEPA"/>
+ <id>yt:playlist:UULFsfcA6cY0bSL781TE3XMEPA</id>
+ <yt:playlistId>UULFsfcA6cY0bSL781TE3XMEPA</yt:playlistId>
+ <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+ <title>Videos</title>
+ <author>
+  <name>да забей</name>
+  <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+ </author>
+ <published>2026-03-01T08:09:04+00:00</published>
+ <entry>
+  <id>yt:video:AfIb7mwS7sY</id>
+  <yt:videoId>AfIb7mwS7sY</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>БАРАНОВИЧИ. RBS. БОЛЬШОЙ ВЫПУСК. ЧАСТЬ 2</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=AfIb7mwS7sY"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-10-23T12:16:22+00:00</published>
+  <updated>2026-10-23T14:27:18+00:00</updated>
+  <media:group>
+   <media:title>БАРАНОВИЧИ. RBS. БОЛЬШОЙ ВЫПУСК. ЧАСТЬ 2</media:title>
+   <media:content url="https://www.youtube.com/v/AfIb7mwS7sY?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/AfIb7mwS7sY/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="77" average="5.00" min="1" max="5"/>
+    <media:statistics views="2250"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:nwx8BoKlHkU</id>
+  <yt:videoId>nwx8BoKlHkU</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>БАРАНОВИЧИ. RBS. БОЛЬШОЙ ВЫПУСК. ЧАСТЬ 1</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=nwx8BoKlHkU"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-10-20T09:21:28+00:00</published>
+  <updated>2026-10-20T09:21:28+00:00</updated>
+  <media:group>
+   <media:title>БАРАНОВИЧИ. RBS. БОЛЬШОЙ ВЫПУСК. ЧАСТЬ 1</media:title>
+   <media:content url="https://www.youtube.com/v/nwx8BoKlHkU?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/nwx8BoKlHkU/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="180" average="5.00" min="1" max="5"/>
+    <media:statistics views="6736"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:uVzLRpqdqPU</id>
+  <yt:videoId>uVzLRpqdqPU</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>МОСТЫ. БИТВА ЗА КУБОК</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=uVzLRpqdqPU"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-10-01T10:25:27+00:00</published>
+  <updated>2026-10-04T23:40:50+00:00</updated>
+  <media:group>
+   <media:title>МОСТЫ. БИТВА ЗА КУБОК</media:title>
+   <media:content url="https://www.youtube.com/v/uVzLRpqdqPU?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/uVzLRpqdqPU/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="171" average="5.00" min="1" max="5"/>
+    <media:statistics views="7501"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:x1XdNs5SGZw</id>
+  <yt:videoId>x1XdNs5SGZw</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>ДАНУ СПЭТАРУ. ДНЕВНИК ТИГРА. ВЫПУСК #4</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=x1XdNs5SGZw"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-09-01T16:00:09+00:00</published>
+  <updated>2026-10-14T05:15:07+00:00</updated>
+  <media:group>
+   <media:title>ДАНУ СПЭТАРУ. ДНЕВНИК ТИГРА. ВЫПУСК #4</media:title>
+   <media:content url="https://www.youtube.com/v/x1XdNs5SGZw?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/x1XdNs5SGZw/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="144" average="5.00" min="1" max="5"/>
+    <media:statistics views="6870"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:UJjef4sNrRk</id>
+  <yt:videoId>UJjef4sNrRk</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>СЛАВИЯ МОЗЫРЬ - ДНЕПР МОГИЛЕВ. 17-ЫЙ ТУР. ВЫСШАЯ ЛИГА БЕЛАРУСИ</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=UJjef4sNrRk"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-08-08T08:19:39+00:00</published>
+  <updated>2026-10-15T05:26:32+00:00</updated>
+  <media:group>
+   <media:title>СЛАВИЯ МОЗЫРЬ - ДНЕПР МОГИЛЕВ. 17-ЫЙ ТУР. ВЫСШАЯ ЛИГА БЕЛАРУСИ</media:title>
+   <media:content url="https://www.youtube.com/v/UJjef4sNrRk?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/UJjef4sNrRk/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="157" average="5.00" min="1" max="5"/>
+    <media:statistics views="3165"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:xqUml2vlRvM</id>
+  <yt:videoId>xqUml2vlRvM</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>ГОМЕЛЬ - ВИТЕБСК. РЕВАНШ. ВЫСШАЯ ЛИГА</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=xqUml2vlRvM"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-08-02T11:32:24+00:00</published>
+  <updated>2026-10-15T04:07:09+00:00</updated>
+  <media:group>
+   <media:title>ГОМЕЛЬ - ВИТЕБСК. РЕВАНШ. ВЫСШАЯ ЛИГА</media:title>
+   <media:content url="https://www.youtube.com/v/xqUml2vlRvM?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/xqUml2vlRvM/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="125" average="5.00" min="1" max="5"/>
+    <media:statistics views="1922"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:S7FCzIrvNAI</id>
+  <yt:videoId>S7FCzIrvNAI</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>КРУМКАЧЫ - ДИНАМО БРЕСТ. КУБОК 1/16. БЕЛАРУСЬ</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=S7FCzIrvNAI"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-07-20T18:25:05+00:00</published>
+  <updated>2026-10-15T05:22:32+00:00</updated>
+  <media:group>
+   <media:title>КРУМКАЧЫ - ДИНАМО БРЕСТ. КУБОК 1/16. БЕЛАРУСЬ</media:title>
+   <media:content url="https://www.youtube.com/v/S7FCzIrvNAI?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/S7FCzIrvNAI/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="78" average="5.00" min="1" max="5"/>
+    <media:statistics views="1063"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:CTPDKAamtio</id>
+  <yt:videoId>CTPDKAamtio</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>АРСЕНАЛ ДЗЕРЖИНСК - ВИТЕБСК. ВЫСШАЯ ЛИГА. 15-ЫЙ ТУР</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=CTPDKAamtio"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-07-13T13:52:49+00:00</published>
+  <updated>2026-10-15T05:09:04+00:00</updated>
+  <media:group>
+   <media:title>АРСЕНАЛ ДЗЕРЖИНСК - ВИТЕБСК. ВЫСШАЯ ЛИГА. 15-ЫЙ ТУР</media:title>
+   <media:content url="https://www.youtube.com/v/CTPDKAamtio?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/CTPDKAamtio/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="79" average="5.00" min="1" max="5"/>
+    <media:statistics views="1389"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:3a_LAJwSLxs</id>
+  <yt:videoId>3a_LAJwSLxs</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>ЕВГЕНИЙ ЮДЧИЦ. ДНЕВНИК ВОЛКА. ВЫПУСК #3</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=3a_LAJwSLxs"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-07-01T17:27:31+00:00</published>
+  <updated>2026-10-15T04:56:50+00:00</updated>
+  <media:group>
+   <media:title>ЕВГЕНИЙ ЮДЧИЦ. ДНЕВНИК ВОЛКА. ВЫПУСК #3</media:title>
+   <media:content url="https://www.youtube.com/v/3a_LAJwSLxs?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/3a_LAJwSLxs/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="89" average="5.00" min="1" max="5"/>
+    <media:statistics views="1455"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:MdWZq-Aw_p4</id>
+  <yt:videoId>MdWZq-Aw_p4</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>БАРАНОВИЧИ - СЛАВИЯ МОЗЫРЬ. ВЫСШАЯ ЛИГА</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=MdWZq-Aw_p4"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-06-27T06:27:35+00:00</published>
+  <updated>2026-10-15T04:42:02+00:00</updated>
+  <media:group>
+   <media:title>БАРАНОВИЧИ - СЛАВИЯ МОЗЫРЬ. ВЫСШАЯ ЛИГА</media:title>
+   <media:content url="https://www.youtube.com/v/MdWZq-Aw_p4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/MdWZq-Aw_p4/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="95" average="5.00" min="1" max="5"/>
+    <media:statistics views="1391"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:XB4DaYP03Ac</id>
+  <yt:videoId>XB4DaYP03Ac</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>НАФТАН НОВОПОЛОЦК – БАРАНОВИЧИ. ПЕРВАЯ ПОБЕДА. ВЫСШАЯ ЛИГА БЕЛАРУСИ</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=XB4DaYP03Ac"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-06-20T09:28:10+00:00</published>
+  <updated>2026-10-15T04:04:33+00:00</updated>
+  <media:group>
+   <media:title>НАФТАН НОВОПОЛОЦК – БАРАНОВИЧИ. ПЕРВАЯ ПОБЕДА. ВЫСШАЯ ЛИГА БЕЛАРУСИ</media:title>
+   <media:content url="https://www.youtube.com/v/XB4DaYP03Ac?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/XB4DaYP03Ac/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="92" average="5.00" min="1" max="5"/>
+    <media:statistics views="1503"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:Ue9ae6F2FYc</id>
+  <yt:videoId>Ue9ae6F2FYc</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>ВАДИМ ПОБУДЕЙ. ДНЕВНИК ТИГРА. ВЫПУСК #2</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=Ue9ae6F2FYc"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-06-16T18:34:24+00:00</published>
+  <updated>2026-10-15T05:22:58+00:00</updated>
+  <media:group>
+   <media:title>ВАДИМ ПОБУДЕЙ. ДНЕВНИК ТИГРА. ВЫПУСК #2</media:title>
+   <media:content url="https://www.youtube.com/v/Ue9ae6F2FYc?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/Ue9ae6F2FYc/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="150" average="5.00" min="1" max="5"/>
+    <media:statistics views="2589"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:UQm3s62-D84</id>
+  <yt:videoId>UQm3s62-D84</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>МЛ ВИТЕБСК - ВИТЕБСК. ДЕРБИ. ЧЕМПИОНАТ БЕЛАРУСИ. ВЫСШАЯ ЛИГА И БЕЛО-СИНИЙ ГОРОД</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=UQm3s62-D84"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-06-14T08:23:25+00:00</published>
+  <updated>2026-10-01T20:23:45+00:00</updated>
+  <media:group>
+   <media:title>МЛ ВИТЕБСК - ВИТЕБСК. ДЕРБИ. ЧЕМПИОНАТ БЕЛАРУСИ. ВЫСШАЯ ЛИГА И БЕЛО-СИНИЙ ГОРОД</media:title>
+   <media:content url="https://www.youtube.com/v/UQm3s62-D84?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/UQm3s62-D84/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="250" average="5.00" min="1" max="5"/>
+    <media:statistics views="4843"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:IgEBQFzUeds</id>
+  <yt:videoId>IgEBQFzUeds</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>БЕЛАРУСЬ - СИРИЯ. ЛАЙТ-ВЫПУСК</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=IgEBQFzUeds"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-06-05T21:39:51+00:00</published>
+  <updated>2026-10-15T05:06:47+00:00</updated>
+  <media:group>
+   <media:title>БЕЛАРУСЬ - СИРИЯ. ЛАЙТ-ВЫПУСК</media:title>
+   <media:content url="https://www.youtube.com/v/IgEBQFzUeds?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/IgEBQFzUeds/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="140" average="5.00" min="1" max="5"/>
+    <media:statistics views="3995"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:r6M5V5pPEAo</id>
+  <yt:videoId>r6M5V5pPEAo</yt:videoId>
+  <yt:channelId>UCsfcA6cY0bSL781TE3XMEPA</yt:channelId>
+  <title>ТИМОФЕЙ СИМАНЕНКА. ДНЕВНИК ТИГРА + MATCHDAY</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=r6M5V5pPEAo"/>
+  <author>
+   <name>да забей</name>
+   <uri>https://www.youtube.com/channel/UCsfcA6cY0bSL781TE3XMEPA</uri>
+  </author>
+  <published>2026-06-01T16:00:06+00:00</published>
+  <updated>2026-10-15T05:04:42+00:00</updated>
+  <media:group>
+   <media:title>ТИМОФЕЙ СИМАНЕНКА. ДНЕВНИК ТИГРА + MATCHDAY</media:title>
+   <media:content url="https://www.youtube.com/v/r6M5V5pPEAo?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/r6M5V5pPEAo/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="295" average="5.00" min="1" max="5"/>
+    <media:statistics views="5251"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

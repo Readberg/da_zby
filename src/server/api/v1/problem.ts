@@ -8,6 +8,7 @@ export const ERROR_CODES = {
   internal: "api.internal_error",
   authRequired: "auth.required",
   forbidden: "auth.forbidden",
+  videosUnavailable: "videos.unavailable",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});

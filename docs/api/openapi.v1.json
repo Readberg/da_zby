@@ -232,6 +232,152 @@
           }
         }
       }
+    },
+    "/videos": {
+      "get": {
+        "operationId": "videos",
+        "summary": "Latest regular videos of the YouTube channel (no Shorts), newest first",
+        "description": "Read from the channel's RSS and cached for an hour. If YouTube fails, the last cached list is returned; without one the endpoint answers 503 videos.unavailable.",
+        "tags": [
+          "videos"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many videos to return, 1–100 (default 20).",
+            "schema": {
+              "default": 20,
+              "description": "How many videos to return, 1–100 (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "security": [],
+        "x-auth-level": "public",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "YouTube video id."
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "publishedAt": {
+                            "type": "string",
+                            "description": "ISO 8601 publication time in UTC."
+                          },
+                          "thumbnailUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "480×360 preview image."
+                          },
+                          "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "Watch page on YouTube."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "publishedAt",
+                          "thumbnailUrl",
+                          "url"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "nextCursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "limit",
+                        "nextCursor"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

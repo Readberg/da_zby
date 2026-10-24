@@ -1,5 +1,6 @@
 import { defineEndpoint } from "./endpoint";
 import { healthSchema, openApiDocumentSchema, versionSchema } from "./schemas/system";
+import { listMetaSchema, videoListSchema, videosQuerySchema } from "./schemas/videos";
 
 /** Registry of all API v1 endpoints: route handlers and the OpenAPI document both read it. */
 export const endpoints = {
@@ -30,5 +31,19 @@ export const endpoints = {
     auth: "public",
     output: openApiDocumentSchema,
     cacheControl: "public, max-age=300",
+  }),
+  videos: defineEndpoint({
+    method: "get",
+    path: "/videos",
+    summary: "Latest regular videos of the YouTube channel (no Shorts), newest first",
+    description:
+      "Read from the channel's RSS and cached for an hour. If YouTube fails, the last cached list is returned; without one the endpoint answers 503 videos.unavailable.",
+    tags: ["videos"],
+    auth: "public",
+    query: videosQuerySchema,
+    output: videoListSchema,
+    meta: listMetaSchema,
+    cacheControl: "public, max-age=300",
+    errors: [422, 503],
   }),
 };
