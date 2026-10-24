@@ -1,0 +1,40 @@
+import { z } from "zod";
+
+export const publicEnvSchema = z.object({
+  NEXT_PUBLIC_SUPABASE_URL: z.url(),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
+});
+
+export const serverEnvSchema = z.object({
+  // Not used by any 0.1.0 feature yet, so it stays optional until the first admin operation needs it.
+  SUPABASE_SECRET_KEY: z
+    .string()
+    .regex(/^(sb_secret_|eyJ)/, "expected an sb_secret_… key (or the legacy service_role JWT)")
+    .optional(),
+  YOUTUBE_CHANNEL_ID: z.string().regex(/^UC[\w-]{22}$/, "expected a channel id like UC…"),
+});
+
+export type PublicEnv = z.infer<typeof publicEnvSchema>;
+export type ServerEnv = z.infer<typeof serverEnvSchema>;
+
+/** Parses env values and throws one readable error that names every bad variable. */
+export function parseEnv<S extends z.ZodType>(
+  schema: S,
+  source: Record<string, string | undefined>,
+): z.infer<S> {
+  // Empty strings in .env files mean "not set".
+  const cleaned = Object.fromEntries(
+    Object.entries(source).map(([key, value]) => [key, value === "" ? undefined : value]),
+  );
+  const result = schema.safeParse(cleaned);
+  if (!result.success) {
+    const lines = result.error.issues.map(
+      (issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`,
+    );
+    throw new Error(
+      `Invalid environment variables (see .env.example and docs/SETUP.md):\n${lines.join("\n")}`,
+    );
+  }
+  return result.data;
+}

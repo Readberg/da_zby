@@ -5,13 +5,31 @@
 
 ## [Не выпущено]
 
-### Добавлено
-- Стартовая документация проекта: `CLAUDE.md`, `AUTOPILOT.md`, `docs/*`, каталог задач первого запуска.
-- Библиотека дизайна `docs/design/` (логотип, референсы, каталог компонентов).
+## [0.1.0] — 2026-10-24
 
-### Миграции БД
-- `20261024000000_init.sql` — начальная схема: профили, турниры, сезоны, клубы, туры, матчи, прогнозы, рейтинги, RLS, автоподсчёт очков, хранилище файлов.
-- `20261024000100_bootstrap_admin_and_kind.sql` — автоназначение первого админа по подтверждённой почте; `tournaments.kind`.
+Каркас, тема и главная с видео канала (эпики E1 «Фундамент», E2 «Главная и видео»).
+
+### Добавлено
+- Проект Next.js 16 (App Router, Cache Components) + TypeScript strict + Tailwind 4 + pnpm; README с запуском за 5 команд (DAZBY-10).
+- ESLint + Prettier, Vitest (unit/contract), Playwright (e2e smoke на 360 и 1280 px) (DAZBY-11).
+- CI на GitHub Actions: lint, typecheck, test, build, e2e (DAZBY-12).
+- Проверка переменных окружения при старте (Zod), разделение публичных и серверных (DAZBY-13).
+- Клиенты Supabase (`@supabase/ssr`) и обновление сессии в `proxy.ts`; для гостей запросов к Supabase нет (DAZBY-14).
+- Типы БД `src/types/database.ts` (вручную по миграциям, до перегенерации), скрипты `db:push`/`db:types` (DAZBY-15, частично).
+- Токены темы, шрифты Oswald/Inter с кириллицей, отключённая стандартная палитра Tailwind (DAZBY-17).
+- UI-компоненты: Button, TextField, Card, ResultBadge, Table, Container, Skeleton; витрина `/styleguide` (только dev) (DAZBY-18).
+- Каркас: шапка, подвал с соцсетями из конфига, страницы 404 и ошибки, тексты в `ru.ts` (DAZBY-19).
+- Библиотека дизайна: `pnpm design:snap`, снимки компонентов и экранов, каталог `COMPONENTS.md` (DAZBY-20).
+- Главная «Свежие видео»: ленивый плеер `youtube-nocookie`, 5 предыдущих видео, скелетон, запасной блок при недоступности YouTube (DAZBY-22).
+- SEO: метаданные, Open Graph 1200×630, иконки из логотипа, `sitemap.xml`, `robots.txt` (DAZBY-23).
+
+### Исправлено
+- Нестабильный unit-тест плеера в CI: заглушка `scrollIntoView` для jsdom перенесена в общий setup (DAZBY-22).
 
 ### API
-- Планируется v1 (`/api/v1`): `health`, `version`, `openapi.json`, `videos`.
+- Внутренний API v1 (`/api/v1`): `withApi`, конверт `{ data, meta }`, ошибки problem+json, `X-Request-Id`, `API-Version: 1`; `GET /health`, `/version`, `/openapi.json`; неизвестная версия → `404 api.version_unsupported` (DAZBY-16).
+- `GET /api/v1/videos?limit=` — последние видео канала без Shorts, кеш 1 ч, `503 videos.unavailable` (DAZBY-21).
+- Снимок контракта: `docs/api/openapi.v1.json`.
+
+### Миграции БД
+- В репозитории: `20261024000000_init.sql`, `20261024000100_bootstrap_admin_and_kind.sql`. **К dev-проекту пока не применены** (ждут владельца, DAZBY-15). Ни одна функция 0.1.0 от БД не зависит; `/api/v1/health` показывает `checks.database = "error"` до применения.

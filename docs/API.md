@@ -56,6 +56,25 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 
 Пока жива версия API, схема БД меняется по схеме **expand → migrate → contract**: сначала добавляем (новые колонки/таблицы), переводим код и данные, и только в следующем релизе убираем старое. Разрушающая миграция — ключевое решение.
 
+## Реализация v1 (DAZBY-16)
+
+| Что | Где |
+|---|---|
+| Реестр эндпоинтов (метод, путь, уровень доступа, схемы, `Cache-Control`) — единый источник для handlers и OpenAPI | `src/server/api/v1/endpoints.ts` |
+| Обёртка `withApi(endpoint, handler)`: `X-Request-Id` (входящий принимается, если `[\w-]{1,128}`), `API-Version: 1`, проверка `query` (422 + `errors[]`), уровни `public/user/admin` (cookie или `Bearer`), проверка ответа по схеме, конверт `{ data, meta }`, ошибки → problem+json | `src/server/api/v1/with-api.ts` |
+| problem+json: `type = urn:da-zby:problem:<code>`, коды в `ERROR_CODES` | `src/server/api/v1/problem.ts` |
+| OpenAPI 3.1 из Zod (`z.toJSONSchema`), снимок `docs/api/openapi.v1.json`, `pnpm api:openapi`; contract-тест падает, если снимок устарел | `src/server/api/v1/openapi.ts` |
+| Неизвестная версия → `404 api.version_unsupported` (+ `supportedVersions`); неизвестный ресурс известной версии → `404 api.not_found` (все методы) | `src/app/api/[version]/[[...path]]/route.ts` |
+
+Служебные эндпоинты: `/health` — `data.status = "ok"`, пока приложение отвечает; `data.checks.database` = `ok`/`error` (проба `select id from tournaments limit 1`, таймаут 2 с; HTTP-статус остаётся 200). `/version` — `version` из `package.json`, `apiVersions`, `buildDate` (время сборки). `/openapi.json` — документ без конверта.
+
+Коды ошибок v1: `api.version_unsupported`, `api.not_found`, `api.validation_failed`, `api.internal_error`, `auth.required`, `auth.forbidden`, `videos.unavailable`.
+
+### `GET /api/v1/videos` (DAZBY-21)
+
+Последние обычные видео канала (без Shorts), новые первыми. `?limit=1..100` (по умолчанию 20; RSS отдаёт максимум 15). Элемент: `id`, `title`, `publishedAt` (UTC), `thumbnailUrl` (480×360), `url`. `meta: { limit, nextCursor: null }`.
+Источник — RSS (D-027, D-045): плейлист длинных видео `UULF…`, при сбое — фид канала с фильтром Shorts. Кеш в памяти процесса 1 час; при недоступности YouTube отдаётся последний удачный список, без него — `503 videos.unavailable`. `Cache-Control: public, max-age=300`.
+
 ## Отложено (не делать без задачи)
 
 Rate limiting (когда появится публичный доступ и трафик), ключи API для внешних клиентов, webhooks, GraphQL, SDK-генерация. Заглушки и «на вырост» не писать.

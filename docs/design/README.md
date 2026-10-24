@@ -13,6 +13,28 @@
 | Снимки ключевых экранов | `screens/*.png` |
 | Живая витрина | `/styleguide` (только dev) |
 
+## Токены в коде (DAZBY-17)
+
+Единственное место значений — `src/app/globals.css` (`:root`). Tailwind-утилиты строятся из них через `@theme inline`; **стандартная палитра Tailwind отключена** (`--color-*: initial`), поэтому `bg-red-500` и т.п. просто не сработают — только токены.
+
+| Токен (CSS) | Утилиты Tailwind | Значение | Назначение |
+|---|---|---|---|
+| `--color-bg` | `bg-bg`, `text-bg` | `#FFFFFF` | основной фон |
+| `--color-ink` | `bg-ink`, `text-ink`, `border-ink` | `#000000` | текст, рамки, тёмные блоки |
+| `--color-accent` | `bg-accent`, `border-accent` | `#FEDE06` | кнопки, акценты; **не для текста на белом** |
+| `--color-muted` | `text-muted` | `#6B6B6B` | вторичный текст |
+| `--color-line` | `border-line` | `#E6E6E6` | разделители, границы карточек |
+| `--color-surface` | `bg-surface` | `#F6F6F6` | фон карточек, зебра таблиц |
+| `--color-success` | `bg-success`, `text-success` | `#1FA84F` | точный счёт, лидеры |
+| `--color-danger` | `bg-danger`, `text-danger` | `#D6232A` | ошибки, «мимо» |
+| `--font-heading` (Oswald) | `font-display` | узкий гротеск, кириллица | заголовки, всегда заглавными |
+| `--font-body` (Inter) | `font-sans` | гротеск, кириллица | основной текст |
+| шкала шрифта | `text-sm` 14 · `text-base` 16 · `text-lg` 20 · `text-h3` 28 · `text-h2` 40 · `text-h1` 56 | px | на мобильных заголовки ≤ `text-h3` |
+| `--radius-sm/md/lg` | `rounded-sm/md/lg` | 4 / 8 / 16 px | скругления |
+| `--container-max` | `max-w-site` | 1200 px | ширина контейнера |
+
+Фокус: глобально `:focus-visible` — жёлтая обводка + чёрное кольцо. Шрифты грузятся через `next/font` (`src/app/fonts.ts`), без запросов к Google из браузера.
+
 ## Как пользоваться (для Claude)
 
 1. **Перед созданием UI** открой `COMPONENTS.md`: если подходящий компонент есть — используй его, не делай копию.

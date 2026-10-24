@@ -1,0 +1,20 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { buttonClasses } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
+import { ru } from "@/messages/ru";
+
+export const metadata: Metadata = { title: ru.notFound.title };
+
+export default function NotFound() {
+  return (
+    <Container className="flex flex-1 flex-col items-start justify-center gap-4 py-16">
+      <p className="font-display text-h2 text-muted sm:text-h1">404</p>
+      <h1 className="text-h3 sm:text-h2">{ru.notFound.title}</h1>
+      <p className="max-w-prose">{ru.notFound.text}</p>
+      <Link href="/" className={buttonClasses("primary")}>
+        {ru.notFound.home}
+      </Link>
+    </Container>
+  );
+}

@@ -29,7 +29,7 @@ src/
     api-client.ts          типизированный клиент API (константа API_VERSION)
     time.ts                UTC ⇄ пояс пользователя, форматирование
     scoring.ts             чистая функция очков, зеркало триггера grade_match()
-    env.ts                 валидация окружения (Zod)
+    env.ts                 публичные переменные (Zod); env.server.ts — серверные (server-only); env-schema.ts — схемы
   messages/ru.ts           все тексты интерфейса
   types/database.ts        сгенерировано (руками не править)
 supabase/migrations/       единственный способ менять схему БД
@@ -59,7 +59,7 @@ tests/e2e/                 Playwright
 
 | Данные | Стратегия |
 |---|---|
-| Видео YouTube | `revalidate = 3600` |
+| Видео YouTube | кеш в памяти процесса 1 ч + последний удачный список при сбое (`src/server/services/videos.ts`, D-045) |
 | Рейтинги, чужие прогнозы, публичные профили | `revalidate = 1800` |
 | Справочники (турниры, клубы, туры) | `revalidate = 300` + `revalidateTag` при изменении |
 | Свои прогнозы, свой профиль, админка | без кеша |
