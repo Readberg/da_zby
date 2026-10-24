@@ -12,10 +12,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "db:push": "gh workflow run db-migrate --ref dev",
-    "db:types": "gh run download --name database-types --dir .tmp-types && mv .tmp-types/generated-database.ts src/types/database.ts && rm -rf .tmp-types",
+    "db:push": "tsx scripts/db.ts push",
+    "db:types": "tsx scripts/db.ts types && prettier --write src/types/database.ts",
     "api:openapi": "tsx scripts/generate-openapi.ts",
-    "design:snap": "playwright test -c playwright.design.config.ts"
+    "design:snap": "playwright test -c playwright.design.config.ts",
+    "db:check": "tsx --env-file=.env.local scripts/check-schema.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
