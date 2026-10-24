@@ -34,6 +34,15 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   };
 }
 
+/** For pages that act in the user's name: signed in AND with a nickname (otherwise onboarding first). */
+export async function requireProfile(
+  returnTo: string,
+): Promise<CurrentUser & { nickname: string }> {
+  const user = await requireUser(returnTo);
+  if (!user.nickname) redirect(`/onboarding?next=${encodeURIComponent(returnTo)}`);
+  return { ...user, nickname: user.nickname };
+}
+
 /** For pages that need a signed-in user: guests are sent to /login and come back afterwards. */
 export async function requireUser(returnTo: string): Promise<CurrentUser> {
   const user = await getCurrentUser();

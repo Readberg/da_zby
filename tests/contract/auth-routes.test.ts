@@ -5,8 +5,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const exchangeCodeForSession = vi.fn();
 const verifyOtp = vi.fn();
 const signOut = vi.fn();
+const getUser = vi.fn();
+const profileRow = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { exchangeCodeForSession, verifyOtp, signOut } }),
+  createClient: async () => ({
+    auth: { exchangeCodeForSession, verifyOtp, signOut, getUser },
+    from: () => ({
+      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: profileRow() }) }) }),
+    }),
+  }),
 }));
 
 const callback = await import("@/app/auth/callback/route");
@@ -24,6 +31,8 @@ beforeEach(() => {
   exchangeCodeForSession.mockReset().mockResolvedValue({ error: null });
   verifyOtp.mockReset().mockResolvedValue({ error: null });
   signOut.mockReset().mockResolvedValue({ error: null });
+  getUser.mockReset().mockResolvedValue({ data: { user: { id: "u1" } } });
+  profileRow.mockReset().mockReturnValue({ nickname: "Readberg" });
 });
 
 describe("GET /auth/callback", () => {
@@ -48,6 +57,26 @@ describe("GET /auth/callback", () => {
     exchangeCodeForSession.mockResolvedValue({ error: { message: "expired" } });
     const r = await callback.GET(req("/auth/callback?code=old"));
     expect(where(r).target).toBe("/login?error=link");
+  });
+});
+
+describe("after sign-in without a nickname", () => {
+  it("callback sends a new user to onboarding, remembering the target page", async () => {
+    profileRow.mockReturnValue({ nickname: null });
+    const r = await callback.GET(req("/auth/callback?code=abc&next=/profile"));
+    expect(where(r).target).toBe("/onboarding?next=%2Fprofile");
+  });
+
+  it("confirm does the same", async () => {
+    profileRow.mockReturnValue({ nickname: null });
+    const r = await confirm.GET(req("/auth/confirm?token_hash=h&type=magiclink"));
+    expect(where(r).target).toBe("/onboarding?next=%2F");
+  });
+
+  it("does not loop when the target already is onboarding", async () => {
+    profileRow.mockReturnValue({ nickname: null });
+    const r = await callback.GET(req("/auth/callback?code=abc&next=/onboarding"));
+    expect(where(r).target).toBe("/onboarding");
   });
 });
 

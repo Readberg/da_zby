@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { destinationAfterLogin } from "@/server/services/post-login";
 
 /**
  * OAuth / magic-link (PKCE) callback: exchanges `code` for a session cookie.
@@ -14,7 +15,9 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(next, origin));
+    if (!error) {
+      return NextResponse.redirect(new URL(await destinationAfterLogin(supabase, next), origin));
+    }
   }
 
   return NextResponse.redirect(new URL("/login?error=link", origin));

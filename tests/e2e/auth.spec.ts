@@ -37,6 +37,14 @@ test.describe("guest and login", () => {
   });
 });
 
+test.describe("onboarding", () => {
+  test("a guest is sent to login and brought back to onboarding afterwards", async ({ page }) => {
+    await page.goto("/onboarding");
+    await expect(page).toHaveURL(/\/login\?next=%2Fonboarding$/);
+    await expect(page.getByLabel("Почта")).toBeVisible();
+  });
+});
+
 test.describe("auth routes", () => {
   test("a callback without a code sends the guest back with an error message", async ({ page }) => {
     await page.goto("/auth/callback");
