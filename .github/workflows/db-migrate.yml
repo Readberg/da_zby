@@ -53,6 +53,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      - name: Schema smoke check (as a guest)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://lrybmorjxxbogbmmpddj.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_GgweOwuWyidSPX_uWXpcvQ_uJgnxI0K
+        run: pnpm exec tsx scripts/check-schema.ts
+
       - name: Compare generated types
         run: |
           supabase gen types typescript --linked --schema public > generated-database.ts

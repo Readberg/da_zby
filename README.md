@@ -27,5 +27,6 @@ pnpm dev                     # http://localhost:3000
 | `pnpm test:e2e` | E2E smoke (Playwright; один раз: `pnpm exec playwright install chromium`) |
 | `pnpm db:push` | Запустить workflow `db-migrate` (применяет миграции к dev-Supabase; сам запускается при мерже миграций в `dev`) |
 | `pnpm db:types` | Забрать сгенерированные типы из последнего прогона `db-migrate` в `src/types/database.ts` |
+| `pnpm db:check` | Проверить живую dev-схему глазами гостя (таблицы, закрытые данные, RLS, бакеты) |
 | `pnpm api:openapi` | Перегенерировать снимок `docs/api/openapi.v1.json` |
 | `pnpm design:snap` | Снимки компонентов и экранов в `docs/design/` |

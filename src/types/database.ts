@@ -1,386 +1,623 @@
-// TODO(DAZBY-15): hand-written from supabase/migrations/* because the dev project was not reachable.
-// Regenerate with `pnpm db:types` once the migrations are applied; do not edit by hand afterwards.
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-type Timestamp = string;
-type Role = "user" | "admin";
-type SeasonStatus = "active" | "closed";
-type MatchStatus = "scheduled" | "finished" | "postponed" | "cancelled";
-type PredictionResult = "exact" | "outcome" | "miss";
-
-type Fk<
-  Name extends string,
-  Column extends string,
-  Ref extends string,
-  OneToOne extends boolean,
-> = {
-  foreignKeyName: Name;
-  columns: [Column];
-  isOneToOne: OneToOne;
-  referencedRelation: Ref;
-  referencedColumns: ["id"];
-};
-
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.18";
+  };
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string;
-          nickname: string | null;
-          full_name: string | null;
-          contact: string | null;
-          about: string | null;
-          avatar_path: string | null;
-          country_code: string | null;
-          city: string | null;
-          utc_offset_minutes: number;
-          role: Role;
-          created_at: Timestamp;
-          last_login_at: Timestamp | null;
-          updated_at: Timestamp;
-        };
-        Insert: {
-          id: string;
-          nickname?: string | null;
-          full_name?: string | null;
-          contact?: string | null;
-          about?: string | null;
-          avatar_path?: string | null;
-          country_code?: string | null;
-          city?: string | null;
-          utc_offset_minutes?: number;
-          role?: Role;
-          created_at?: Timestamp;
-          last_login_at?: Timestamp | null;
-          updated_at?: Timestamp;
-        };
-        Update: {
-          id?: string;
-          nickname?: string | null;
-          full_name?: string | null;
-          contact?: string | null;
-          about?: string | null;
-          avatar_path?: string | null;
-          country_code?: string | null;
-          city?: string | null;
-          utc_offset_minutes?: number;
-          role?: Role;
-          created_at?: Timestamp;
-          last_login_at?: Timestamp | null;
-          updated_at?: Timestamp;
-        };
-        Relationships: [];
-      };
-      profile_private: {
-        Row: { user_id: string; email: string | null };
-        Insert: { user_id: string; email?: string | null };
-        Update: { user_id?: string; email?: string | null };
-        Relationships: [Fk<"profile_private_user_id_fkey", "user_id", "profiles", true>];
-      };
       admin_bootstrap: {
-        Row: { email: string; nickname: string | null };
-        Insert: { email: string; nickname?: string | null };
-        Update: { email?: string; nickname?: string | null };
-        Relationships: [];
-      };
-      tournaments: {
         Row: {
-          id: string;
-          name: string;
-          slug: string;
-          kind: "score_prediction";
-          points_exact: number;
-          points_outcome: number;
-          is_active: boolean;
-          created_at: Timestamp;
-          updated_at: Timestamp;
+          email: string;
+          nickname: string | null;
         };
         Insert: {
-          id?: string;
-          name: string;
-          slug: string;
-          kind?: "score_prediction";
-          points_exact?: number;
-          points_outcome?: number;
-          is_active?: boolean;
-          created_at?: Timestamp;
-          updated_at?: Timestamp;
+          email: string;
+          nickname?: string | null;
         };
         Update: {
-          id?: string;
-          name?: string;
-          slug?: string;
-          kind?: "score_prediction";
-          points_exact?: number;
-          points_outcome?: number;
-          is_active?: boolean;
-          created_at?: Timestamp;
-          updated_at?: Timestamp;
+          email?: string;
+          nickname?: string | null;
         };
         Relationships: [];
-      };
-      seasons: {
-        Row: {
-          id: string;
-          tournament_id: string;
-          name: string;
-          status: SeasonStatus;
-          closed_at: Timestamp | null;
-          created_at: Timestamp;
-        };
-        Insert: {
-          id?: string;
-          tournament_id: string;
-          name: string;
-          status?: SeasonStatus;
-          closed_at?: Timestamp | null;
-          created_at?: Timestamp;
-        };
-        Update: {
-          id?: string;
-          tournament_id?: string;
-          name?: string;
-          status?: SeasonStatus;
-          closed_at?: Timestamp | null;
-          created_at?: Timestamp;
-        };
-        Relationships: [Fk<"seasons_tournament_id_fkey", "tournament_id", "tournaments", false>];
       };
       clubs: {
         Row: {
+          created_at: string;
           id: string;
+          logo_path: string | null;
           name: string;
           short_name: string | null;
-          logo_path: string | null;
-          created_at: Timestamp;
         };
         Insert: {
+          created_at?: string;
           id?: string;
+          logo_path?: string | null;
           name: string;
           short_name?: string | null;
-          logo_path?: string | null;
-          created_at?: Timestamp;
         };
         Update: {
+          created_at?: string;
           id?: string;
+          logo_path?: string | null;
           name?: string;
           short_name?: string | null;
-          logo_path?: string | null;
-          created_at?: Timestamp;
         };
         Relationships: [];
       };
-      season_clubs: {
-        Row: { season_id: string; club_id: string };
-        Insert: { season_id: string; club_id: string };
-        Update: { season_id?: string; club_id?: string };
-        Relationships: [
-          Fk<"season_clubs_season_id_fkey", "season_id", "seasons", false>,
-          Fk<"season_clubs_club_id_fkey", "club_id", "clubs", false>,
-        ];
-      };
-      tours: {
-        Row: {
-          id: string;
-          season_id: string;
-          number: number;
-          title: string | null;
-          deadline_override: Timestamp | null;
-          created_at: Timestamp;
-        };
-        Insert: {
-          id?: string;
-          season_id: string;
-          number: number;
-          title?: string | null;
-          deadline_override?: Timestamp | null;
-          created_at?: Timestamp;
-        };
-        Update: {
-          id?: string;
-          season_id?: string;
-          number?: number;
-          title?: string | null;
-          deadline_override?: Timestamp | null;
-          created_at?: Timestamp;
-        };
-        Relationships: [Fk<"tours_season_id_fkey", "season_id", "seasons", false>];
-      };
       matches: {
         Row: {
-          id: string;
-          tour_id: string;
-          home_club_id: string;
           away_club_id: string;
-          kickoff_at: Timestamp;
-          status: MatchStatus;
-          home_score: number | null;
           away_score: number | null;
-          created_at: Timestamp;
-          updated_at: Timestamp;
+          created_at: string;
+          home_club_id: string;
+          home_score: number | null;
+          id: string;
+          kickoff_at: string;
+          status: string;
+          tour_id: string;
+          updated_at: string;
         };
         Insert: {
-          id?: string;
-          tour_id: string;
-          home_club_id: string;
           away_club_id: string;
-          kickoff_at: Timestamp;
-          status?: MatchStatus;
-          home_score?: number | null;
           away_score?: number | null;
-          created_at?: Timestamp;
-          updated_at?: Timestamp;
+          created_at?: string;
+          home_club_id: string;
+          home_score?: number | null;
+          id?: string;
+          kickoff_at: string;
+          status?: string;
+          tour_id: string;
+          updated_at?: string;
         };
         Update: {
-          id?: string;
-          tour_id?: string;
-          home_club_id?: string;
           away_club_id?: string;
-          kickoff_at?: Timestamp;
-          status?: MatchStatus;
-          home_score?: number | null;
           away_score?: number | null;
-          created_at?: Timestamp;
-          updated_at?: Timestamp;
+          created_at?: string;
+          home_club_id?: string;
+          home_score?: number | null;
+          id?: string;
+          kickoff_at?: string;
+          status?: string;
+          tour_id?: string;
+          updated_at?: string;
         };
         Relationships: [
-          Fk<"matches_tour_id_fkey", "tour_id", "tours", false>,
-          Fk<"matches_home_club_id_fkey", "home_club_id", "clubs", false>,
-          Fk<"matches_away_club_id_fkey", "away_club_id", "clubs", false>,
+          {
+            foreignKeyName: "matches_away_club_id_fkey";
+            columns: ["away_club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "matches_home_club_id_fkey";
+            columns: ["home_club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "matches_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
         ];
       };
       predictions: {
         Row: {
-          id: string;
-          user_id: string;
-          match_id: string;
-          home_score: number;
           away_score: number;
-          result: PredictionResult | null;
+          created_at: string;
+          home_score: number;
+          id: string;
+          match_id: string;
           points: number | null;
-          created_at: Timestamp;
-          updated_at: Timestamp;
+          result: string | null;
+          updated_at: string;
+          user_id: string;
         };
         Insert: {
-          id?: string;
-          user_id: string;
-          match_id: string;
-          home_score: number;
           away_score: number;
-          result?: PredictionResult | null;
+          created_at?: string;
+          home_score: number;
+          id?: string;
+          match_id: string;
           points?: number | null;
-          created_at?: Timestamp;
-          updated_at?: Timestamp;
+          result?: string | null;
+          updated_at?: string;
+          user_id: string;
         };
         Update: {
-          id?: string;
-          user_id?: string;
-          match_id?: string;
-          home_score?: number;
           away_score?: number;
-          result?: PredictionResult | null;
+          created_at?: string;
+          home_score?: number;
+          id?: string;
+          match_id?: string;
           points?: number | null;
-          created_at?: Timestamp;
-          updated_at?: Timestamp;
+          result?: string | null;
+          updated_at?: string;
+          user_id?: string;
         };
         Relationships: [
-          Fk<"predictions_user_id_fkey", "user_id", "profiles", false>,
-          Fk<"predictions_match_id_fkey", "match_id", "matches", false>,
+          {
+            foreignKeyName: "predictions_match_id_fkey";
+            columns: ["match_id"];
+            isOneToOne: false;
+            referencedRelation: "matches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "predictions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      profile_private: {
+        Row: {
+          email: string | null;
+          user_id: string;
+        };
+        Insert: {
+          email?: string | null;
+          user_id: string;
+        };
+        Update: {
+          email?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_private_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      profiles: {
+        Row: {
+          about: string | null;
+          avatar_path: string | null;
+          city: string | null;
+          contact: string | null;
+          country_code: string | null;
+          created_at: string;
+          full_name: string | null;
+          id: string;
+          last_login_at: string | null;
+          nickname: string | null;
+          role: string;
+          updated_at: string;
+          utc_offset_minutes: number;
+        };
+        Insert: {
+          about?: string | null;
+          avatar_path?: string | null;
+          city?: string | null;
+          contact?: string | null;
+          country_code?: string | null;
+          created_at?: string;
+          full_name?: string | null;
+          id: string;
+          last_login_at?: string | null;
+          nickname?: string | null;
+          role?: string;
+          updated_at?: string;
+          utc_offset_minutes?: number;
+        };
+        Update: {
+          about?: string | null;
+          avatar_path?: string | null;
+          city?: string | null;
+          contact?: string | null;
+          country_code?: string | null;
+          created_at?: string;
+          full_name?: string | null;
+          id?: string;
+          last_login_at?: string | null;
+          nickname?: string | null;
+          role?: string;
+          updated_at?: string;
+          utc_offset_minutes?: number;
+        };
+        Relationships: [];
+      };
+      season_clubs: {
+        Row: {
+          club_id: string;
+          season_id: string;
+        };
+        Insert: {
+          club_id: string;
+          season_id: string;
+        };
+        Update: {
+          club_id?: string;
+          season_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "season_clubs_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "season_clubs_season_id_fkey";
+            columns: ["season_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id"];
+          },
         ];
       };
       season_standings: {
         Row: {
+          created_at: string;
+          exact_count: number;
+          final_rank: number;
+          miss_count: number;
+          outcome_count: number;
+          points: number;
+          predictions_count: number;
           season_id: string;
           user_id: string;
-          final_rank: number;
-          points: number;
-          exact_count: number;
-          outcome_count: number;
-          miss_count: number;
-          predictions_count: number;
-          created_at: Timestamp;
         };
         Insert: {
+          created_at?: string;
+          exact_count: number;
+          final_rank: number;
+          miss_count: number;
+          outcome_count: number;
+          points: number;
+          predictions_count: number;
           season_id: string;
           user_id: string;
-          final_rank: number;
-          points: number;
-          exact_count: number;
-          outcome_count: number;
-          miss_count: number;
-          predictions_count: number;
-          created_at?: Timestamp;
         };
         Update: {
+          created_at?: string;
+          exact_count?: number;
+          final_rank?: number;
+          miss_count?: number;
+          outcome_count?: number;
+          points?: number;
+          predictions_count?: number;
           season_id?: string;
           user_id?: string;
-          final_rank?: number;
-          points?: number;
-          exact_count?: number;
-          outcome_count?: number;
-          miss_count?: number;
-          predictions_count?: number;
-          created_at?: Timestamp;
         };
         Relationships: [
-          Fk<"season_standings_season_id_fkey", "season_id", "seasons", false>,
-          Fk<"season_standings_user_id_fkey", "user_id", "profiles", false>,
+          {
+            foreignKeyName: "season_standings_season_id_fkey";
+            columns: ["season_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "season_standings_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      seasons: {
+        Row: {
+          closed_at: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          status: string;
+          tournament_id: string;
+        };
+        Insert: {
+          closed_at?: string | null;
+          created_at?: string;
+          id?: string;
+          name: string;
+          status?: string;
+          tournament_id: string;
+        };
+        Update: {
+          closed_at?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          status?: string;
+          tournament_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "seasons_tournament_id_fkey";
+            columns: ["tournament_id"];
+            isOneToOne: false;
+            referencedRelation: "tournaments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tournaments: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          kind: string;
+          name: string;
+          points_exact: number;
+          points_outcome: number;
+          slug: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          kind?: string;
+          name: string;
+          points_exact?: number;
+          points_outcome?: number;
+          slug: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          kind?: string;
+          name?: string;
+          points_exact?: number;
+          points_outcome?: number;
+          slug?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tours: {
+        Row: {
+          created_at: string;
+          deadline_override: string | null;
+          id: string;
+          number: number;
+          season_id: string;
+          title: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          deadline_override?: string | null;
+          id?: string;
+          number: number;
+          season_id: string;
+          title?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          deadline_override?: string | null;
+          id?: string;
+          number?: number;
+          season_id?: string;
+          title?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tours_season_id_fkey";
+            columns: ["season_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id"];
+          },
         ];
       };
     };
     Views: {
       season_leaderboard: {
         Row: {
+          current_rank: number | null;
+          exact_count: number | null;
+          final_rank: number | null;
+          losses_count: number | null;
+          miss_count: number | null;
+          outcome_count: number | null;
+          points: number | null;
+          predictions_count: number | null;
           season_id: string | null;
           user_id: string | null;
-          predictions_count: number | null;
-          exact_count: number | null;
-          outcome_count: number | null;
-          miss_count: number | null;
-          wins_count: number | null;
-          losses_count: number | null;
           win_rate: number | null;
-          points: number | null;
-          current_rank: number | null;
-          final_rank: number | null;
+          wins_count: number | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "predictions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tours_season_id_fkey";
+            columns: ["season_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       tour_leaderboard: {
         Row: {
+          current_rank: number | null;
+          exact_count: number | null;
+          miss_count: number | null;
+          outcome_count: number | null;
+          points: number | null;
+          predictions_count: number | null;
           tour_id: string | null;
           user_id: string | null;
-          predictions_count: number | null;
-          exact_count: number | null;
-          outcome_count: number | null;
-          miss_count: number | null;
-          points: number | null;
-          current_rank: number | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "matches_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "predictions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Functions: {
-      is_admin: { Args: never; Returns: boolean };
-      set_user_role: { Args: { target: string; new_role: string }; Returns: undefined };
-      tour_deadline: { Args: { p_tour_id: string }; Returns: string };
+      apply_admin_bootstrap: {
+        Args: { p_confirmed: boolean; p_email: string; p_user_id: string };
+        Returns: undefined;
+      };
       can_predict: { Args: { p_match_id: string }; Returns: boolean };
-      recalculate_season: { Args: { p_season_id: string }; Returns: undefined };
       close_season: { Args: { p_season_id: string }; Returns: undefined };
+      is_admin: { Args: never; Returns: boolean };
+      recalculate_season: { Args: { p_season_id: string }; Returns: undefined };
       reopen_season: { Args: { p_season_id: string }; Returns: undefined };
+      set_user_role: {
+        Args: { new_role: string; target: string };
+        Returns: undefined;
+      };
+      tour_deadline: { Args: { p_tour_id: string }; Returns: string };
     };
-    Enums: { [_ in never]: never };
-    CompositeTypes: { [_ in never]: never };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 };
 
-type PublicSchema = Database["public"];
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-export type Tables<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Row"];
-export type TablesInsert<T extends keyof PublicSchema["Tables"]> =
-  PublicSchema["Tables"][T]["Insert"];
-export type TablesUpdate<T extends keyof PublicSchema["Tables"]> =
-  PublicSchema["Tables"][T]["Update"];
-export type Views<T extends keyof PublicSchema["Views"]> = PublicSchema["Views"][T]["Row"];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I;
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I;
+      }
+      ? I
+      : never
+    : never;
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U;
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U;
+      }
+      ? U
+      : never
+    : never;
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never;
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    keyof DefaultSchema["CompositeTypes"] | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never;
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const;
