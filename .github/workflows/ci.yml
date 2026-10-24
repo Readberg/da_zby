@@ -21,6 +21,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: https://lrybmorjxxbogbmmpddj.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_GgweOwuWyidSPX_uWXpcvQ_uJgnxI0K
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      YOUTUBE_CHANNEL_ID: UCsfcA6cY0bSL781TE3XMEPA
     steps:
       - uses: actions/checkout@v5
 

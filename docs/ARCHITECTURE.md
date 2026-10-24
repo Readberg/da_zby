@@ -29,7 +29,7 @@ src/
     api-client.ts          типизированный клиент API (константа API_VERSION)
     time.ts                UTC ⇄ пояс пользователя, форматирование
     scoring.ts             чистая функция очков, зеркало триггера grade_match()
-    env.ts                 валидация окружения (Zod)
+    env.ts                 публичные переменные (Zod); env.server.ts — серверные (server-only); env-schema.ts — схемы
   messages/ru.ts           все тексты интерфейса
   types/database.ts        сгенерировано (руками не править)
 supabase/migrations/       единственный способ менять схему БД
