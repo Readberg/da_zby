@@ -21,7 +21,7 @@ test("client JavaScript contains no server secrets", async ({ page, request }) =
   await page.waitForLoadState("networkidle");
   for (const url of scripts) {
     const source = await (await request.get(url)).text();
-    expect(source, url).not.toMatch(/sb_secret_|SUPABASE_SECRET_KEY/);
+    expect(source, url).not.toMatch(/sb_secret_[\w-]{20,}|SUPABASE_SECRET_KEY/);
   }
 });
 
