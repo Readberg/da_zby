@@ -22,6 +22,17 @@ export const ru = {
       tiktok: "TikTok",
     },
   },
+  home: {
+    videosTitle: "Свежие видео",
+    play: "Смотреть видео",
+    playerTitle: "Видеоплеер YouTube",
+    watchOnYoutube: "Смотреть на YouTube",
+    moreVideos: "Предыдущие выпуски",
+    allVideos: "Все видео на канале",
+    unavailableTitle: "Видео сейчас не загрузились",
+    unavailableText: "YouTube не ответил. Свежие выпуски всегда есть на нашем канале.",
+    toChannel: "Перейти на канал",
+  },
   notFound: {
     title: "Страница не найдена",
     text: "Такой страницы нет. Возможно, ссылка устарела или в адресе опечатка.",

@@ -1,0 +1,58 @@
+import { buttonClasses } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { siteConfig } from "@/config/site";
+import { ru } from "@/messages/ru";
+import { VideosUnavailableError, type Video } from "@/server/services/videos";
+import { VideoShowcase } from "./video-showcase";
+
+export const HOME_VIDEOS_COUNT = 6;
+
+const channelUrl = siteConfig.social.find((link) => link.id === "youtube")?.url ?? "";
+
+export function VideosUnavailable() {
+  return (
+    <Card variant="accent" title={ru.home.unavailableTitle}>
+      <p className="mb-4">{ru.home.unavailableText}</p>
+      <a
+        href={channelUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={buttonClasses("primary")}
+      >
+        {ru.home.toChannel}
+        <span className="sr-only"> {ru.common.opensInNewTab}</span>
+      </a>
+    </Card>
+  );
+}
+
+export function LatestVideosSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[2fr_1fr]">
+      <Skeleton className="aspect-video w-full" />
+      <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-1">
+        {Array.from({ length: 3 }, (_, i) => (
+          <Skeleton key={i} className="aspect-video w-full lg:h-24 lg:aspect-auto" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Server component: reads videos straight from the service (no HTTP hop). */
+export async function LatestVideos({
+  loadVideos,
+}: {
+  loadVideos: (limit: number) => Promise<Video[]>;
+}) {
+  let videos: Video[];
+  try {
+    videos = await loadVideos(HOME_VIDEOS_COUNT);
+  } catch (error) {
+    if (error instanceof VideosUnavailableError) return <VideosUnavailable />;
+    throw error;
+  }
+  if (videos.length === 0) return <VideosUnavailable />;
+  return <VideoShowcase videos={videos} />;
+}
