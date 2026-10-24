@@ -25,7 +25,7 @@ pnpm dev                     # http://localhost:3000
 | `pnpm typecheck` | Генерация типов маршрутов и проверка TypeScript |
 | `pnpm test` | Unit-тесты (Vitest) |
 | `pnpm test:e2e` | E2E smoke (Playwright; один раз: `pnpm exec playwright install chromium`) |
-| `pnpm db:push` | Применить миграции к dev-Supabase (нужны `supabase login` и `supabase link --project-ref lrybmorjxxbogbmmpddj`) |
-| `pnpm db:types` | Перегенерировать `src/types/database.ts` из привязанного проекта |
+| `pnpm db:push` | Запустить workflow `db-migrate` (применяет миграции к dev-Supabase; сам запускается при мерже миграций в `dev`) |
+| `pnpm db:types` | Забрать сгенерированные типы из последнего прогона `db-migrate` в `src/types/database.ts` |
 | `pnpm api:openapi` | Перегенерировать снимок `docs/api/openapi.v1.json` |
 | `pnpm design:snap` | Снимки компонентов и экранов в `docs/design/` |

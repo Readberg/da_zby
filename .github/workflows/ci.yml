@@ -24,6 +24,18 @@ jobs:
       YOUTUBE_CHANNEL_ID: UCsfcA6cY0bSL781TE3XMEPA
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Applied migrations are immutable
+        if: github.event_name == 'pull_request'
+        run: |
+          changed=$(git diff --name-status "origin/${{ github.base_ref }}...HEAD" -- supabase/migrations | grep -v '^A' || true)
+          if [ -n "$changed" ]; then
+            echo "::error::Existing migrations must not be edited or deleted; add a new migration instead."
+            echo "$changed"
+            exit 1
+          fi
 
       - uses: pnpm/action-setup@v4
 
@@ -38,6 +50,13 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+      - name: No server secrets in the client bundle
+        run: |
+          if grep -rlE "sb_secret_|SUPABASE_SECRET_KEY" .next/static; then
+            echo "::error::Server secret name or value found in .next/static"
+            exit 1
+          fi
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4

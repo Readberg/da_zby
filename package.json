@@ -1,6 +1,6 @@
 {
   "name": "da-zby",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,8 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "db:push": "npx -y supabase@2 db push",
-    "db:types": "npx -y supabase@2 gen types typescript --linked --schema public > src/types/database.ts && prettier --write src/types/database.ts",
+    "db:push": "gh workflow run db-migrate --ref dev",
+    "db:types": "gh run download --name database-types --dir .tmp-types && mv .tmp-types/generated-database.ts src/types/database.ts && rm -rf .tmp-types",
     "api:openapi": "tsx scripts/generate-openapi.ts",
     "design:snap": "playwright test -c playwright.design.config.ts"
   },

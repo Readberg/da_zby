@@ -1,0 +1,68 @@
+name: db-migrate
+
+# Applies supabase/migrations to the DEV Supabase project after they land in `dev` (D-047).
+# Production is out of scope: it will get its own workflow with manual approval (E8).
+
+on:
+  push:
+    branches: [dev]
+    paths: ["supabase/migrations/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: db-migrate-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PROJECT_REF: lrybmorjxxbogbmmpddj
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check secrets
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
+            echo "::error::Set SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD in Settings → Secrets and variables → Actions (docs/SETUP.md, C)."
+            exit 1
+          fi
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Pending migrations
+        run: supabase migration list
+
+      - name: Apply migrations
+        run: supabase db push
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Compare generated types
+        run: |
+          supabase gen types typescript --linked --schema public > generated-database.ts
+          pnpm exec prettier --write generated-database.ts > /dev/null
+          if ! diff -q generated-database.ts src/types/database.ts > /dev/null; then
+            echo "::warning::src/types/database.ts differs from the live schema; download the 'database-types' artifact and commit it."
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: database-types
+          path: generated-database.ts
+          retention-days: 14

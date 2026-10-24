@@ -5,6 +5,8 @@ vi.mock("@/server/services/videos.server", () => ({
   videosService: { getLatestVideos: vi.fn(() => new Promise(() => {})) },
 }));
 
+vi.mock("next/server", () => ({ connection: async () => {} }));
+
 const { default: Home } = await import("./page");
 
 describe("Home page", () => {
