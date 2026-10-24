@@ -1,0 +1,47 @@
+name: stand-check
+
+# Runs the e2e suite against the Railway stand (address is public, not a secret) after every successful deployment (DAZBY-42).
+# A red run here means the deployed site is broken even though CI on the commit was green.
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-against-stand:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      E2E_BASE_URL: https://dazby-production.up.railway.app
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.deployment.sha }}
+
+      - name: Health of the stand
+        run: |
+          for i in 1 2 3 4 5 6; do
+            curl -fsS "$E2E_BASE_URL/api/v1/health" && exit 0
+            sleep 10
+          done
+          echo "::error::$E2E_BASE_URL/api/v1/health did not answer 200"
+          exit 1
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-stand
+          path: playwright-report/
+          retention-days: 7
