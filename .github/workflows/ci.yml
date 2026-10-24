@@ -66,6 +66,9 @@ jobs:
 
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+        env:
+          # Dev project only; enables signed-in e2e tests (skipped when empty).
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
