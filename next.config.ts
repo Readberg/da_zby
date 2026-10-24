@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  env: {
+    // Exposed by GET /api/v1/version.
+    APP_BUILD_DATE: new Date().toISOString(),
+  },
   turbopack: {
     rules: {
       "*.css": {
