@@ -34,6 +34,13 @@ export const profilePatchSchema = z
 
 export type ProfilePatch = z.infer<typeof profilePatchSchema>;
 
+/** UTC offsets offered in the profile: every 30 minutes plus the three 45-minute zones. */
+export function utcOffsetOptions(): { minutes: number; label: string }[] {
+  const minutes = new Set<number>([345, 525, 765]);
+  for (let m = -720; m <= 840; m += 30) minutes.add(m);
+  return [...minutes].sort((a, b) => a - b).map((m) => ({ minutes: m, label: formatUtcOffset(m) }));
+}
+
 export function formatUtcOffset(minutes: number): string {
   const sign = minutes < 0 ? "−" : "+";
   const abs = Math.abs(minutes);

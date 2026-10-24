@@ -10,7 +10,11 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   images: {
     // YouTube video previews.
-    remotePatterns: [new URL("https://i.ytimg.com/vi/**")],
+    remotePatterns: [
+      new URL("https://i.ytimg.com/vi/**"),
+      // User photos from the public Supabase Storage bucket "avatars".
+      new URL("https://*.supabase.co/storage/v1/object/public/avatars/**"),
+    ],
   },
   env: {
     // Exposed by GET /api/v1/version.

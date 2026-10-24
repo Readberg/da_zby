@@ -5,7 +5,7 @@ import logo from "@/assets/logo.png";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
 import { ru } from "@/messages/ru";
-import { NavLink } from "./nav-link";
+import { NavLink, StaticNavLink } from "./nav-link";
 import { UserMenu } from "./user-menu";
 
 export function SiteHeader() {
@@ -18,13 +18,10 @@ export function SiteHeader() {
         </Link>
         <div className="flex items-center gap-1">
           <nav aria-label={ru.nav.label}>
-            <ul className="flex items-center gap-1">
-              {siteConfig.nav.map((item) => (
-                <li key={item.id}>
-                  <NavLink href={item.href}>{ru.nav[item.id]}</NavLink>
-                </li>
-              ))}
-            </ul>
+            {/* usePathname() needs Suspense on dynamic routes such as /u/[nickname]. */}
+            <Suspense fallback={<NavList link={StaticNavLink} />}>
+              <NavList link={NavLink} />
+            </Suspense>
           </nav>
           {/* The user is request-time data: keep it out of the static shell. */}
           <Suspense fallback={<span className="inline-block h-11 w-20" aria-hidden="true" />}>
@@ -33,5 +30,17 @@ export function SiteHeader() {
         </div>
       </Container>
     </header>
+  );
+}
+
+function NavList({ link: Link }: { link: typeof NavLink }) {
+  return (
+    <ul className="flex items-center gap-1">
+      {siteConfig.nav.map((item) => (
+        <li key={item.id}>
+          <Link href={item.href}>{ru.nav[item.id]}</Link>
+        </li>
+      ))}
+    </ul>
   );
 }
