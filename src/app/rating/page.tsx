@@ -5,7 +5,9 @@ import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RatingPicker } from "@/features/rating/components/rating-picker";
 import { SeasonRatingTable, TourRatingTable } from "@/features/rating/components/rating-table";
+import { points } from "@/lib/plural";
 import { ru } from "@/messages/ru";
+import { getCurrentUser } from "@/server/services/current-user";
 import { getRatingPageCached } from "@/server/services/rating.cached";
 
 export const metadata: Metadata = { title: ru.rating.title };
@@ -21,11 +23,16 @@ async function RatingContent({
 }) {
   const params = await searchParams;
   const tourNumber = Number(first(params.tour));
-  const data = await getRatingPageCached(
-    first(params.tournament),
-    first(params.season),
-    Number.isInteger(tourNumber) && tourNumber > 0 ? tourNumber : undefined,
-  );
+  // The shared table comes from the cache; who is looking is worked out per request, in parallel.
+  const [data, user] = await Promise.all([
+    getRatingPageCached(
+      first(params.tournament),
+      first(params.season),
+      Number.isInteger(tourNumber) && tourNumber > 0 ? tourNumber : undefined,
+    ),
+    getCurrentUser(),
+  ]);
+  const mine = user ? data.rows.find((row) => row.userId === user.id) : undefined;
 
   if (!data.tournament) return <p className="text-muted">{ru.rating.noTournaments}</p>;
 
@@ -44,10 +51,22 @@ async function RatingContent({
           {season.status === "closed" && !tour && (
             <p className="text-sm text-muted">{ru.rating.seasonClosed}</p>
           )}
+          {mine && (
+            <p className="rounded-md bg-surface px-4 py-3">
+              {ru.rating.yourPlace
+                .replace("{place}", String(mine.place ?? "—"))
+                .replace("{points}", points(mine.points))}
+            </p>
+          )}
           {tour ? (
-            <TourRatingTable rows={data.rows} matches={data.matches} cells={data.cells} />
+            <TourRatingTable
+              rows={data.rows}
+              matches={data.matches}
+              cells={data.cells}
+              currentUserId={user?.id}
+            />
           ) : (
-            <SeasonRatingTable rows={data.rows} />
+            <SeasonRatingTable rows={data.rows} currentUserId={user?.id} />
           )}
           <p className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted">
             <Link href={`/predictions?${toPredictions}`} className="underline">

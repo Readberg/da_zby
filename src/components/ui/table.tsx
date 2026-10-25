@@ -39,11 +39,7 @@ export function TR({
 }: HTMLAttributes<HTMLTableRowElement> & { highlight?: boolean }) {
   return (
     <tr
-      className={cx(
-        "border-b border-line",
-        highlight && "font-semibold bg-accent! text-black",
-        className,
-      )}
+      className={cx("border-b border-line", highlight && "font-semibold bg-accent/25!", className)}
       {...props}
     />
   );

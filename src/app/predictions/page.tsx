@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PredictionPicker } from "@/features/predictions/components/prediction-picker";
 import { PredictionTable } from "@/features/predictions/components/prediction-table";
 import { formatDateTime } from "@/lib/local-time";
+import { points } from "@/lib/plural";
 import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_UTC_OFFSET_MINUTES } from "@/lib/time";
 import { ru } from "@/messages/ru";
@@ -83,6 +84,18 @@ async function PredictionsContent({
               {ru.predictions.toRating}
             </Link>
           </p>
+          {data.tournament && (
+            <details className="group rounded-md bg-surface px-4 py-3">
+              <summary className="cursor-pointer font-semibold">
+                {ru.predictions.rulesTitle}
+              </summary>
+              <p className="mt-2 text-muted">
+                {ru.predictions.rules
+                  .replace("{exact}", points(data.tournament.pointsExact))
+                  .replace("{outcome}", points(data.tournament.pointsOutcome))}
+              </p>
+            </details>
+          )}
           <PredictionTable
             key={tour.id}
             tourId={tour.id}
@@ -90,6 +103,7 @@ async function PredictionsContent({
             signedIn={Boolean(user)}
             offsetMinutes={offset}
             open={tour.open}
+            ratingHref={`/rating?${query}`}
             loginHref={`/login?next=${encodeURIComponent(`/predictions?${query}`)}`}
           />
         </section>

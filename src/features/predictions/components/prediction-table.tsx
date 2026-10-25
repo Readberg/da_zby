@@ -9,6 +9,7 @@ import { ClubLogo } from "@/components/ui/club-logo";
 import { Input } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { formatDateTime } from "@/lib/local-time";
+import { points as pointsText } from "@/lib/plural";
 import { ru } from "@/messages/ru";
 import type { MatchView, PageClub } from "@/server/services/predictions";
 
@@ -42,6 +43,7 @@ export function PredictionTable({
   offsetMinutes,
   open,
   loginHref,
+  ratingHref,
 }: {
   tourId: string;
   matches: MatchView[];
@@ -49,6 +51,8 @@ export function PredictionTable({
   offsetMinutes: number;
   open: boolean;
   loginHref: string;
+  /** Where the table of this tour lives (shown with the tour result). */
+  ratingHref?: string;
 }) {
   const router = useRouter();
   const saved = (match: MatchView): Entry => ({
@@ -106,6 +110,32 @@ export function PredictionTable({
       return items.length > 0 || Object.keys(problems).length > 0;
     })();
 
+  // What the visitor earned in this tour, once matches have been played.
+  const earned = matches.reduce(
+    (sum, m) => {
+      const p = m.prediction;
+      if (m.status !== "finished" || !p?.result) return sum;
+      return {
+        points: sum.points + (p.points ?? 0),
+        exact: sum.exact + (p.result === "exact" ? 1 : 0),
+        outcome: sum.outcome + (p.result === "outcome" ? 1 : 0),
+      };
+    },
+    { points: 0, exact: 0, outcome: 0 },
+  );
+  const hasResult = matches.some((m) => m.status === "finished" && m.prediction?.result);
+
+  /** "saved" / "unsaved" / null for the small status under each editable pair of fields. */
+  function chip(match: MatchView): "saved" | "unsaved" | null {
+    const entry = entries[match.id] ?? { home: "", away: "" };
+    const home = parseScore(entry.home);
+    const away = parseScore(entry.away);
+    const before = match.prediction;
+    if (home === null && away === null) return null;
+    if (before && home === before.homeScore && away === before.awayScore) return "saved";
+    return "unsaved";
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
@@ -147,6 +177,25 @@ export function PredictionTable({
             {ru.auth.login}
           </Link>
         </p>
+      )}
+
+      {signedIn && hasResult && (
+        <div className="rounded-lg bg-surface p-5">
+          <p className="text-sm font-semibold uppercase tracking-widest text-muted">
+            {ru.predictions.tourResult}
+          </p>
+          <p className="mt-1 text-lg font-semibold">
+            {ru.predictions.tourResultText
+              .replace("{points}", pointsText(earned.points))
+              .replace("{exact}", String(earned.exact))
+              .replace("{outcome}", String(earned.outcome))}
+          </p>
+          {ratingHref && (
+            <Link href={ratingHref} className="mt-2 inline-block text-sm underline">
+              {ru.predictions.tourTable}
+            </Link>
+          )}
+        </div>
       )}
 
       <ul className="flex flex-col divide-y divide-line">
@@ -204,6 +253,14 @@ export function PredictionTable({
                 </div>
                 <ClubName club={match.away} align="left" />
               </div>
+
+              {editable && !errors[match.id] && chip(match) && (
+                <p
+                  className={`text-center text-sm ${chip(match) === "saved" ? "text-success" : "text-muted"}`}
+                >
+                  {chip(match) === "saved" ? ru.predictions.savedChip : ru.predictions.notSaved}
+                </p>
+              )}
 
               {errors[match.id] && (
                 <p role="alert" className="text-center text-sm text-danger">

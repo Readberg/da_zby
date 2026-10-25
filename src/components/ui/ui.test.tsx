@@ -100,7 +100,7 @@ describe("Table", () => {
     );
     expect(screen.getByRole("table", { name: "Легенда" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Участник" })).toHaveAttribute("scope", "col");
-    expect(screen.getByRole("row", { name: "Readberg" })).toHaveClass("bg-accent!");
+    expect(screen.getByRole("row", { name: "Readberg" })).toHaveClass("bg-accent/25!");
   });
 });
 

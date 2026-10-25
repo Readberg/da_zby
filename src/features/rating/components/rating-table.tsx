@@ -38,7 +38,13 @@ function Place({ row }: { row: RatingRow }) {
 }
 
 /** Season table: place, participant, misses, right outcomes, exact scores, points. */
-export function SeasonRatingTable({ rows }: { rows: RatingRow[] }) {
+export function SeasonRatingTable({
+  rows,
+  currentUserId,
+}: {
+  rows: RatingRow[];
+  currentUserId?: string | null;
+}) {
   if (rows.length === 0) return <p className="text-muted">{ru.rating.empty}</p>;
   return (
     <>
@@ -75,7 +81,11 @@ export function SeasonRatingTable({ rows }: { rows: RatingRow[] }) {
         </THead>
         <TBody>
           {rows.map((row) => (
-            <TR key={row.userId}>
+            <TR
+              key={row.userId}
+              highlight={row.userId === currentUserId}
+              aria-current={row.userId === currentUserId ? "true" : undefined}
+            >
               <TD className="font-semibold">
                 <Place row={row} />
               </TD>
@@ -117,10 +127,12 @@ export function TourRatingTable({
   rows,
   matches,
   cells,
+  currentUserId,
 }: {
   rows: RatingRow[];
   matches: TourMatch[];
   cells: Record<string, Record<string, PredictionCell>>;
+  currentUserId?: string | null;
 }) {
   if (rows.length === 0) return <p className="text-muted">{ru.rating.emptyTour}</p>;
   return (
@@ -146,7 +158,11 @@ export function TourRatingTable({
       </THead>
       <TBody>
         {rows.map((row) => (
-          <TR key={row.userId}>
+          <TR
+            key={row.userId}
+            highlight={row.userId === currentUserId}
+            aria-current={row.userId === currentUserId ? "true" : undefined}
+          >
             <TD className="font-semibold">
               <Place row={row} />
             </TD>
