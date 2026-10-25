@@ -11,11 +11,11 @@ export const serverEnvSchema = z.object({
   // Telegram sign-in (D-054): token of the login bot and the Telegram ids that become admins.
   TELEGRAM_BOT_TOKEN: z
     .string()
-    .regex(/^d+:[w-]{20,}$/, "expected a token like 123456:ABC…")
+    .regex(/^\d+:[\w-]{20,}$/, "expected a token like 123456:ABC…")
     .optional(),
   TELEGRAM_ADMIN_IDS: z
     .string()
-    .regex(/^d+(,d+)*$/, "expected comma-separated Telegram ids")
+    .regex(/^\d+(,\d+)*$/, "expected comma-separated Telegram ids")
     .optional(),
   YOUTUBE_CHANNEL_ID: z.string().regex(/^UC[\w-]{22}$/, "expected a channel id like UC…"),
 });
