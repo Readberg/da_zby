@@ -28,10 +28,6 @@ async function ProfileContent() {
             <span className="font-normal text-muted">{ru.profile.nicknameNote}</span>
           </dd>
         </div>
-        <div className="flex flex-wrap gap-x-2">
-          <dt className="text-muted">{ru.profile.email}:</dt>
-          <dd>{profile.email}</dd>
-        </div>
       </dl>
       <Link
         href={`/u/${encodeURIComponent(profile.nickname ?? "")}`}

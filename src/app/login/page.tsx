@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LoginForm } from "@/features/auth/components/login-form";
-import { authMethods } from "@/lib/auth-methods";
+import { TelegramLogin } from "@/features/auth/components/telegram-login";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
@@ -22,15 +21,14 @@ async function LoginContent({
   // Already signed in: nothing to do here.
   if (await getCurrentUser()) redirect(next);
 
-  return <LoginForm next={next} linkError={params.error === "link"} />;
+  return <TelegramLogin next={next} error={params.error ? ru.auth.errors.telegram : null} />;
 }
 
 export default function LoginPage(props: PageProps<"/login">) {
-  const intro = authMethods().email ? ru.auth.loginIntroEmail : ru.auth.loginIntro;
   return (
     <Container className="flex flex-col gap-4 py-8 sm:py-12">
       <h1 className="text-h3 sm:text-h1">{ru.auth.loginTitle}</h1>
-      <p className="max-w-prose text-muted">{intro}</p>
+      <p className="max-w-prose text-muted">{ru.auth.loginIntro}</p>
       <Suspense fallback={<Skeleton className="h-32 max-w-md" />}>
         <LoginContent searchParams={props.searchParams} />
       </Suspense>
