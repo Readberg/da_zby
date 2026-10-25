@@ -96,6 +96,16 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 - `GET|POST|PATCH|DELETE /api/v1/admin/clubs` (admin): справочник клубов (`name`, `shortName`, `logoPath`, `logoUrl`). Логотип загружается прямо в бакет `club-logos` (только админ, до 1 МБ, jpeg/png/webp) и привязывается через `logoPath`. Удаление клуба с матчами — 409 `admin.in_use`.
 - Изменение и удаление идут по `id` в теле (путевых параметров в v1 пока нет).
 
+### Админка: сезоны, туры, матчи (DAZBY-63, 64)
+Все эндпоинты — только админ; изменение и удаление идут по `id` в теле.
+- `GET|POST /admin/seasons`: список (с числом клубов и туров) и создание `{ tournamentId, name, copyFromSeasonId? }` (состав можно скопировать с другого сезона). Занятое название — 409 `admin.duplicate`.
+- `GET /admin/season?seasonId=`: сезон, состав (`clubIds`) и туры с дедлайном (`deadlineAt` — ручной или «за 10 минут до первого матча»).
+- `PUT /admin/seasons/clubs`: заменить состав; клуб с матчами сезона убрать нельзя — 409 `admin.in_use`.
+- `POST /admin/seasons/close|reopen|recalculate`: закрыть (фиксирует итоговые места), откатить закрытие, пересчитать очки. Неверное состояние — 409 `admin.season_state`.
+- Закрытый сезон только для чтения: любые правки составa, туров и матчей — 409 `admin.season_closed`.
+- `POST|PATCH|DELETE /admin/tours`, `GET /admin/tour?tourId=`: туры (номер по умолчанию — следующий, ручной дедлайн `deadlineOverride`). Тур с матчами не удаляется (409 `admin.in_use`).
+- `POST|PATCH|DELETE /admin/matches`: матч (клубы только из состава сезона, `kickoffAt` — момент времени в UTC). Результат: `status: finished` + `homeScore`/`awayScore` (итог с доп. временем, без пенальти); другой статус обнуляет счёт. Очки считает триггер БД. Матч с прогнозами не удаляется — ставьте «отменён».
+
 ### Вход через Telegram (D-056)
 - `POST /api/v1/auth/telegram/start` (публичный): создаёт попытку, отвечает `{ token, code, appUrl, webUrl, expiresInSeconds }`; 429 `api.too_many_requests` при слишком большом числе незавершённых попыток, 503 `auth.telegram_unavailable`, если вход не настроен.
 - `GET /api/v1/auth/telegram/status?token=` (публичный): `{ status: pending | confirmed | expired }`. При `confirmed` браузер переходит на `/auth/telegram?token=…` (не часть API: ставит cookie сессии).
