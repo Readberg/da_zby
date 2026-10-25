@@ -20,6 +20,11 @@ export default function AdminHomePage() {
             <p className="text-muted">{ru.admin.home.clubsHint}</p>
           </Card>
         </Link>
+        <Link href="/admin/seasons" className="group">
+          <Card title={ru.admin.nav.seasons} className="transition-shadow group-hover:shadow-soft">
+            <p className="text-muted">{ru.admin.home.seasonsHint}</p>
+          </Card>
+        </Link>
         <Link href="/admin/users" className="group">
           <Card title={ru.admin.nav.users} className="transition-shadow group-hover:shadow-soft">
             <p className="text-muted">{ru.admin.home.usersHint}</p>

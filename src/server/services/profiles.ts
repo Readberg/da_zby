@@ -48,6 +48,16 @@ async function loadRow(supabase: Db, userId: string): Promise<Tables<"profiles">
   return data;
 }
 
+/** Time zone of a user as a fixed UTC offset in minutes; UTC+3 when there is no profile row. */
+export async function getUtcOffsetMinutes(supabase: Db, userId: string): Promise<number> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("utc_offset_minutes")
+    .eq("id", userId)
+    .maybeSingle();
+  return data?.utc_offset_minutes ?? 180;
+}
+
 export async function getOwnProfile(supabase: Db, user: AuthUser): Promise<ProfileMe> {
   return toDto(await loadRow(supabase, user.id), user.email ?? null);
 }
