@@ -17,10 +17,15 @@ const videos: Video[] = Array.from({ length: 6 }, (_, i) => ({
 }));
 
 describe("VideoShowcase", () => {
-  it("shows the newest video as a preview without loading YouTube", () => {
+  it("shows the newest video in the standard YouTube player, not started automatically", () => {
     const { container } = render(<VideoShowcase videos={videos} />);
-    expect(screen.getByRole("button", { name: "Смотреть видео: Выпуск 1" })).toBeInTheDocument();
-    expect(container.querySelector("iframe")).toBeNull();
+    const player = screen.getByTitle("Видеоплеер YouTube: Выпуск 1");
+    expect(player).toHaveAttribute(
+      "src",
+      `https://www.youtube-nocookie.com/embed/${videos[0]!.id}?rel=0`,
+    );
+    expect(container.querySelector("iframe")).toBe(player);
+    expect(screen.queryByRole("button", { name: /Смотреть видео/ })).toBeNull();
     expect(screen.getByText("23 октября 2026")).toBeInTheDocument();
   });
 
@@ -30,21 +35,12 @@ describe("VideoShowcase", () => {
     expect(within(more).getAllByRole("listitem")).toHaveLength(5);
   });
 
-  it("starts the privacy-enhanced player on click", async () => {
-    render(<VideoShowcase videos={videos} />);
-    await userEvent.click(screen.getByRole("button", { name: "Смотреть видео: Выпуск 1" }));
-    const player = screen.getByTitle("Видеоплеер YouTube: Выпуск 1");
-    expect(player).toHaveAttribute(
-      "src",
-      `https://www.youtube-nocookie.com/embed/${videos[0]!.id}?autoplay=1&rel=0`,
-    );
-  });
-
   it("switches the player to a video from the grid", async () => {
     render(<VideoShowcase videos={videos} />);
     await userEvent.click(screen.getByRole("button", { name: /Выпуск 3/ }));
 
-    expect(screen.getByTitle("Видеоплеер YouTube: Выпуск 3")).toBeInTheDocument();
+    const player = screen.getByTitle("Видеоплеер YouTube: Выпуск 3");
+    expect(player.getAttribute("src")).toContain("autoplay=1");
     expect(screen.getByRole("heading", { name: "Выпуск 3" })).toBeInTheDocument();
     const more = screen.getByRole("region", { name: "Предыдущие выпуски" });
     expect(within(more).queryByText("Выпуск 3")).toBeNull();
@@ -65,7 +61,7 @@ describe("LatestVideos", () => {
     const loadVideos = vi.fn(async () => videos);
     render(await LatestVideos({ loadVideos }));
     expect(loadVideos).toHaveBeenCalledWith(6);
-    expect(screen.getByRole("button", { name: "Смотреть видео: Выпуск 1" })).toBeInTheDocument();
+    expect(screen.getByTitle("Видеоплеер YouTube: Выпуск 1")).toBeInTheDocument();
   });
 
   it("shows the fallback with a channel link when YouTube is unavailable", async () => {

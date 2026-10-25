@@ -37,11 +37,61 @@ export const profilePatchSchema = z
 
 export type ProfilePatch = z.infer<typeof profilePatchSchema>;
 
+/** Well-known places for each offset, shown next to it so nobody has to guess their zone. */
+const UTC_REGIONS: Record<number, string> = {
+  [-720]: "Бейкер",
+  [-660]: "Паго-Паго",
+  [-600]: "Гавайи",
+  [-540]: "Аляска",
+  [-480]: "Лос-Анджелес, Ванкувер",
+  [-420]: "Денвер, Финикс",
+  [-360]: "Чикаго, Мехико",
+  [-300]: "Нью-Йорк, Торонто, Богота",
+  [-240]: "Галифакс, Каракас",
+  [-210]: "Ньюфаундленд",
+  [-180]: "Буэнос-Айрес, Сан-Паулу",
+  [-120]: "Южная Георгия",
+  [-60]: "Азорские острова",
+  0: "Лондон, Лиссабон, Рейкьявик",
+  60: "Берлин, Париж, Варшава, Рим",
+  120: "Киев, Рига, Вильнюс, Афины, Каир",
+  180: "Минск, Москва, Стамбул",
+  210: "Тегеран",
+  240: "Ереван, Баку, Тбилиси, Дубай",
+  270: "Кабул",
+  300: "Астана, Ташкент, Карачи",
+  330: "Дели, Мумбаи",
+  345: "Катманду",
+  360: "Бишкек, Дакка, Омск",
+  390: "Янгон",
+  420: "Бангкок, Джакарта",
+  480: "Пекин, Сингапур, Перт",
+  525: "Юкла",
+  540: "Токио, Сеул",
+  570: "Аделаида, Дарвин",
+  600: "Сидней, Владивосток",
+  630: "Лорд-Хау",
+  660: "Нумеа, Магадан",
+  690: "Норфолк",
+  720: "Окленд, Фиджи",
+  765: "Чатем",
+  780: "Апиа",
+  840: "Киритимати",
+};
+
 /** UTC offsets offered in the profile: every 30 minutes plus the three 45-minute zones. */
 export function utcOffsetOptions(): { minutes: number; label: string }[] {
   const minutes = new Set<number>([345, 525, 765]);
   for (let m = -720; m <= 840; m += 30) minutes.add(m);
-  return [...minutes].sort((a, b) => a - b).map((m) => ({ minutes: m, label: formatUtcOffset(m) }));
+  return [...minutes]
+    .sort((a, b) => a - b)
+    .map((m) => {
+      const region = UTC_REGIONS[m];
+      return {
+        minutes: m,
+        label: region ? `${formatUtcOffset(m)} — ${region}` : formatUtcOffset(m),
+      };
+    });
 }
 
 export function formatUtcOffset(minutes: number): string {

@@ -148,7 +148,7 @@ export function ProfileForm({
       </SelectField>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={status === "saving"}>
+        <Button type="submit" loading={status === "saving"}>
           {status === "saving" ? ru.profile.saving : ru.profile.save}
         </Button>
         <p role="status" aria-live="polite" className="text-sm">
