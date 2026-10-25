@@ -62,7 +62,7 @@
 2. Заполните пустые значения: `SUPABASE_SECRET_KEY` (пункт C.2) и при способе 2 — `JIRA_*`. Остальное уже есть.
 3. Файл `.env.local` не коммитится (он в `.gitignore`). Проверка: `git status` его не показывает.
 
-## 🟡 E. Вход через Google (эпик E3) (≈20 минут)
+## 🔴 E. Вход через Google (основной способ входа, D-053) (≈20 минут)
 
 1. https://console.cloud.google.com → сверху выпадающий список проектов → **New project** → имя «da-zby» → **Create**.
 2. Меню **APIs & Services → OAuth consent screen** (или **Google Auth Platform**): нажмите **Get started** → App name «Да забей», User support email — ваш → Audience **External** → контактный email → **Create**.

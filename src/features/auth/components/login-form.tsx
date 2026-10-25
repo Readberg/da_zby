@@ -4,16 +4,15 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TextField } from "@/components/ui/field";
+import { authMethods } from "@/lib/auth-methods";
 import { isPlausibleEmail } from "@/lib/email";
 import { createClient } from "@/lib/supabase/client";
 import { ru } from "@/messages/ru";
 
-// Hidden until Google is configured in Supabase and Google Cloud (docs/SETUP.md, section E).
-const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH === "1";
-
 type Status = "idle" | "sending" | "sent";
 
 export function LoginForm({ next, linkError }: { next: string; linkError?: boolean }) {
+  const methods = authMethods();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(linkError ? ru.auth.errors.link : null);
@@ -65,8 +64,27 @@ export function LoginForm({ next, linkError }: { next: string; linkError?: boole
     );
   }
 
+  const googleButton = methods.google && (
+    <Button type="button" variant={methods.email ? "secondary" : "primary"} onClick={onGoogle}>
+      {ru.auth.google}
+    </Button>
+  );
+
+  if (!methods.email) {
+    return (
+      <div className="flex max-w-md flex-col gap-4">
+        {googleButton || <p className="text-muted">{ru.auth.unavailable}</p>}
+        <p id="login-error" role="alert" className="min-h-5 text-sm text-danger">
+          {error}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={onSubmit} noValidate className="flex max-w-md flex-col gap-4">
+      {googleButton}
+      {methods.google && <p className="text-center text-sm text-muted">{ru.auth.or}</p>}
       <TextField
         id="login-email"
         label={ru.auth.emailLabel}
@@ -81,14 +99,6 @@ export function LoginForm({ next, linkError }: { next: string; linkError?: boole
       <Button type="submit" disabled={status === "sending"}>
         {status === "sending" ? ru.auth.sending : ru.auth.send}
       </Button>
-      {GOOGLE_ENABLED && (
-        <>
-          <p className="text-center text-sm text-muted">{ru.auth.or}</p>
-          <Button type="button" variant="secondary" onClick={onGoogle}>
-            {ru.auth.google}
-          </Button>
-        </>
-      )}
     </form>
   );
 }
