@@ -1,42 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import { ApiClientError, api } from "@/lib/api-client";
 import { LOGIN_NEXT_COOKIE, LOGIN_NEXT_MAX_AGE_SECONDS } from "@/lib/login-next";
 import { ru } from "@/messages/ru";
 
-const WIDGET_SRC = "https://telegram.org/js/telegram-widget.js?22";
-
-type TelegramWidgetUser = Record<string, string | number>;
-
-type TelegramGlobal = {
-  Login?: {
-    auth: (
-      options: { bot_id: number; request_access?: boolean | string; lang?: string },
-      callback: (user: TelegramWidgetUser | false) => void,
-    ) => void;
-  };
+type Attempt = {
+  token: string;
+  code: string;
+  appUrl: string;
+  webUrl: string;
+  expiresAt: number;
 };
 
-/** The signed fields go to the server as they are: the signature covers exactly what Telegram sent. */
-export function telegramAuthUrl(user: TelegramWidgetUser): string {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(user)) params.set(key, String(value));
-  return `/auth/telegram?${params.toString()}`;
+type Status = "pending" | "confirmed" | "expired";
+
+const STORAGE_KEY = "dazby.telegram-login";
+const POLL_MS = 1500;
+
+// The running attempt lives in sessionStorage: a phone may reload this page while the Telegram app
+// is in front, and the attempt must survive that. A module variable is the fallback when storage
+// is blocked.
+let memory: string | null = null;
+const listeners = new Set<() => void>();
+
+function readStored(): string | null {
+  try {
+    return sessionStorage.getItem(STORAGE_KEY);
+  } catch {
+    return memory;
+  }
 }
 
-function loadWidgetScript(): Promise<void> {
-  if ((window as unknown as { Telegram?: TelegramGlobal }).Telegram?.Login) {
-    return Promise.resolve();
+function writeStored(value: string | null) {
+  memory = value;
+  try {
+    if (value) sessionStorage.setItem(STORAGE_KEY, value);
+    else sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Blocked storage: the in-memory copy above is used.
   }
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = WIDGET_SRC;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("telegram widget failed to load"));
-    document.head.appendChild(script);
-  });
+  listeners.forEach((listener) => listener());
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function parseAttempt(raw: string | null): Attempt | null {
+  if (!raw) return null;
+  try {
+    const attempt = JSON.parse(raw) as Attempt;
+    return attempt.expiresAt > Date.now() ? attempt : null;
+  } catch {
+    return null;
+  }
 }
 
 function PlaneIcon() {
@@ -48,71 +70,145 @@ function PlaneIcon() {
 }
 
 /**
- * Own "Войти через Telegram" button that opens Telegram's login window (the official widget
- * script is only used for its `Telegram.Login.auth` call). After the visitor confirms in
- * Telegram the page continues to /auth/telegram by itself; the return path travels in a
- * short-lived cookie.
+ * Sign-in through the Telegram bot. The site creates a one-time attempt and opens the bot in the
+ * Telegram app; the visitor presses Start and picks the number shown here, and this page — which
+ * keeps asking the server — continues by itself. It uses whichever Telegram account is active in
+ * the app, so switching accounts there just works. The return path travels in a short-lived cookie.
  */
 export function TelegramLogin({
-  botId,
   next,
   error,
   navigate = (url) => window.location.assign(url),
 }: {
-  /** Numeric id of the login bot (the digits before the colon in its token; not a secret). */
-  botId: number | null;
   next: string;
   error?: string | null;
   navigate?: (url: string) => void;
 }) {
-  const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const stored = useSyncExternalStore(subscribe, readStored, () => null);
+  const attempt = useMemo(() => parseAttempt(stored), [stored]);
+  const [starting, setStarting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const finished = useRef(false);
 
+  const reset = useCallback((text: string | null) => {
+    writeStored(null);
+    setMessage(text);
+  }, []);
+
+  const token = attempt?.token;
   useEffect(() => {
-    if (botId) void loadWidgetScript().catch(() => undefined);
-  }, [botId]);
+    if (!token) return;
+    finished.current = false;
 
-  async function onClick() {
-    if (!botId || busy) return;
-    setFailed(false);
-    setBusy(true);
+    async function poll() {
+      if (finished.current) return;
+      try {
+        const { status } = await api<{ status: Status }>(
+          `/auth/telegram/status?token=${encodeURIComponent(token!)}`,
+        );
+        if (finished.current) return;
+        if (status === "confirmed") {
+          finished.current = true;
+          navigate(`/auth/telegram?token=${encodeURIComponent(token!)}`);
+        } else if (status === "expired") {
+          finished.current = true;
+          reset(ru.auth.errors.expired);
+        }
+      } catch {
+        // A short network hiccup: the next tick tries again.
+      }
+    }
+
+    const timer = setInterval(poll, POLL_MS);
+    const onVisible = () => document.visibilityState === "visible" && void poll();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      finished.current = true;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [token, navigate, reset]);
+
+  async function start() {
+    if (starting) return;
+    setStarting(true);
+    setMessage(null);
     document.cookie = `${LOGIN_NEXT_COOKIE}=${encodeURIComponent(next)}; path=/; max-age=${LOGIN_NEXT_MAX_AGE_SECONDS}; samesite=lax`;
     try {
-      await loadWidgetScript();
-      const login = (window as unknown as { Telegram?: TelegramGlobal }).Telegram?.Login;
-      if (!login) throw new Error("no widget");
-      login.auth({ bot_id: botId, request_access: "write", lang: "ru" }, (user) => {
-        if (!user) {
-          setBusy(false);
-          return;
-        }
-        navigate(telegramAuthUrl(user));
-      });
-    } catch {
-      setBusy(false);
-      setFailed(true);
+      const created = await api<Omit<Attempt, "expiresAt"> & { expiresInSeconds: number }>(
+        "/auth/telegram/start",
+        { method: "POST" },
+      );
+      const fresh: Attempt = {
+        token: created.token,
+        code: created.code,
+        appUrl: created.appUrl,
+        webUrl: created.webUrl,
+        expiresAt: Date.now() + created.expiresInSeconds * 1000,
+      };
+      writeStored(JSON.stringify(fresh));
+      // Opens the Telegram app directly; without the app nothing happens and the links below work.
+      window.location.href = fresh.appUrl;
+    } catch (cause) {
+      const unavailable = cause instanceof ApiClientError && cause.problem.status === 503;
+      setMessage(unavailable ? ru.auth.unavailable : ru.auth.errors.start);
+    } finally {
+      setStarting(false);
     }
   }
 
-  const message = failed ? ru.auth.errors.telegramScript : error;
+  if (attempt) {
+    return (
+      <div className="flex max-w-md flex-col gap-4">
+        <p className="text-muted">{ru.auth.codeIntro}</p>
+        <p
+          aria-label={`${ru.auth.codeLabel}: ${attempt.code}`}
+          className="font-display text-h1 leading-none tracking-wide"
+        >
+          {attempt.code}
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <a
+            href={attempt.appUrl}
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-telegram px-7 text-base font-semibold text-white transition hover:brightness-95 active:scale-[0.97]"
+          >
+            <PlaneIcon />
+            {ru.auth.openTelegram}
+          </a>
+          <Button variant="text" onClick={() => reset(null)}>
+            {ru.auth.cancel}
+          </Button>
+        </div>
+        <p className="text-sm text-muted">
+          {ru.auth.noApp}{" "}
+          <a href={attempt.webUrl} target="_blank" rel="noopener noreferrer" className="underline">
+            {ru.auth.openInBrowser}
+          </a>
+        </p>
+        <p role="status" className="flex items-center gap-2 text-sm text-muted">
+          <span
+            aria-hidden="true"
+            className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"
+          />
+          {ru.auth.waiting}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex max-w-md flex-col gap-3">
-      {botId ? (
-        <Button
-          type="button"
-          onClick={onClick}
-          loading={busy}
-          className="bg-telegram px-7 text-white hover:brightness-95"
-        >
-          {!busy && <PlaneIcon />}
-          {busy ? ru.auth.waiting : ru.auth.telegram}
-        </Button>
-      ) : (
-        <p className="text-muted">{ru.auth.unavailable}</p>
-      )}
+      <Button
+        type="button"
+        onClick={start}
+        loading={starting}
+        className="bg-telegram px-7 text-white hover:brightness-95"
+      >
+        {!starting && <PlaneIcon />}
+        {ru.auth.telegram}
+      </Button>
       <p id="login-error" role="alert" className="min-h-5 text-sm text-danger">
-        {message}
+        {message ?? error}
       </p>
     </div>
   );

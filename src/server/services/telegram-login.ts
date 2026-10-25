@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
-import type { TelegramUser } from "./telegram-auth";
+import type { TelegramUser } from "./login-tokens";
 
 /**
  * Telegram gives no email, but Supabase accounts need one. Each Telegram id maps to a fixed

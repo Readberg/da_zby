@@ -1,91 +1,134 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TelegramLogin, telegramAuthUrl } from "./telegram-login";
 
-type Auth = (options: object, callback: (user: object | false) => void) => void;
-const auth = vi.fn<Auth>();
+const api = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/api-client", async (original) => ({
+  ...(await original<typeof import("@/lib/api-client")>()),
+  api,
+}));
+
+const { TelegramLogin } = await import("./telegram-login");
+const { ApiClientError } = await import("@/lib/api-client");
+
+const started = {
+  token: "t".repeat(43),
+  code: "47",
+  appUrl: "tg://resolve?domain=dazby_bot&start=abc",
+  webUrl: "https://t.me/dazby_bot?start=abc",
+  expiresInSeconds: 600,
+};
 
 beforeEach(() => {
-  auth.mockReset();
-  (window as unknown as { Telegram: object }).Telegram = { Login: { auth } };
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  api.mockReset();
+  sessionStorage.clear();
 });
 
 afterEach(() => {
-  delete (window as unknown as { Telegram?: object }).Telegram;
+  vi.useRealTimers();
+  sessionStorage.clear();
   document.cookie = "login_next=; max-age=0; path=/";
 });
 
-describe("telegramAuthUrl", () => {
-  it("passes every signed field through unchanged", () => {
-    const url = new URL(
-      telegramAuthUrl({ id: 42, first_name: "Роман", auth_date: 1800000000, hash: "abc" }),
-      "http://localhost",
-    );
-    expect(url.pathname).toBe("/auth/telegram");
-    expect(Object.fromEntries(url.searchParams)).toEqual({
-      id: "42",
-      first_name: "Роман",
-      auth_date: "1800000000",
-      hash: "abc",
-    });
-  });
-});
+async function begin(navigate = vi.fn()) {
+  api.mockResolvedValueOnce(started);
+  render(<TelegramLogin next="/profile" navigate={navigate} />);
+  await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+  return navigate;
+}
 
 describe("TelegramLogin", () => {
-  it("opens Telegram's window for the bot and remembers where to return", async () => {
-    render(<TelegramLogin botId={123456} next="/profile" />);
-    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+  it("starts an attempt, shows the number to pick in the bot and remembers the return page", async () => {
+    await begin();
 
-    expect(auth).toHaveBeenCalledOnce();
-    expect(auth.mock.calls[0]![0]).toMatchObject({ bot_id: 123456, request_access: "write" });
+    expect(api).toHaveBeenCalledWith("/auth/telegram/start", { method: "POST" });
+    expect(await screen.findByLabelText("Число для подтверждения: 47")).toBeVisible();
+    expect(screen.getByRole("link", { name: /Открыть Telegram/ })).toHaveAttribute(
+      "href",
+      started.appUrl,
+    );
+    expect(screen.getByRole("link", { name: "Открыть в браузере" })).toHaveAttribute(
+      "href",
+      started.webUrl,
+    );
     expect(document.cookie).toContain("login_next=%2Fprofile");
   });
 
-  it("continues to the server by itself when Telegram confirms", async () => {
-    const navigate = vi.fn();
-    auth.mockImplementation((_options, callback) =>
-      callback({ id: 42, auth_date: 1800000000, hash: "abc" }),
-    );
-    render(<TelegramLogin botId={123456} next="/" navigate={navigate} />);
-    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+  it("continues to the server by itself once the bot confirmed", async () => {
+    const navigate = await begin();
+    api.mockResolvedValue({ status: "confirmed" });
 
-    expect(navigate).toHaveBeenCalledWith(expect.stringMatching(/^\/auth\/telegram\?/));
+    await act(() => vi.advanceTimersByTimeAsync(1600));
+
+    expect(api).toHaveBeenLastCalledWith(
+      `/auth/telegram/status?token=${encodeURIComponent(started.token)}`,
+    );
+    expect(navigate).toHaveBeenCalledWith(`/auth/telegram?token=${started.token}`);
   });
 
-  it("goes back to idle when the visitor closes the Telegram window", async () => {
-    const navigate = vi.fn();
-    auth.mockImplementation((_options, callback) => callback(false));
-    render(<TelegramLogin botId={123456} next="/" navigate={navigate} />);
-    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+  it("keeps waiting while the attempt is pending", async () => {
+    const navigate = await begin();
+    api.mockResolvedValue({ status: "pending" });
 
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Войти через Telegram" })).toBeEnabled(),
-    );
+    await act(() => vi.advanceTimersByTimeAsync(3300));
+
     expect(navigate).not.toHaveBeenCalled();
+    expect(screen.getByText("Ждём подтверждения в Telegram…")).toBeVisible();
   });
 
-  it("explains when the Telegram script is not available", async () => {
-    delete (window as unknown as { Telegram?: object }).Telegram;
-    const original = document.head.appendChild.bind(document.head);
-    vi.spyOn(document.head, "appendChild").mockImplementation((node) => {
-      queueMicrotask(() => (node as HTMLScriptElement).onerror?.(new Event("error")));
-      return original(document.createComment("blocked"));
-    });
-    render(<TelegramLogin botId={123456} next="/" />);
+  it("goes back to the start with a message when the attempt expires or a wrong number was picked", async () => {
+    await begin();
+    api.mockResolvedValue({ status: "expired" });
+
+    await act(() => vi.advanceTimersByTimeAsync(1600));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Начните заново");
+    expect(screen.getByRole("button", { name: "Войти через Telegram" })).toBeEnabled();
+  });
+
+  it("lets the visitor cancel", async () => {
+    await begin();
+    await userEvent.click(screen.getByRole("button", { name: "Отмена" }));
+    expect(screen.getByRole("button", { name: "Войти через Telegram" })).toBeVisible();
+  });
+
+  it("resumes a running attempt after the page was reloaded", () => {
+    sessionStorage.setItem(
+      "dazby.telegram-login",
+      JSON.stringify({ ...started, expiresAt: Date.now() + 60_000 }),
+    );
+    render(<TelegramLogin next="/" />);
+    expect(screen.getByLabelText("Число для подтверждения: 47")).toBeVisible();
+  });
+
+  it("ignores a stored attempt that has expired", () => {
+    sessionStorage.setItem(
+      "dazby.telegram-login",
+      JSON.stringify({ ...started, expiresAt: Date.now() - 1000 }),
+    );
+    render(<TelegramLogin next="/" />);
+    expect(screen.getByRole("button", { name: "Войти через Telegram" })).toBeVisible();
+  });
+
+  it("says sign-in is unavailable when the server is not configured", async () => {
+    api.mockRejectedValueOnce(
+      new ApiClientError({ status: 503, code: "auth.telegram_unavailable" }),
+    );
+    render(<TelegramLogin next="/" />);
     await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Не удалось открыть окно Telegram");
-    vi.restoreAllMocks();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Вход временно недоступен");
   });
 
-  it("says sign-in is unavailable when no bot is configured", () => {
-    render(<TelegramLogin botId={null} next="/" />);
-    expect(screen.getByText("Вход временно недоступен. Загляните позже.")).toBeVisible();
-    expect(screen.queryByRole("button")).toBeNull();
+  it("shows the generic error for other failures", async () => {
+    api.mockRejectedValueOnce(new Error("network"));
+    render(<TelegramLogin next="/" />);
+    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Не удалось начать вход");
   });
 
   it("shows the error passed from the server", () => {
-    render(<TelegramLogin botId={123456} next="/" error="Не получилось" />);
+    render(<TelegramLogin next="/" error="Не получилось" />);
     expect(screen.getByRole("alert")).toHaveTextContent("Не получилось");
   });
 });

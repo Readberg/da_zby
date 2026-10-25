@@ -20,7 +20,7 @@ const publicRelations = [
   "season_leaderboard",
   "tour_leaderboard",
 ];
-const privateRelations = ["profile_private", "admin_bootstrap"];
+const privateRelations = ["profile_private", "admin_bootstrap", "login_tokens"];
 const buckets = ["avatars", "club-logos"];
 
 const failures: string[] = [];
