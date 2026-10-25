@@ -25,7 +25,7 @@ async function AdminGate({ children }: { children: ReactNode }) {
 
   return (
     <Container className="flex flex-col gap-8 py-8 sm:py-12">
-      <header className="flex flex-col gap-3 border-b border-line pb-4">
+      <header className="flex flex-col gap-3 rounded-lg bg-surface p-4 sm:p-5">
         <Link
           href="/admin"
           className="w-fit text-sm font-semibold uppercase tracking-widest text-muted hover:text-ink"

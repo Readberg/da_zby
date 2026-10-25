@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Container } from "@/components/ui/container";
+import { NarrowPage } from "@/components/ui/narrow-page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OnboardingForm } from "@/features/profile/components/onboarding-form";
 import { safeRedirectPath } from "@/lib/safe-redirect";
@@ -27,12 +27,10 @@ async function OnboardingContent({
 
 export default function OnboardingPage(props: PageProps<"/onboarding">) {
   return (
-    <Container className="flex flex-col gap-4 py-8 sm:py-12">
-      <h1 className="text-h3 sm:text-h1">{ru.onboarding.title}</h1>
-      <p className="max-w-prose text-muted">{ru.onboarding.intro}</p>
-      <Suspense fallback={<Skeleton className="h-40 max-w-md" />}>
+    <NarrowPage title={ru.onboarding.title} intro={ru.onboarding.intro}>
+      <Suspense fallback={<Skeleton className="h-40 w-full" />}>
         <OnboardingContent searchParams={props.searchParams} />
       </Suspense>
-    </Container>
+    </NarrowPage>
   );
 }

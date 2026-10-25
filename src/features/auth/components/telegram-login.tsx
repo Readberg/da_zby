@@ -159,7 +159,7 @@ export function TelegramLogin({
 
   if (attempt) {
     return (
-      <div className="flex max-w-md flex-col gap-4">
+      <div className="flex w-full flex-col gap-4">
         <p className="text-muted">{ru.auth.codeIntro}</p>
         <p
           aria-label={`${ru.auth.codeLabel}: ${attempt.code}`}
@@ -197,12 +197,12 @@ export function TelegramLogin({
   }
 
   return (
-    <div className="flex max-w-md flex-col gap-3">
+    <div className="flex w-full flex-col gap-3">
       <Button
         type="button"
         onClick={start}
         loading={starting}
-        className="bg-telegram px-7 text-white hover:brightness-95"
+        className="min-h-14 w-full bg-telegram px-7 text-lg text-white hover:brightness-95"
       >
         {!starting && <PlaneIcon />}
         {ru.auth.telegram}
