@@ -129,7 +129,7 @@ describe("PredictionTable", () => {
     expect(screen.queryByRole("spinbutton")).toBeNull();
     expect(screen.queryByRole("button", { name: "Сохранить прогнозы" })).toBeNull();
     expect(screen.getByLabelText("Ваш прогноз")).toHaveTextContent("2 : 1");
-    expect(screen.getByText(/Итог/)).toHaveTextContent("2 : 1");
+    expect(screen.getByText(/^Итог:/)).toHaveTextContent("2 : 1");
     expect(screen.getByText(/Очки/)).toHaveTextContent("3");
   });
 
@@ -152,5 +152,56 @@ describe("PredictionTable", () => {
   it("shows an empty state for a tour without matches", () => {
     table([]);
     expect(screen.getByText("В этом туре пока нет матчей.")).toBeVisible();
+  });
+
+  it("shows what the visitor earned in the tour with a link to the tour table", () => {
+    table(
+      [
+        match(m1, {
+          status: "finished",
+          homeScore: 2,
+          awayScore: 1,
+          editable: false,
+          prediction: { homeScore: 2, awayScore: 1, result: "exact", points: 3 },
+        }),
+        match(m2, {
+          status: "finished",
+          homeScore: 0,
+          awayScore: 0,
+          editable: false,
+          prediction: { homeScore: 1, awayScore: 1, result: "outcome", points: 1 },
+        }),
+      ],
+      { open: false, ratingHref: "/rating?tour=3" },
+    );
+    expect(screen.getByText("Итог тура")).toBeVisible();
+    expect(screen.getByText("4 очка · точных счетов: 1 · угаданных исходов: 1")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Таблица тура" })).toHaveAttribute(
+      "href",
+      "/rating?tour=3",
+    );
+  });
+
+  it("has no tour result before any match is graded", () => {
+    table([match(m1)]);
+    expect(screen.queryByText("Итог тура")).toBeNull();
+  });
+
+  it("tells whether each prediction is saved or not", async () => {
+    table([
+      match(m1, { prediction: { homeScore: 1, awayScore: 0, result: null, points: null } }),
+      match(m2, { home: club("Нафтан"), away: club("Гомель") }),
+    ]);
+    expect(screen.getByText("Сохранено")).toBeVisible();
+    expect(screen.queryByText("Не сохранено")).toBeNull();
+
+    await userEvent.type(screen.getByLabelText("Голы Нафтан"), "2");
+    await userEvent.type(screen.getByLabelText("Голы Гомель"), "2");
+    expect(screen.getByText("Не сохранено")).toBeVisible();
+
+    await userEvent.clear(screen.getByLabelText("Голы Динамо"));
+    await userEvent.type(screen.getByLabelText("Голы Динамо"), "5");
+    expect(screen.getAllByText("Не сохранено")).toHaveLength(2);
+    expect(screen.queryByText("Сохранено")).toBeNull();
   });
 });
