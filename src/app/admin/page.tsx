@@ -7,26 +7,35 @@ export default function AdminHomePage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-h3 sm:text-h2">{ru.admin.overview}</h1>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link href="/admin/tournaments" className="group">
+        <Link href="/admin/tournaments" className="group relative">
           <Card
             title={ru.admin.nav.tournaments}
-            className="transition-shadow group-hover:shadow-soft"
+            className="transition-transform duration-200 group-hover:-translate-y-0.5"
           >
             <p className="text-muted">{ru.admin.home.tournamentsHint}</p>
           </Card>
         </Link>
         <Link href="/admin/clubs" className="group">
-          <Card title={ru.admin.nav.clubs} className="transition-shadow group-hover:shadow-soft">
+          <Card
+            title={ru.admin.nav.clubs}
+            className="transition-transform duration-200 group-hover:-translate-y-0.5"
+          >
             <p className="text-muted">{ru.admin.home.clubsHint}</p>
           </Card>
         </Link>
         <Link href="/admin/seasons" className="group">
-          <Card title={ru.admin.nav.seasons} className="transition-shadow group-hover:shadow-soft">
+          <Card
+            title={ru.admin.nav.seasons}
+            className="transition-transform duration-200 group-hover:-translate-y-0.5"
+          >
             <p className="text-muted">{ru.admin.home.seasonsHint}</p>
           </Card>
         </Link>
         <Link href="/admin/users" className="group">
-          <Card title={ru.admin.nav.users} className="transition-shadow group-hover:shadow-soft">
+          <Card
+            title={ru.admin.nav.users}
+            className="transition-transform duration-200 group-hover:-translate-y-0.5"
+          >
             <p className="text-muted">{ru.admin.home.usersHint}</p>
           </Card>
         </Link>

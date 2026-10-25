@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Container } from "@/components/ui/container";
+import { NarrowPage } from "@/components/ui/narrow-page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TelegramLogin } from "@/features/auth/components/telegram-login";
 import { safeRedirectPath } from "@/lib/safe-redirect";
@@ -26,12 +26,10 @@ async function LoginContent({
 
 export default function LoginPage(props: PageProps<"/login">) {
   return (
-    <Container className="flex flex-col gap-4 py-8 sm:py-12">
-      <h1 className="text-h3 sm:text-h1">{ru.auth.loginTitle}</h1>
-      <p className="max-w-prose text-muted">{ru.auth.loginIntro}</p>
-      <Suspense fallback={<Skeleton className="h-32 max-w-md" />}>
+    <NarrowPage title={ru.auth.loginTitle} intro={ru.auth.loginIntro}>
+      <Suspense fallback={<Skeleton className="h-24 w-full" />}>
         <LoginContent searchParams={props.searchParams} />
       </Suspense>
-    </Container>
+    </NarrowPage>
   );
 }
