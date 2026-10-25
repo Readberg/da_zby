@@ -66,7 +66,7 @@ describe("Card", () => {
 
   it("uses the dark background for the accent variant", () => {
     render(<Card variant="accent" title="Пост" data-testid="card" />);
-    expect(screen.getByTestId("card")).toHaveClass("bg-ink");
+    expect(screen.getByTestId("card")).toHaveClass("bg-black");
     expect(screen.getByRole("heading", { name: "Пост" })).toHaveClass("text-accent");
   });
 });

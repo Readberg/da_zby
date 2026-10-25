@@ -14,6 +14,9 @@ export const ru = {
     predictions: "Прогнозы",
     rating: "Рейтинг",
   },
+  theme: {
+    toggle: "Переключить тему: светлая / тёмная",
+  },
   footer: {
     socialLabel: "Мы в соцсетях",
     copyright: "© «Да забей»",
@@ -89,6 +92,7 @@ export const ru = {
   },
   admin: {
     title: "Админка",
+    overview: "Обзор",
     nav: {
       users: "Пользователи",
       tournaments: "Турниры",

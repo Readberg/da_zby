@@ -119,7 +119,7 @@ async function UsersContent({
 export default function AdminUsersPage(props: PageProps<"/admin/users">) {
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-h3 sm:text-h1">{ru.admin.nav.users}</h1>
+      <h1 className="text-h3 sm:text-h2">{ru.admin.nav.users}</h1>
       <Suspense fallback={<Skeleton className="h-64" />}>
         <UsersContent searchParams={props.searchParams} />
       </Suspense>

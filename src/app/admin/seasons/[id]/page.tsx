@@ -46,7 +46,7 @@ async function SeasonContent({ params }: { params: PageProps<"/admin/seasons/[id
           ← {ru.admin.nav.seasons}
         </Link>
         <p className="mt-3 text-sm text-muted">{season.tournamentName}</p>
-        <h1 className="text-h3 sm:text-h1">{season.name}</h1>
+        <h1 className="text-h3 sm:text-h2">{season.name}</h1>
         <p className="mt-2 text-sm text-muted">
           <StatusPill tone={closed ? "muted" : "ok"}>
             {closed ? ru.admin.seasons.closedLabel : ru.admin.seasons.activeLabel}

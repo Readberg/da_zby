@@ -36,7 +36,7 @@ export function Avatar({
       aria-hidden="true"
       className={cx(
         box,
-        "flex items-center justify-center bg-accent font-display font-bold uppercase text-ink",
+        "flex items-center justify-center bg-accent font-display font-bold uppercase text-black",
       )}
       style={{ width: px, height: px, fontSize: px / 2 }}
     >

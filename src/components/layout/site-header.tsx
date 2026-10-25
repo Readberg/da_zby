@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
 import { ru } from "@/messages/ru";
 import { NavLink, StaticNavLink } from "./nav-link";
+import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 
 export function SiteHeader() {
@@ -23,6 +24,7 @@ export function SiteHeader() {
               <NavList link={NavLink} />
             </Suspense>
           </nav>
+          <ThemeToggle />
           {/* The user is request-time data: keep it out of the static shell. */}
           <Suspense fallback={<span className="inline-block h-11 w-20" aria-hidden="true" />}>
             <UserMenu />
