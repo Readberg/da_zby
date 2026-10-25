@@ -29,14 +29,33 @@ test.describe("themes", () => {
     expect(dark).not.toBe(light);
   });
 
-  test("text stays readable on the yellow accent in both themes", async ({ page }) => {
+  test("the sign-in pill is inverse to the page in both themes", async ({ page }) => {
     for (const scheme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: scheme });
       await page.goto("/");
       const login = page.getByRole("banner").getByRole("link", { name: "Войти" });
       await expect(login).toBeVisible();
-      const color = await login.evaluate((el) => getComputedStyle(el).color);
-      expect(color).toBe("rgb(0, 0, 0)");
+      const {
+        color,
+        background,
+        page: pageBg,
+      } = await login.evaluate((el) => ({
+        color: getComputedStyle(el).color,
+        background: getComputedStyle(el).backgroundColor,
+        page: getComputedStyle(document.body).backgroundColor,
+      }));
+      expect(color).toBe(pageBg);
+      expect(background).not.toBe(pageBg);
+    }
+  });
+
+  test("text on the yellow accent is black in both themes", async ({ page }) => {
+    for (const scheme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto("/");
+      const cta = page.getByRole("link", { name: "Войти через Telegram" });
+      await expect(cta).toBeVisible();
+      expect(await cta.evaluate((el) => getComputedStyle(el).color)).toBe("rgb(0, 0, 0)");
     }
   });
 });

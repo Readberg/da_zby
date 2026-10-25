@@ -16,10 +16,18 @@ import type { MatchView, PageClub } from "@/server/services/predictions";
 
 type Entry = { home: string; away: string };
 
-function ClubName({ club, align }: { club: PageClub; align: "left" | "right" }) {
+function ClubName({
+  club,
+  align,
+  className = "",
+}: {
+  club: PageClub;
+  align: "left" | "right";
+  className?: string;
+}) {
   return (
     <span
-      className={`flex min-w-0 items-center gap-2 ${align === "right" ? "flex-row-reverse text-right" : ""}`}
+      className={`flex min-w-0 items-center gap-2 ${align === "right" ? "sm:flex-row-reverse sm:text-right" : ""} ${className}`}
     >
       <ClubLogo src={club.logoUrl} name={club.name} size={32} />
       <span className="truncate font-semibold">{club.name}</span>
@@ -199,60 +207,67 @@ export function PredictionTable({
         </div>
       )}
 
-      <ul className="flex flex-col divide-y divide-line">
+      <ul className="flex flex-col gap-3">
         {matches.map((match) => {
           const entry = entries[match.id] ?? { home: "", away: "" };
           const editable = canEdit && match.editable;
           const finished = match.status === "finished";
           return (
-            <li key={match.id} className="flex flex-col gap-2 py-4">
+            <li key={match.id} className="flex flex-col gap-2 rounded-lg bg-surface p-4 sm:p-5">
               <p className="text-sm text-muted">
                 {formatDateTime(match.kickoffAt, offsetMinutes)}
                 {match.status !== "scheduled" && !finished && (
                   <span className="ml-2">· {ru.admin.matches.statuses[match.status]}</span>
                 )}
               </p>
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
-                <ClubName club={match.home} align="right" />
-                <div className="flex items-center gap-1">
-                  {editable ? (
-                    <>
-                      <Input
-                        aria-label={`${ru.predictions.goalsOf} ${match.home.name}`}
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        max={99}
-                        value={entry.home}
-                        invalid={Boolean(errors[match.id])}
-                        onChange={(e) => change(match.id, "home", e.target.value)}
-                        className="w-14 px-1 text-center"
-                      />
-                      <span aria-hidden="true">:</span>
-                      <Input
-                        aria-label={`${ru.predictions.goalsOf} ${match.away.name}`}
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        max={99}
-                        value={entry.away}
-                        invalid={Boolean(errors[match.id])}
-                        onChange={(e) => change(match.id, "away", e.target.value)}
-                        className="w-14 px-1 text-center"
-                      />
-                    </>
-                  ) : (
+              <div className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[1fr_auto_auto_auto_1fr] sm:gap-x-3">
+                <ClubName club={match.home} align="right" className="col-start-1 row-start-1" />
+                {editable ? (
+                  <>
+                    <Input
+                      aria-label={`${ru.predictions.goalsOf} ${match.home.name}`}
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={99}
+                      value={entry.home}
+                      invalid={Boolean(errors[match.id])}
+                      onChange={(e) => change(match.id, "home", e.target.value)}
+                      className="col-start-2 row-start-1 w-14 px-1 text-center sm:col-start-2"
+                    />
                     <span
-                      className="min-w-24 text-center font-display text-lg"
-                      aria-label={ru.predictions.yourPrediction}
+                      aria-hidden="true"
+                      className="hidden sm:col-start-3 sm:row-start-1 sm:block"
                     >
-                      {match.prediction
-                        ? `${match.prediction.homeScore} : ${match.prediction.awayScore}`
-                        : "– : –"}
+                      :
                     </span>
-                  )}
-                </div>
-                <ClubName club={match.away} align="left" />
+                    <Input
+                      aria-label={`${ru.predictions.goalsOf} ${match.away.name}`}
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={99}
+                      value={entry.away}
+                      invalid={Boolean(errors[match.id])}
+                      onChange={(e) => change(match.id, "away", e.target.value)}
+                      className="col-start-2 row-start-2 w-14 px-1 text-center sm:col-start-4 sm:row-start-1"
+                    />
+                  </>
+                ) : (
+                  <span
+                    className="col-start-2 row-span-2 row-start-1 min-w-16 text-center font-display text-lg sm:col-span-3 sm:row-span-1 sm:min-w-24"
+                    aria-label={ru.predictions.yourPrediction}
+                  >
+                    {match.prediction
+                      ? `${match.prediction.homeScore} : ${match.prediction.awayScore}`
+                      : "– : –"}
+                  </span>
+                )}
+                <ClubName
+                  club={match.away}
+                  align="left"
+                  className="col-start-1 row-start-2 sm:col-start-5 sm:row-start-1"
+                />
               </div>
 
               {editable && !errors[match.id] && chip(match) && (

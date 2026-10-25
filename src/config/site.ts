@@ -13,6 +13,11 @@ export const siteConfig = {
   analytics: {
     scriptUrl: "https://cloud.umami.is/script.js",
     websiteId: "8db86c05-ed7a-4581-ae16-6194582ad3dc",
+    /** Hosts that are counted: the configured site and its stand address (comma-separated). */
+    domains: (siteUrl: string) =>
+      [
+        ...new Set([new URL(siteUrl).hostname, "dazby.com", "dazby-production.up.railway.app"]),
+      ].join(","),
   },
   /** Header navigation: only pages that already exist. */
   nav: [

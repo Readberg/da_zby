@@ -61,7 +61,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             defer
             src={siteConfig.analytics.scriptUrl}
             data-website-id={siteConfig.analytics.websiteId}
-            data-domains={new URL(publicEnv.NEXT_PUBLIC_SITE_URL).hostname}
+            data-domains={siteConfig.analytics.domains(publicEnv.NEXT_PUBLIC_SITE_URL)}
             strategy="afterInteractive"
           />
         )}

@@ -21,7 +21,7 @@ export function PredictionPicker({ data }: { data: PredictionsPageData }) {
   if (!tournament) return null;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 rounded-lg bg-surface p-4 sm:grid-cols-3 sm:p-5">
       <SelectField
         id="pick-tournament"
         label={ru.predictions.tournament}
