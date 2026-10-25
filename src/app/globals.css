@@ -160,6 +160,7 @@
 
 @theme inline {
   --animate-page-in: page-in 0.35s ease-out both;
+  --animate-trend-in: trend-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-progress: progress 8s cubic-bezier(0.1, 0.6, 0.2, 1) forwards;
 
   @keyframes progress {
@@ -168,6 +169,17 @@
     }
     to {
       transform: scaleX(0.92);
+    }
+  }
+
+  @keyframes trend-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 

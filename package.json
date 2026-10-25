@@ -1,6 +1,6 @@
 {
   "name": "da-zby",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,7 +16,8 @@
     "db:types": "tsx scripts/db.ts types && prettier --write src/types/database.ts",
     "api:openapi": "tsx scripts/generate-openapi.ts",
     "design:snap": "playwright test -c playwright.design.config.ts",
-    "db:check": "tsx --env-file=.env.local scripts/check-schema.ts"
+    "db:check": "tsx --env-file=.env.local scripts/check-schema.ts",
+    "db:copy-catalog": "tsx scripts/copy-catalog.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

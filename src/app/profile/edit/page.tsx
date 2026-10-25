@@ -20,11 +20,6 @@ async function EditContent() {
 
   return (
     <>
-      <p className="max-w-xl text-sm">
-        <span className="text-muted">{ru.profile.nickname}:</span>{" "}
-        <span className="font-semibold">{profile.nickname}</span>{" "}
-        <span className="text-muted">{ru.profile.nicknameNote}</span>
-      </p>
       <AvatarUploader
         userId={user.id}
         nickname={user.nickname}
@@ -34,6 +29,7 @@ async function EditContent() {
       <ProfileForm
         countries={countryOptions()}
         initial={{
+          nickname: profile.nickname ?? "",
           fullName: profile.fullName ?? "",
           contact: profile.contact ?? "",
           about: profile.about ?? "",

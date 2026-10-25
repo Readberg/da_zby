@@ -9,7 +9,8 @@ import { ClubLogo } from "@/components/ui/club-logo";
 import { Input } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { formatDateTime } from "@/lib/local-time";
-import { points as pointsText } from "@/lib/plural";
+import { CountUp } from "@/components/ui/count-up";
+import { pluralRu } from "@/lib/plural";
 import { ru } from "@/messages/ru";
 import type { MatchView, PageClub } from "@/server/services/predictions";
 
@@ -185,8 +186,8 @@ export function PredictionTable({
             {ru.predictions.tourResult}
           </p>
           <p className="mt-1 text-lg font-semibold">
+            <CountUp value={earned.points} /> {pluralRu(earned.points, ["очко", "очка", "очков"])}
             {ru.predictions.tourResultText
-              .replace("{points}", pointsText(earned.points))
               .replace("{exact}", String(earned.exact))
               .replace("{outcome}", String(earned.outcome))}
           </p>
