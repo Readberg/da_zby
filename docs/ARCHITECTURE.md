@@ -55,7 +55,7 @@ tests/e2e/                 Playwright
 - `/auth/confirm` (по token_hash) остался служебным: через него e2e-тесты входят тестовым пользователем (DAZBY-52).
 - Нужны серверные секреты `TELEGRAM_BOT_TOKEN` и `SUPABASE_SECRET_KEY`; без любого из них вход и вебхук закрыты (fail closed). Таблица `login_tokens` доступна только ключу сервиса.
 - `profiles.nickname IS NULL` → `/onboarding` (кроме выхода и статики).
-- Админ: `requireAdmin()` в layout `/admin` + RLS + уровень `admin` в `withApi`.
+- Админ: `requireAdmin()` в layout `/admin` (гость → вход, не админ → «Нет доступа») + RLS + уровень `admin` в `withApi` (`is_admin()`). Ссылка «Админка» в шапке видна только админам.
 - Админы: Telegram-id из `TELEGRAM_ADMIN_IDS` перед созданием аккаунта записываются в `admin_bootstrap` (по синтетической почте) — дальше срабатывает существующий триггер (миграция `…000100`).
 
 ## Кеширование

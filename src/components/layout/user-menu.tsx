@@ -20,6 +20,11 @@ export async function UserMenu() {
 
   return (
     <nav aria-label={ru.auth.userMenu} className="flex items-center gap-1">
+      {user.role === "admin" && (
+        <Link href="/admin" className={itemClass}>
+          {ru.admin.title}
+        </Link>
+      )}
       <Link href="/profile" className={itemClass}>
         {ru.auth.profile}
       </Link>

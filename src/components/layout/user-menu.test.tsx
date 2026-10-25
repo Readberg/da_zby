@@ -29,4 +29,15 @@ describe("UserMenu", () => {
     expect(screen.getByRole("link", { name: "Профиль" })).toHaveAttribute("href", "/profile");
     expect(screen.queryByText("Выбрать ник")).not.toBeInTheDocument();
   });
+
+  it("shows the Admin link to admins only", async () => {
+    getCurrentUser.mockResolvedValue({ id: "u1", nickname: "Readberg", role: "admin" });
+    const admin = render(await UserMenu());
+    expect(screen.getByRole("link", { name: "Админка" })).toHaveAttribute("href", "/admin");
+    admin.unmount();
+
+    getCurrentUser.mockResolvedValue({ id: "u2", nickname: "Petya", role: "user" });
+    render(await UserMenu());
+    expect(screen.queryByRole("link", { name: "Админка" })).not.toBeInTheDocument();
+  });
 });

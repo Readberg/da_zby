@@ -15,6 +15,7 @@ export const ERROR_CODES = {
   nicknameLocked: "profile.nickname_locked",
   tooManyRequests: "api.too_many_requests",
   loginUnavailable: "auth.telegram_unavailable",
+  lastAdmin: "admin.last_admin",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});
