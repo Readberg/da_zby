@@ -72,6 +72,17 @@
 4. Дождитесь деплоя: при старте сайт сам направит вебхук бота на свой адрес (в логах Railway: «[telegram] webhook registered» или «already set»). Миграция `login_tokens` применяется автоматически (workflow `db-migrate`).
 5. Проверка: **Войти через Telegram** → открывается приложение Telegram → Start → выберите число с сайта → сайт сам входит и открывает профиль.
 
+## 🔴 H. Перенос базы в Frankfurt (D-062, DAZBY-78) (≈15 минут вашего времени)
+
+Зачем: сайт в Амстердаме, база в Токио — каждый запрос ≈0,35 с. Регион проекта менять нельзя, поэтому создаём новый проект рядом.
+1. https://supabase.com/dashboard → **New project** → организация та же → название `da-zby-dev-eu` → **Region: Central EU (Frankfurt)** → придумайте пароль БД (сохраните в менеджере паролей, в чат не присылайте) → **Create**.
+2. Когда проект создан: **Project Settings → API Keys** — скопируйте адрес проекта (Project URL), publishable key (`sb_publishable_…`) и secret key (`sb_secret_…`).
+3. Создайте файл `.env.new.local` в папке проекта (он в .gitignore) и впишите три строки: `NEXT_PUBLIC_SUPABASE_URL=…`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=…`, `SUPABASE_SECRET_KEY=…`. В чат ключи не присылайте.
+4. GitHub → репозиторий → Settings → Secrets and variables → Actions: обновите `SUPABASE_DB_PASSWORD` (пароль нового проекта). `SUPABASE_ACCESS_TOKEN` остаётся (он на аккаунт).
+5. Напишите мне «проект готов, .env.new.local создан» и **ref нового проекта** (часть адреса до `.supabase.co`, он не секретный).
+6. Дальше делаю я: применяю миграции на новый проект, копирую каталог (`pnpm db:copy-catalog`), меняю ref в workflow и env, обновляю переменные Railway через API (значения из файла, не из чата), проверяю вход и скорость. Telegram-вход после переезда заведёт новые аккаунты; админ — по `TELEGRAM_ADMIN_IDS`.
+7. Когда примете — старый проект `lrybmorjxxbogbmmpddj` удалите сами (Settings → General → Delete project).
+
 ## 🟡 F. Почта для писем входа (SMTP) (≈15 минут, когда начнёте тесты с другими людьми)
 
 Выберите сервис (Resend, Brevo и т.п. — это ключевое решение, Claude заведёт задачу «Анализ» с вариантами). Далее: зарегистрируйтесь → создайте API-ключ/SMTP-доступ → Supabase → **Authentication → Emails → SMTP Settings** (в старом интерфейсе **Project Settings → Authentication → SMTP**) → **Enable custom SMTP** → вставьте хост, порт, логин, пароль, адрес отправителя → **Save**. Проверка: письмо входа приходит быстро и не в спам.

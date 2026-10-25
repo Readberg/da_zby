@@ -103,17 +103,19 @@ describe("updateOwnProfile", () => {
     expect(calls.update).toEqual({ nickname: "Новичок" });
   });
 
-  it("locks a chosen nickname", async () => {
-    const { db } = fakeDb({ current: row({ nickname: "Readberg" }) });
-    await expect(updateOwnProfile(db, user, { nickname: "Другой" })).rejects.toMatchObject({
-      status: 409,
-      code: "profile.nickname_locked",
+  it("changes a chosen nickname", async () => {
+    const { db, calls } = fakeDb({
+      current: row({ nickname: "Readberg" }),
+      updated: row({ nickname: "Другой" }),
     });
+    const me = await updateOwnProfile(db, user, { nickname: "Другой" });
+    expect(calls.update).toEqual({ nickname: "Другой" });
+    expect(me.nickname).toBe("Другой");
   });
 
-  it("allows re-sending the same nickname (any case) as a no-op for that field", async () => {
+  it("does not write when the same nickname is sent again", async () => {
     const { db, calls } = fakeDb({ current: row({ nickname: "Readberg" }) });
-    const me = await updateOwnProfile(db, user, { nickname: "readberg" });
+    const me = await updateOwnProfile(db, user, { nickname: "Readberg" });
     expect(calls.update).toBeUndefined();
     expect(me.nickname).toBe("Readberg");
   });

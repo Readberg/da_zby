@@ -1,4 +1,5 @@
 import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
+import { CountUp } from "@/components/ui/count-up";
 import { ru } from "@/messages/ru";
 import type { StatsRow } from "@/server/services/rating";
 
@@ -30,7 +31,9 @@ export function ProfileStats({ rows }: { rows: StatsRow[] }) {
               <TD className="text-right">{row.predictionsCount}</TD>
               <TD className="text-right">{row.winsCount}</TD>
               <TD className="text-right">{row.lossesCount}</TD>
-              <TD className="text-right font-semibold">{row.points}</TD>
+              <TD className="text-right font-semibold">
+                <CountUp value={row.points} />
+              </TD>
               <TD className="text-right">
                 {row.winRate === null ? "—" : `${String(row.winRate).replace(".", ",")}%`}
               </TD>

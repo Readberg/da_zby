@@ -124,7 +124,7 @@ export const ru = {
     rules:
       "Точный счёт — {exact}. Верный исход (победа, ничья или поражение, но не точный счёт) — {outcome}. Иначе — 0. Считается итог матча с дополнительным временем, без серии пенальти. Прогноз можно менять до дедлайна тура.",
     tourResult: "Итог тура",
-    tourResultText: "{points} · точных счетов: {exact} · угаданных исходов: {outcome}",
+    tourResultText: " · точных счетов: {exact} · угаданных исходов: {outcome}",
     tourTable: "Таблица тура",
   },
   admin: {
@@ -367,6 +367,8 @@ export const ru = {
     seasonClosedOption: "закрыт",
     cacheNote: "Данные обновляются не реже чем раз в 30 минут.",
     yourPlace: "Ваше место: {place} · {points}",
+    trendUp: "Поднялись на {n} за последний тур",
+    trendDown: "Опустились на {n} за последний тур",
   },
   profile: {
     title: "Профиль",
@@ -375,7 +377,8 @@ export const ru = {
     back: "К профилю",
     editTitle: "Редактирование профиля",
     nickname: "Ник",
-    nicknameNote: "Ник выбирается один раз.",
+    nicknameHint:
+      "3–20 символов: буквы, цифры и «_». Виден в рейтинге; ссылка на профиль изменится.",
     fullName: "Имя",
     contact: "Контакт для связи",
     contactHint: "Например, Telegram или Instagram",

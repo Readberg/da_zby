@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { avatarUrl } from "@/lib/avatar";
+import { placeChanges, type Standing } from "@/lib/place-change";
 import type { Database } from "@/types/database";
 
 type Db = SupabaseClient<Database>;
@@ -17,6 +18,8 @@ export type RatingRow = {
   missCount: number;
   points: number;
   predictionsCount: number;
+  /** Places gained with the latest graded tour (negative: lost); null when unknown. */
+  trend: number | null;
 };
 
 export type TourMatch = {
@@ -96,6 +99,7 @@ export function toRatingRows(rows: Raw[], seasonClosed: boolean): RatingRow[] {
         missCount: row.miss_count ?? 0,
         points: row.points ?? 0,
         predictionsCount: row.predictions_count ?? 0,
+        trend: null,
       };
     })
     .sort(
@@ -115,6 +119,46 @@ export function winRate(wins: number, losses: number): number | null {
 }
 
 const status = (value: string): "active" | "closed" => (value === "closed" ? "closed" : "active");
+
+const standing = (row: RatingRow): Standing => ({
+  userId: row.userId,
+  points: row.points,
+  exactCount: row.exactCount,
+  outcomeCount: row.outcomeCount,
+  predictionsCount: row.predictionsCount,
+});
+
+/** Adds the places gained with the latest tour that has a graded match; rows stay as they are if none. */
+async function withTrend(
+  db: Db,
+  rows: RatingRow[],
+  tours: { id: string; number: number }[],
+): Promise<RatingRow[]> {
+  if (rows.length === 0 || tours.length === 0) return rows;
+  const finished = await db
+    .from("matches")
+    .select("tour_id")
+    .eq("status", "finished")
+    .in(
+      "tour_id",
+      tours.map((t) => t.id),
+    );
+  if (finished.error) throw finished.error;
+  const graded = new Set((finished.data ?? []).map((m) => m.tour_id));
+  const last = [...tours].filter((t) => graded.has(t.id)).sort((a, b) => b.number - a.number)[0];
+  if (!last) return rows;
+
+  const board = await db
+    .from("tour_leaderboard")
+    .select("*, profiles(nickname, avatar_path)")
+    .eq("tour_id", last.id);
+  if (board.error) throw board.error;
+  const changes = placeChanges(
+    rows.map(standing),
+    toRatingRows((board.data ?? []) as Raw[], false).map(standing),
+  );
+  return rows.map((row) => ({ ...row, trend: changes.get(row.userId) ?? null }));
+}
 
 /** Data of the rating page: catalogue, then the season table or one tour with every prediction. */
 export async function getRatingPage(
@@ -171,7 +215,12 @@ export async function getRatingPage(
     choice.tour !== undefined ? tourRows.find((t) => t.number === choice.tour) : undefined;
 
   if (!chosen) {
-    return { ...base, tours, rows: toRatingRows((boardResult.data ?? []) as Raw[], closed) };
+    const rows = toRatingRows((boardResult.data ?? []) as Raw[], closed);
+    return {
+      ...base,
+      tours,
+      rows: closed ? rows : await withTrend(db, rows, tourRows),
+    };
   }
 
   const [tourBoard, matchesResult, clubsResult] = await Promise.all([
