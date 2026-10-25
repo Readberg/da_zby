@@ -47,6 +47,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      login_tokens: {
+        Row: {
+          code: string;
+          confirmed_at: string | null;
+          consumed_at: string | null;
+          created_at: string;
+          expires_at: string;
+          first_name: string | null;
+          last_name: string | null;
+          telegram_id: string | null;
+          telegram_username: string | null;
+          token_hash: string;
+        };
+        Insert: {
+          code: string;
+          confirmed_at?: string | null;
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          telegram_id?: string | null;
+          telegram_username?: string | null;
+          token_hash: string;
+        };
+        Update: {
+          code?: string;
+          confirmed_at?: string | null;
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          telegram_id?: string | null;
+          telegram_username?: string | null;
+          token_hash?: string;
+        };
+        Relationships: [];
+      };
       matches: {
         Row: {
           away_club_id: string;

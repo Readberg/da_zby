@@ -86,6 +86,11 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 Тело запроса описано в OpenAPI (`requestBody`); невалидный JSON → `400 api.invalid_json`, нарушение схемы → `422 api.validation_failed` с `errors[]`. Ответы `/me` — `Cache-Control: private, no-store`.
 Новые коды: `api.invalid_json`, `profile.not_found`, `profile.nickname_taken`, `profile.nickname_locked`.
 
+### Вход через Telegram (D-056)
+- `POST /api/v1/auth/telegram/start` (публичный): создаёт попытку, отвечает `{ token, code, appUrl, webUrl, expiresInSeconds }`; 429 `api.too_many_requests` при слишком большом числе незавершённых попыток, 503 `auth.telegram_unavailable`, если вход не настроен.
+- `GET /api/v1/auth/telegram/status?token=` (публичный): `{ status: pending | confirmed | expired }`. При `confirmed` браузер переходит на `/auth/telegram?token=…` (не часть API: ставит cookie сессии).
+- Вебхук бота `/api/telegram/webhook` — не часть публичного контракта (вызывает только Telegram).
+
 ## Отложено (не делать без задачи)
 
 Rate limiting (когда появится публичный доступ и трафик), ключи API для внешних клиентов, webhooks, GraphQL, SDK-генерация. Заглушки и «на вырост» не писать.

@@ -13,6 +13,8 @@ export const ERROR_CODES = {
   profileNotFound: "profile.not_found",
   nicknameTaken: "profile.nickname_taken",
   nicknameLocked: "profile.nickname_locked",
+  tooManyRequests: "api.too_many_requests",
+  loginUnavailable: "auth.telegram_unavailable",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});

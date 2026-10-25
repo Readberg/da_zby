@@ -12,10 +12,9 @@
 ### A1. Бот Telegram и переменные в Railway (≈15 минут) 🔴
 Пошагово — [docs/SETUP.md](SETUP.md), раздел **E**. Коротко:
 1. @BotFather → `/newbot` → username бота (оканчивается на `bot`) → получите токен (секрет!).
-2. @BotFather → `/setdomain` → этот бот → `dazby-production.up.railway.app`.
+2. (Домен в @BotFather больше не нужен: вход идёт через бота.)
 3. @userinfobot → скопируйте свой числовой Id.
 4. Railway → сервис → **Variables** → добавьте `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ADMIN_IDS` (ваш Id), `SUPABASE_SECRET_KEY`. Дождитесь деплоя.
-- ⚠️ Если на шаге 2 BotFather не примет домен Railway — напишите мне: тогда вход заработает только после покупки домена, а пока проверим другим путём.
 - [ ] Готово
 
 ### A2. Первый вход — ключевая проверка 🔑 (3 минуты)
