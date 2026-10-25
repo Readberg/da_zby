@@ -1,40 +1,27 @@
-import { render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { TelegramLogin, telegramAuthUrl } from "./telegram-login";
 
-async function load(botUsername: string) {
-  vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_TELEGRAM_BOT_USERNAME", botUsername);
-  return import("./telegram-login");
-}
+type Auth = (options: object, callback: (user: object | false) => void) => void;
+const auth = vi.fn<Auth>();
+
+beforeEach(() => {
+  auth.mockReset();
+  (window as unknown as { Telegram: object }).Telegram = { Login: { auth } };
+});
 
 afterEach(() => {
-  vi.unstubAllEnvs();
+  delete (window as unknown as { Telegram?: object }).Telegram;
   document.cookie = "login_next=; max-age=0; path=/";
 });
 
-describe("TelegramLogin", () => {
-  it("embeds the widget for the configured bot and remembers where to return", async () => {
-    const { TelegramLogin } = await load("dazby_login_bot");
-    const { container } = render(<TelegramLogin next="/profile" />);
-
-    const script = container.querySelector("script")!;
-    expect(script.src).toContain("telegram.org/js/telegram-widget.js");
-    expect(script.dataset.telegramLogin).toBe("dazby_login_bot");
-    expect(script.dataset.onauth).toBe("dazbyTelegramAuth(user)");
-    expect(script.dataset.authUrl).toBeUndefined();
-    expect(document.cookie).toContain("login_next=%2Fprofile");
-  });
-
-  it("continues to the server by itself when Telegram confirms the login", async () => {
-    const { TelegramLogin } = await load("dazby_login_bot");
-    const navigate = vi.fn();
-    render(<TelegramLogin next="/" navigate={navigate} />);
-
-    const callback = (window as unknown as Record<string, (u: object) => void>).dazbyTelegramAuth;
-    callback({ id: 42, first_name: "Роман", auth_date: 1800000000, hash: "abc" });
-
-    expect(navigate).toHaveBeenCalledOnce();
-    const url = new URL(navigate.mock.calls[0]![0], "http://localhost");
+describe("telegramAuthUrl", () => {
+  it("passes every signed field through unchanged", () => {
+    const url = new URL(
+      telegramAuthUrl({ id: 42, first_name: "Роман", auth_date: 1800000000, hash: "abc" }),
+      "http://localhost",
+    );
     expect(url.pathname).toBe("/auth/telegram");
     expect(Object.fromEntries(url.searchParams)).toEqual({
       id: "42",
@@ -43,23 +30,62 @@ describe("TelegramLogin", () => {
       hash: "abc",
     });
   });
+});
 
-  it("says sign-in is unavailable when no bot is configured", async () => {
-    const { TelegramLogin } = await load("");
-    const { container } = render(<TelegramLogin next="/" />);
+describe("TelegramLogin", () => {
+  it("opens Telegram's window for the bot and remembers where to return", async () => {
+    render(<TelegramLogin botId={123456} next="/profile" />);
+    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+
+    expect(auth).toHaveBeenCalledOnce();
+    expect(auth.mock.calls[0]![0]).toMatchObject({ bot_id: 123456, request_access: "write" });
+    expect(document.cookie).toContain("login_next=%2Fprofile");
+  });
+
+  it("continues to the server by itself when Telegram confirms", async () => {
+    const navigate = vi.fn();
+    auth.mockImplementation((_options, callback) =>
+      callback({ id: 42, auth_date: 1800000000, hash: "abc" }),
+    );
+    render(<TelegramLogin botId={123456} next="/" navigate={navigate} />);
+    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+
+    expect(navigate).toHaveBeenCalledWith(expect.stringMatching(/^\/auth\/telegram\?/));
+  });
+
+  it("goes back to idle when the visitor closes the Telegram window", async () => {
+    const navigate = vi.fn();
+    auth.mockImplementation((_options, callback) => callback(false));
+    render(<TelegramLogin botId={123456} next="/" navigate={navigate} />);
+    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Войти через Telegram" })).toBeEnabled(),
+    );
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("explains when the Telegram script is not available", async () => {
+    delete (window as unknown as { Telegram?: object }).Telegram;
+    const original = document.head.appendChild.bind(document.head);
+    vi.spyOn(document.head, "appendChild").mockImplementation((node) => {
+      queueMicrotask(() => (node as HTMLScriptElement).onerror?.(new Event("error")));
+      return original(document.createComment("blocked"));
+    });
+    render(<TelegramLogin botId={123456} next="/" />);
+    await userEvent.click(screen.getByRole("button", { name: "Войти через Telegram" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Не удалось открыть окно Telegram");
+    vi.restoreAllMocks();
+  });
+
+  it("says sign-in is unavailable when no bot is configured", () => {
+    render(<TelegramLogin botId={null} next="/" />);
     expect(screen.getByText("Вход временно недоступен. Загляните позже.")).toBeVisible();
-    expect(container.querySelector("script")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
   });
 
-  it("rejects a malformed bot name instead of putting it into the page", async () => {
-    const { TelegramLogin } = await load('x"><img src=x>');
-    const { container } = render(<TelegramLogin next="/" />);
-    expect(container.querySelector("script")).toBeNull();
-  });
-
-  it("shows the error passed from the server", async () => {
-    const { TelegramLogin } = await load("dazby_login_bot");
-    render(<TelegramLogin next="/" error="Не получилось" />);
+  it("shows the error passed from the server", () => {
+    render(<TelegramLogin botId={123456} next="/" error="Не получилось" />);
     expect(screen.getByRole("alert")).toHaveTextContent("Не получилось");
   });
 });

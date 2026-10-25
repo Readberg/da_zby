@@ -6,7 +6,7 @@ export function SiteFooter() {
   const social = siteConfig.social.filter((link) => link.url);
 
   return (
-    <footer className="mt-auto border-t-4 border-accent bg-ink text-white">
+    <footer className="mt-auto border-t border-line bg-surface text-muted">
       <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
         <nav aria-label={ru.footer.socialLabel}>
           <ul className="flex flex-wrap gap-x-4 gap-y-1">
@@ -16,7 +16,7 @@ export function SiteFooter() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center underline-offset-4 hover:text-accent hover:underline"
+                  className="inline-flex min-h-11 items-center underline-offset-4 transition-colors hover:text-ink hover:underline"
                 >
                   {ru.footer.social[link.id]}
                   <span className="sr-only"> {ru.common.opensInNewTab}</span>
@@ -25,7 +25,7 @@ export function SiteFooter() {
             ))}
           </ul>
         </nav>
-        <p className="text-sm text-line">
+        <p className="text-sm">
           {ru.footer.copyright} · {ru.site.tagline}
         </p>
       </Container>

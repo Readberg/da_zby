@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
 
 const base =
-  "inline-flex min-h-11 items-center px-3 font-display text-base uppercase tracking-wide";
+  "inline-flex min-h-11 items-center rounded-full px-4 text-base font-medium transition-colors duration-200";
 
 /** Navigation link that marks the current page. Needs a <Suspense> boundary around it. */
 export function NavLink({ href, children }: { href: string; children: ReactNode }) {
@@ -16,7 +16,10 @@ export function NavLink({ href, children }: { href: string; children: ReactNode 
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={cx(base, active ? "bg-accent text-ink" : "text-white hover:text-accent")}
+      className={cx(
+        base,
+        active ? "bg-surface font-semibold text-ink" : "text-ink hover:bg-surface",
+      )}
     >
       {children}
     </Link>
@@ -26,7 +29,7 @@ export function NavLink({ href, children }: { href: string; children: ReactNode 
 /** Same link without the current-page mark: the Suspense fallback while the path is unknown. */
 export function StaticNavLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className={cx(base, "text-white hover:text-accent")}>
+    <Link href={href} className={cx(base, "text-ink hover:bg-surface")}>
       {children}
     </Link>
   );
