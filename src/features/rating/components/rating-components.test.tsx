@@ -68,6 +68,26 @@ describe("SeasonRatingTable", () => {
   });
 });
 
+describe("highlighting the visitor", () => {
+  const rows = [
+    row({ userId: "a", nickname: "Аня" }),
+    row({ userId: "b", nickname: "Боря", place: 2 }),
+  ];
+
+  it("marks only the visitor's own row in the season table", () => {
+    render(<SeasonRatingTable rows={rows} currentUserId="b" />);
+    const [, anya, borya] = screen.getAllByRole("row");
+    expect(borya).toHaveClass("bg-accent/25!");
+    expect(borya).toHaveAttribute("aria-current", "true");
+    expect(anya).not.toHaveClass("bg-accent/25!");
+  });
+
+  it("marks nobody for a guest", () => {
+    render(<SeasonRatingTable rows={rows} />);
+    expect(document.querySelector("[aria-current]")).toBeNull();
+  });
+});
+
 describe("TourRatingTable", () => {
   const matches: TourMatch[] = [
     {
