@@ -76,12 +76,17 @@ describe("GET /auth/telegram", () => {
   it("sends a new user without a nickname to onboarding", async () => {
     profileRow.mockReturnValue({ nickname: null });
     const r = await route.GET(req(signedQuery(fresh())));
-    expect(target(r)).toBe("/onboarding?next=%2F");
+    expect(target(r)).toBe("/onboarding?next=%2Fprofile");
   });
 
   it("never follows a hostile return path from the cookie", async () => {
     const r = await route.GET(req(signedQuery(fresh()), "login_next=https%3A%2F%2Fevil.example"));
-    expect(target(r)).toBe("/");
+    expect(target(r)).toBe("/profile");
+  });
+
+  it("lands on the profile when no particular page was requested", async () => {
+    const r = await route.GET(req(signedQuery(fresh())));
+    expect(target(r)).toBe("/profile");
   });
 
   it("refuses a forged signature without touching accounts", async () => {

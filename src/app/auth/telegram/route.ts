@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { serverEnv } from "@/lib/env.server";
 import { LOGIN_NEXT_COOKIE } from "@/lib/login-next";
+import { publicOrigin } from "@/lib/public-origin";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -13,7 +14,8 @@ import { parseAdminIds, prepareTelegramSession } from "@/server/services/telegra
  * the account and opens a session. Any failure returns to /login with a generic message.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  const origin = publicOrigin(request);
   const fail = () => NextResponse.redirect(new URL("/login?error=telegram", origin));
 
   const botToken = serverEnv.TELEGRAM_BOT_TOKEN;
@@ -32,7 +34,9 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.verifyOtp({ type: "email", token_hash: tokenHash });
     if (error) return fail();
 
-    const next = safeRedirectPath(request.cookies.get(LOGIN_NEXT_COOKIE)?.value ?? null);
+    // Signing in from the header (no particular page asked for) lands on the profile.
+    const requested = safeRedirectPath(request.cookies.get(LOGIN_NEXT_COOKIE)?.value ?? null);
+    const next = requested === "/" ? "/profile" : requested;
     const response = NextResponse.redirect(
       new URL(await destinationAfterLogin(supabase, next), origin),
     );
