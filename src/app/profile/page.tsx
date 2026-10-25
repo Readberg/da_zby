@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ru } from "@/messages/ru";
 import { requireProfile } from "@/server/services/current-user";
 import { getPublicProfile } from "@/server/services/public-profiles";
+import { getProfileStatsCached } from "@/server/services/rating.cached";
 
 export const metadata: Metadata = { title: ru.profile.title, robots: { index: false } };
 
@@ -22,6 +23,7 @@ async function ProfileContent() {
   return (
     <ProfileView
       profile={profile}
+      stats={await getProfileStatsCached(profile.id)}
       actions={
         <Link href="/profile/edit" className={buttonClasses("secondary", "px-5")}>
           {ru.profile.edit}

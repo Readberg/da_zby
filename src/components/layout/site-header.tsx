@@ -16,7 +16,7 @@ export function SiteHeader() {
           <Image src={logo} alt="" width={48} height={48} priority className="h-12 w-12" />
           <span className="font-display text-lg uppercase text-ink">{ru.site.name}</span>
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <nav aria-label={ru.nav.label}>
             {/* usePathname() needs Suspense on dynamic routes such as /u/[nickname]. */}
             <Suspense fallback={<NavList link={StaticNavLink} />}>

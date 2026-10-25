@@ -7,6 +7,7 @@ import { ProfileView } from "@/features/profile/components/profile-view";
 import { createClient } from "@/lib/supabase/server";
 import { ru } from "@/messages/ru";
 import { getPublicProfile } from "@/server/services/public-profiles";
+import { getProfileStatsCached } from "@/server/services/rating.cached";
 
 export const metadata: Metadata = { title: ru.publicProfile.title };
 
@@ -14,7 +15,7 @@ async function ProfileContent({ params }: { params: PageProps<"/u/[nickname]">["
   const { nickname } = await params;
   const profile = await getPublicProfile(await createClient(), decodeURIComponent(nickname));
   if (!profile) notFound();
-  return <ProfileView profile={profile} />;
+  return <ProfileView profile={profile} stats={await getProfileStatsCached(profile.id)} />;
 }
 
 export default function PublicProfilePage(props: PageProps<"/u/[nickname]">) {

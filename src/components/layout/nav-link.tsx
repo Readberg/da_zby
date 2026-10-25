@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
 
 const base =
-  "inline-flex min-h-11 items-center rounded-full px-4 text-base font-medium transition-colors duration-200";
+  "inline-flex min-h-11 items-center rounded-full px-3 text-base sm:px-4 font-medium transition-colors duration-200";
 
 /** Navigation link that marks the current page. Needs a <Suspense> boundary around it. */
 export function NavLink({ href, children }: { href: string; children: ReactNode }) {

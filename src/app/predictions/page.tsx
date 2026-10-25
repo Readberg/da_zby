@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +25,8 @@ async function PredictionsContent({
 }: {
   searchParams: PageProps<"/predictions">["searchParams"];
 }) {
+  // Deadlines depend on the current time: render at request time, never in the static shell.
+  await connection();
   const params = await searchParams;
   const tourNumber = Number(first(params.tour));
   const supabase = await createClient();
@@ -68,6 +72,11 @@ async function PredictionsContent({
                   : ru.predictions.noDeadline}
             </p>
           </div>
+          <p className="text-sm">
+            <Link href={`/rating?${query}`} className="underline">
+              {ru.predictions.toRating}
+            </Link>
+          </p>
           <PredictionTable
             key={tour.id}
             tourId={tour.id}
