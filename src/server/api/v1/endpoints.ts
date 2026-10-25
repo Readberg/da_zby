@@ -6,6 +6,11 @@ import {
   nicknameAvailabilitySchema,
   profileMeSchema,
 } from "./schemas/profile";
+import {
+  telegramLoginStartSchema,
+  telegramLoginStatusQuerySchema,
+  telegramLoginStatusSchema,
+} from "./schemas/auth";
 import { listMetaSchema, videoListSchema, videosQuerySchema } from "./schemas/videos";
 
 /** Registry of all API v1 endpoints: route handlers and the OpenAPI document both read it. */
@@ -69,6 +74,29 @@ export const endpoints = {
     auth: "public",
     query: nicknameAvailabilityQuerySchema,
     output: nicknameAvailabilitySchema,
+    cacheControl: "no-store",
+    errors: [422],
+  }),
+  telegramLoginStart: defineEndpoint({
+    method: "post",
+    path: "/auth/telegram/start",
+    summary: "Start signing in through the Telegram bot",
+    description:
+      "Creates a one-time attempt (valid 10 minutes). The visitor opens the bot link, presses Start and picks the two-digit `code` in the bot; poll `/auth/telegram/status` until it says `confirmed`, then go to `/auth/telegram?token=…`.",
+    tags: ["auth"],
+    auth: "public",
+    output: telegramLoginStartSchema,
+    cacheControl: "no-store",
+    errors: [429, 503],
+  }),
+  telegramLoginStatus: defineEndpoint({
+    method: "get",
+    path: "/auth/telegram/status",
+    summary: "Progress of a Telegram sign-in attempt",
+    tags: ["auth"],
+    auth: "public",
+    query: telegramLoginStatusQuerySchema,
+    output: telegramLoginStatusSchema,
     cacheControl: "no-store",
     errors: [422],
   }),

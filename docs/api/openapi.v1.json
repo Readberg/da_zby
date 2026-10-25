@@ -802,6 +802,210 @@
         }
       }
     },
+    "/auth/telegram/start": {
+      "post": {
+        "operationId": "telegramLoginStart",
+        "summary": "Start signing in through the Telegram bot",
+        "description": "Creates a one-time attempt (valid 10 minutes). The visitor opens the bot link, presses Start and picks the two-digit `code` in the bot; poll `/auth/telegram/status` until it says `confirmed`, then go to `/auth/telegram?token=…`.",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-auth-level": "public",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": {
+                          "type": "string",
+                          "description": "Secret of this sign-in attempt; keep it in the browser, never log it."
+                        },
+                        "code": {
+                          "type": "string",
+                          "description": "Two-digit number to show; the visitor picks it in the bot."
+                        },
+                        "appUrl": {
+                          "type": "string",
+                          "description": "tg:// link that opens the bot in the Telegram app."
+                        },
+                        "webUrl": {
+                          "type": "string",
+                          "description": "https://t.me link for devices without the app."
+                        },
+                        "expiresInSeconds": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "token",
+                        "code",
+                        "appUrl",
+                        "webUrl",
+                        "expiresInSeconds"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/telegram/status": {
+      "get": {
+        "operationId": "telegramLoginStatus",
+        "summary": "Progress of a Telegram sign-in attempt",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{20,64}$"
+            }
+          }
+        ],
+        "security": [],
+        "x-auth-level": "public",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "confirmed",
+                            "expired"
+                          ],
+                          "description": "confirmed: continue to /auth/telegram?token=… to open the session."
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/videos": {
       "get": {
         "operationId": "videos",

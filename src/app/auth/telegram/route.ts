@@ -5,29 +5,32 @@ import { publicOrigin } from "@/lib/public-origin";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { consumeLogin } from "@/server/services/login-tokens";
 import { destinationAfterLogin } from "@/server/services/post-login";
-import { verifyTelegramAuth } from "@/server/services/telegram-auth";
 import { parseAdminIds, prepareTelegramSession } from "@/server/services/telegram-login";
 
+const TOKEN_PATTERN = /^[A-Za-z0-9_-]{20,64}$/;
+
 /**
- * Redirect target of the Telegram Login Widget. Verifies Telegram's signature, finds or creates
- * the account and opens a session. Any failure returns to /login with a generic message.
+ * Last step of signing in through the bot: exchanges the confirmed one-time token for a session.
+ * Any failure returns to /login with a generic message.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
   const origin = publicOrigin(request);
   const fail = () => NextResponse.redirect(new URL("/login?error=telegram", origin));
 
-  const botToken = serverEnv.TELEGRAM_BOT_TOKEN;
-  if (!botToken || !serverEnv.SUPABASE_SECRET_KEY) return fail();
-
-  const verified = verifyTelegramAuth(searchParams, botToken);
-  if (!verified.ok) return fail();
+  const token = request.nextUrl.searchParams.get("token");
+  if (!token || !TOKEN_PATTERN.test(token)) return fail();
+  if (!serverEnv.TELEGRAM_BOT_TOKEN || !serverEnv.SUPABASE_SECRET_KEY) return fail();
 
   try {
+    const admin = createAdminClient();
+    const user = await consumeLogin(admin, token);
+    if (!user) return fail();
+
     const tokenHash = await prepareTelegramSession(
-      createAdminClient(),
-      verified.user,
+      admin,
+      user,
       parseAdminIds(serverEnv.TELEGRAM_ADMIN_IDS),
     );
     const supabase = await createClient();
