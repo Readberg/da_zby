@@ -5,7 +5,9 @@ import { expect, test } from "@playwright/test";
 test("guest pages make no requests to Supabase", async ({ page }) => {
   const supabaseRequests: string[] = [];
   page.on("request", (request) => {
-    if (request.url().includes("supabase.co")) supabaseRequests.push(request.url());
+    // Requests to Supabase itself; club logos go through the site's own /_next/image address.
+    if (new URL(request.url()).hostname.endsWith("supabase.co"))
+      supabaseRequests.push(request.url());
   });
   await page.goto("/");
   await page.waitForLoadState("load");
@@ -29,6 +31,8 @@ test("client JavaScript contains no server secrets", async ({ page, request }) =
 
 test("headings use the condensed Cyrillic display font in caps", async ({ page }) => {
   await page.goto("/");
+  // The streamed home swaps its static copy for the final one: measure the final h1.
+  await expect(page.locator("h1")).toHaveCount(1);
   const heading = page.getByRole("heading", { level: 1 });
   await expect(heading).toBeVisible();
   const style = await heading.evaluate((el) => {
