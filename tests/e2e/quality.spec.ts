@@ -81,6 +81,8 @@ test("content column is centred and at most 1200 px wide", async ({ page }, test
 
 test("home with videos has no horizontal scroll", async ({ page }) => {
   await page.goto("/");
+  // Streaming keeps the static copy next to the final one until the swap.
+  await expect(page.locator("h1")).toHaveCount(1);
   await expect(
     page
       .locator('iframe[title^="Видеоплеер YouTube"]')
