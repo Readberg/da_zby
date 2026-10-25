@@ -7,6 +7,12 @@ import {
   profileMeSchema,
 } from "./schemas/profile";
 import {
+  adminUserRoleBodySchema,
+  adminUserRoleSchema,
+  adminUsersQuerySchema,
+  adminUsersSchema,
+} from "./schemas/admin";
+import {
   telegramLoginStartSchema,
   telegramLoginStatusQuerySchema,
   telegramLoginStatusSchema,
@@ -76,6 +82,31 @@ export const endpoints = {
     output: nicknameAvailabilitySchema,
     cacheControl: "no-store",
     errors: [422],
+  }),
+  adminUsersList: defineEndpoint({
+    method: "get",
+    path: "/admin/users",
+    summary: "Users for the admin list",
+    description: "Newest first; `search` matches part of a nickname or a full name.",
+    tags: ["admin"],
+    auth: "admin",
+    query: adminUsersQuerySchema,
+    output: adminUsersSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 403, 422],
+  }),
+  adminUserRole: defineEndpoint({
+    method: "patch",
+    path: "/admin/users/role",
+    summary: "Grant or revoke the admin role",
+    description:
+      "The last admin cannot be demoted (409 admin.last_admin). Every user can read who the admins are; only an admin can change it.",
+    tags: ["admin"],
+    auth: "admin",
+    body: adminUserRoleBodySchema,
+    output: adminUserRoleSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 404, 409, 422],
   }),
   telegramLoginStart: defineEndpoint({
     method: "post",

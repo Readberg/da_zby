@@ -69,3 +69,18 @@ test.describe("auth routes", () => {
     expect(response.status()).toBe(405);
   });
 });
+
+test.describe("admin area", () => {
+  test("a guest is sent to login and brought back to the admin area", async ({ page }) => {
+    await page.goto("/admin/users");
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+  });
+
+  test("the admin API is closed to guests", async ({ request }) => {
+    expect((await request.get("/api/v1/admin/users")).status()).toBe(401);
+    const patch = await request.patch("/api/v1/admin/users/role", {
+      data: { userId: "11111111-1111-4111-8111-111111111111", role: "admin" },
+    });
+    expect(patch.status()).toBe(401);
+  });
+});
