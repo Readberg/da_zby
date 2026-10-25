@@ -84,3 +84,17 @@ test.describe("admin area", () => {
     expect(patch.status()).toBe(401);
   });
 });
+
+test.describe("admin catalog", () => {
+  test("a guest is sent to login from the tournaments and clubs pages", async ({ page }) => {
+    await page.goto("/admin/tournaments");
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+    await page.goto("/admin/clubs");
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+  });
+
+  test("the catalog API is closed to guests", async ({ request }) => {
+    expect((await request.get("/api/v1/admin/tournaments")).status()).toBe(401);
+    expect((await request.get("/api/v1/admin/clubs")).status()).toBe(401);
+  });
+});
