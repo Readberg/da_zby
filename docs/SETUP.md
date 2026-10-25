@@ -37,7 +37,7 @@
 
 Проверка: Claude после старта выведет «Jira: доступ есть, проект DAZBY найден, типы и статусы совпадают» либо перечислит, чего не хватает.
 
-## 🔴 C. Supabase (dev-проект `lrybmorjxxbogbmmpddj`) (≈15 минут)
+## 🔴 C. Supabase (dev-проект `ksykaqwkbfqtkvdxqedv`) (≈15 минут)
 
 1. Войдите на https://supabase.com/dashboard → откройте проект (ссылка вида `…/project/lrybmorjxxbogbmmpddj`).
 2. **Секретный ключ.** Левое меню **Project Settings → API Keys** → блок **Secret keys** (ключ вида `sb_secret_…`; в старом интерфейсе — `service_role` на вкладке Legacy API keys) → **Reveal / Create new secret key** → скопируйте. Впишите в `.env.local`: `SUPABASE_SECRET_KEY=…`. Этот ключ обходит все права — никому не показывайте и в браузерный код он не попадает.
@@ -98,7 +98,7 @@
 4. Откроется сервис. Сразу **Settings → Source → Branch** → выберите **`dev`** (это тестовый стенд; прод из `main` — позже, E8).
 5. **Variables → Raw Editor** → вставьте (это публичные значения, не секреты) → **Update Variables**:
    ```
-   NEXT_PUBLIC_SUPABASE_URL=https://lrybmorjxxbogbmmpddj.supabase.co
+   NEXT_PUBLIC_SUPABASE_URL=https://ksykaqwkbfqtkvdxqedv.supabase.co
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_GgweOwuWyidSPX_uWXpcvQ_uJgnxI0K
    YOUTUBE_CHANNEL_ID=UCsfcA6cY0bSL781TE3XMEPA
    NEXT_PUBLIC_SITE_URL=http://localhost:3000

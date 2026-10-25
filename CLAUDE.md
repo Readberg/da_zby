@@ -44,7 +44,7 @@ Next.js (App Router, последняя стабильная) · TypeScript `str
 
 ## Окружения и секреты
 
-- Сейчас **только dev**: Supabase-проект `lrybmorjxxbogbmmpddj` (публичные значения — в `.env.example`). Прод — перед публичным релизом. Домен — в самом конце.
+- Сейчас **только dev**: Supabase-проект `ksykaqwkbfqtkvdxqedv` (публичные значения — в `.env.example`). Прод — перед публичным релизом. Домен — в самом конце.
 - Секреты только в `.env.local` (в `.gitignore`) и переменных Railway. Никогда — в репозиторий, доки, Jira, логи, чат.
   `SUPABASE_SECRET_KEY` (`sb_secret_…`, раньше service_role) и `JIRA_*` — только сервер, без префикса `NEXT_PUBLIC_`.
 
