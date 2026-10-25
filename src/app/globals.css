@@ -88,3 +88,61 @@
     box-shadow: 0 0 0 5px var(--color-ink);
   }
 }
+
+/* Motion and pointer feedback: everything clickable looks clickable and changes smoothly. */
+@layer base {
+  a,
+  button,
+  select,
+  summary,
+  [role="button"],
+  input[type="file"],
+  input[type="checkbox"],
+  input[type="radio"],
+  label[for] {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  a,
+  input,
+  select,
+  textarea {
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      opacity 0.2s ease;
+  }
+}
+
+@theme inline {
+  --animate-page-in: page-in 0.35s ease-out both;
+
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

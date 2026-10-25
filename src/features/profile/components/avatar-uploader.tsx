@@ -91,7 +91,7 @@ export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Pr
             aria-label={ru.avatar.choose}
             tabIndex={-1}
           />
-          <Button variant="secondary" disabled={busy} onClick={() => input.current?.click()}>
+          <Button variant="secondary" loading={busy} onClick={() => input.current?.click()}>
             {busy ? ru.avatar.uploading : currentUrl ? ru.avatar.replace : ru.avatar.choose}
           </Button>
           {currentUrl && (

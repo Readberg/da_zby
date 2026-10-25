@@ -71,6 +71,9 @@ export const ru = {
   profile: {
     title: "Профиль",
     publicLink: "Как видят другие",
+    edit: "Редактировать",
+    back: "К профилю",
+    editTitle: "Редактирование профиля",
     nickname: "Ник",
     nicknameNote: "Ник выбирается один раз.",
     fullName: "Имя",

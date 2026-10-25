@@ -41,6 +41,14 @@
 - Где используется: вход (`/login`), онбординг, профиль (`/profile`), `/styleguide`.
 - Снимок: `components/field.png`
 
+### Индикатор загрузки (Spinner) и кнопка в процессе
+- Путь: `src/components/ui/spinner.tsx`; `<Button loading>` показывает кольцо, блокирует повторные клики и ставит `aria-busy`.
+- Для страниц: `loading.tsx` с `PageLoading` (`src/components/layout/page-loading.tsx`) — скелет виден сразу при переходе.
+- Движение: плавные смены цвета/фона 0,2 с, лёгкое нажатие (`scale .98`), появление страницы (`template.tsx`, `animate-page-in`), курсор-«рука» на всём кликабельном; при `prefers-reduced-motion` анимации отключаются.
+
+### Профиль (ProfileView)
+- Путь: `src/features/profile/components/profile-view.tsx` — шапка (фото, ник, имя, место), «О себе», контакты, даты, блок статистики; слот `actions` для кнопки «Редактировать» у владельца.
+
 ### Аватар (Avatar)
 - Путь: `src/components/ui/avatar.tsx`
 - Варианты: размеры `sm` 40 / `md` 64 / `lg` 128 px; с фото или заглушка — первая буква имени на жёлтом круге.

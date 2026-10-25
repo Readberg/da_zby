@@ -7,17 +7,17 @@ import { formatDate } from "@/lib/time";
 import { ru } from "@/messages/ru";
 import type { Video } from "@/server/services/videos";
 
-function embedUrl(id: string) {
-  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+function embedUrl(id: string, autoplay: boolean) {
+  return `https://www.youtube-nocookie.com/embed/${id}?rel=0${autoplay ? "&autoplay=1" : ""}`;
 }
 
 /**
- * Big lazy player for one video plus a grid of the others. The YouTube iframe is created only
- * after a click, so the page loads just preview images until the visitor wants to watch.
+ * Standard YouTube player for the newest video plus a grid of the others. Picking another video
+ * from the grid switches the player and starts it.
  */
 export function VideoShowcase({ videos }: { videos: Video[] }) {
   const [selectedId, setSelectedId] = useState(videos[0]?.id);
-  const [playing, setPlaying] = useState(false);
+  const [autoplay, setAutoplay] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
 
   const selected = videos.find((video) => video.id === selectedId) ?? videos[0];
@@ -26,7 +26,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
 
   function play(id: string) {
     setSelectedId(id);
-    setPlaying(true);
+    setAutoplay(true);
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -37,38 +37,15 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
           ref={playerRef}
           className="relative aspect-video w-full scroll-mt-4 overflow-hidden rounded-md bg-ink"
         >
-          {playing ? (
-            <iframe
-              key={selected.id}
-              src={embedUrl(selected.id)}
-              title={`${ru.home.playerTitle}: ${selected.title}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full"
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => play(selected.id)}
-              aria-label={`${ru.home.play}: ${selected.title}`}
-              className="group absolute inset-0 h-full w-full"
-            >
-              <Image
-                src={selected.thumbnailUrl}
-                alt=""
-                fill
-                priority
-                sizes="(min-width: 1024px) 66vw, 100vw"
-                className="object-cover"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-ink bg-accent transition-transform group-hover:scale-110"
-              >
-                <span className="ml-1 h-0 w-0 border-y-[12px] border-l-[20px] border-y-transparent border-l-ink" />
-              </span>
-            </button>
-          )}
+          <iframe
+            key={selected.id}
+            src={embedUrl(selected.id, autoplay)}
+            title={`${ru.home.playerTitle}: ${selected.title}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            loading="lazy"
+            className="absolute inset-0 h-full w-full"
+          />
         </div>
         <h2 id="current-video-title" className="text-lg normal-case sm:text-h3 sm:uppercase">
           {selected.title}

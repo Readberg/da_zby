@@ -8,10 +8,10 @@ test("home page opens and shows the site title", async ({ page }) => {
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page).toHaveTitle(/Да забей/);
-  // Videos come from YouTube at request time: accept either the player or the fallback block.
+  // Videos come from YouTube at request time: accept either the embedded player or the fallback block.
   await expect(
     page
-      .getByRole("button", { name: /^Смотреть видео/ })
+      .locator('iframe[title^="Видеоплеер YouTube"]')
       .or(page.getByRole("link", { name: /Перейти на канал/ })),
   ).toBeVisible({ timeout: 15_000 });
   expect(errors).toEqual([]);
