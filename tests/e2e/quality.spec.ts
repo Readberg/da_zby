@@ -31,6 +31,8 @@ test("client JavaScript contains no server secrets", async ({ page, request }) =
 
 test("headings use the condensed Cyrillic display font in caps", async ({ page }) => {
   await page.goto("/");
+  // The streamed home swaps its static copy for the final one: measure the final h1.
+  await expect(page.locator("h1")).toHaveCount(1);
   const heading = page.getByRole("heading", { level: 1 });
   await expect(heading).toBeVisible();
   const style = await heading.evaluate((el) => {
