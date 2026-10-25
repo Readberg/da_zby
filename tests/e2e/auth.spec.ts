@@ -98,3 +98,30 @@ test.describe("admin catalog", () => {
     expect((await request.get("/api/v1/admin/clubs")).status()).toBe(401);
   });
 });
+
+test.describe("admin seasons and matches", () => {
+  test("a guest is sent to login from the seasons pages", async ({ page }) => {
+    await page.goto("/admin/seasons");
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+    await page.goto("/admin/seasons/11111111-1111-4111-8111-111111111111");
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+  });
+
+  test("the seasons, tours and matches API is closed to guests", async ({ request }) => {
+    expect((await request.get("/api/v1/admin/seasons")).status()).toBe(401);
+    expect(
+      (
+        await request.get("/api/v1/admin/tour?tourId=44444444-4444-4444-8444-444444444444")
+      ).status(),
+    ).toBe(401);
+    const result = await request.patch("/api/v1/admin/matches", {
+      data: {
+        id: "55555555-5555-4555-8555-555555555555",
+        status: "finished",
+        homeScore: 1,
+        awayScore: 0,
+      },
+    });
+    expect(result.status()).toBe(401);
+  });
+});

@@ -11,6 +11,7 @@ export const metadata: Metadata = { title: ru.admin.title, robots: { index: fals
 const sections = [
   { href: "/admin/tournaments", label: ru.admin.nav.tournaments },
   { href: "/admin/clubs", label: ru.admin.nav.clubs },
+  { href: "/admin/seasons", label: ru.admin.nav.seasons },
   { href: "/admin/users", label: ru.admin.nav.users },
 ];
 

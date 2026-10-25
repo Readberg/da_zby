@@ -18,6 +18,8 @@ export const ERROR_CODES = {
   lastAdmin: "admin.last_admin",
   duplicate: "admin.duplicate",
   inUse: "admin.in_use",
+  seasonClosed: "admin.season_closed",
+  seasonState: "admin.season_state",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});
