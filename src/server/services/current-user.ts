@@ -45,6 +45,15 @@ export async function requireProfile(
   return { ...user, nickname: user.nickname };
 }
 
+/**
+ * For the admin area: guests are sent to /login, signed-in users who are not admins get null
+ * (the layout shows "no access"). Admin rights are checked here and again by RLS and `is_admin()`.
+ */
+export async function requireAdmin(returnTo: string): Promise<CurrentUser | null> {
+  const user = await requireUser(returnTo);
+  return user.role === "admin" ? user : null;
+}
+
 /** For pages that need a signed-in user: guests are sent to /login and come back afterwards. */
 export async function requireUser(returnTo: string): Promise<CurrentUser> {
   const user = await getCurrentUser();
