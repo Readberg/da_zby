@@ -11,7 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_UTC_OFFSET_MINUTES } from "@/lib/time";
 import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
-import { getPredictionsPage } from "@/server/services/predictions";
+import { composePredictionsPage, getMyPredictions } from "@/server/services/predictions";
+import { getPredictionsPublicCached } from "@/server/services/predictions.cached";
 import { getUtcOffsetMinutes } from "@/server/services/profiles";
 
 export const metadata: Metadata = { title: ru.predictions.title };
@@ -30,16 +31,21 @@ async function PredictionsContent({
   const params = await searchParams;
   const tourNumber = Number(first(params.tour));
   const supabase = await createClient();
-  const user = await getCurrentUser();
-
-  const [data, offset] = await Promise.all([
-    getPredictionsPage(supabase, user?.id ?? null, {
-      tournament: first(params.tournament),
-      season: first(params.season),
-      tour: Number.isInteger(tourNumber) && tourNumber > 0 ? tourNumber : undefined,
-    }),
+  // The shared part comes from the cache (in parallel with finding the visitor); the visitor's own
+  // predictions are read live.
+  const [user, pub] = await Promise.all([
+    getCurrentUser(),
+    getPredictionsPublicCached(first(params.tournament), first(params.season)),
+  ]);
+  const [mine, offset] = await Promise.all([
+    user && pub.season ? getMyPredictions(supabase, user.id, pub.season.id) : Promise.resolve({}),
     user ? getUtcOffsetMinutes(supabase, user.id) : Promise.resolve(DEFAULT_UTC_OFFSET_MINUTES),
   ]);
+  const data = composePredictionsPage(
+    pub,
+    mine,
+    Number.isInteger(tourNumber) && tourNumber > 0 ? tourNumber : undefined,
+  );
 
   if (!data.tournament) return <p className="text-muted">{ru.predictions.noTournaments}</p>;
 

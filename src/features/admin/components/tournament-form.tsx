@@ -13,7 +13,14 @@ type Errors = Partial<Record<"name" | "slug" | "pointsExact" | "pointsOutcome", 
 type Status = "idle" | "saving" | "saved" | "failed";
 
 /** Create form (no `tournament`) and edit form of one tournament, with the re-grade button. */
-export function TournamentForm({ tournament }: { tournament?: Tournament }) {
+export function TournamentForm({
+  tournament,
+  onCreated,
+}: {
+  tournament?: Tournament;
+  /** Called with the new tournament as soon as the server confirmed it. */
+  onCreated?: (tournament: Tournament) => void;
+}) {
   const router = useRouter();
   const editing = Boolean(tournament);
   const [name, setName] = useState(tournament?.name ?? "");
@@ -57,7 +64,11 @@ export function TournamentForm({ tournament }: { tournament?: Tournament }) {
           json: { id: tournament.id, ...parsed.data },
         });
       } else {
-        await api("/admin/tournaments", { method: "POST", json: parsed.data });
+        const created = await api<Tournament>("/admin/tournaments", {
+          method: "POST",
+          json: parsed.data,
+        });
+        onCreated?.(created);
         setName("");
         setSlug("");
       }

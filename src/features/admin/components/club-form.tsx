@@ -1,13 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { ClubLogo } from "@/components/ui/club-logo";
 import { TextField } from "@/components/ui/field";
 import { clubFieldsSchema } from "@/lib/admin-schema";
 import { ApiClientError, api } from "@/lib/api-client";
 import { CLUB_LOGO_ACCEPT, buildClubLogoPath, validateClubLogo } from "@/lib/club-logo";
+import { normalizeClubLogo } from "@/lib/club-logo-normalize";
 import { createClient } from "@/lib/supabase/client";
 import { ru } from "@/messages/ru";
 import type { Club } from "@/server/api/v1/schemas/admin-catalog";
@@ -16,7 +17,15 @@ type Errors = Partial<Record<"name" | "shortName" | "logo", string>>;
 type Status = "idle" | "saving" | "saved" | "failed";
 
 /** Create form (no `club`) and edit form of one club, with logo upload and delete. */
-export function ClubForm({ club }: { club?: Club }) {
+export function ClubForm({
+  club,
+  onCreated,
+  onDeleted,
+}: {
+  club?: Club;
+  onCreated?: (club: Club) => void;
+  onDeleted?: (id: string) => void;
+}) {
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(club?.name ?? "");
@@ -31,18 +40,21 @@ export function ClubForm({ club }: { club?: Club }) {
   const prefix = club ? `club-${club.id}` : "club-new";
 
   async function onChooseLogo(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+    const picked = event.target.files?.[0];
     event.target.value = "";
-    if (!file) return;
-    const problem = validateClubLogo(file);
-    if (problem) {
-      setErrors((current) => ({ ...current, logo: ru.admin.clubs.logoErrors[problem] }));
-      return;
-    }
+    if (!picked) return;
 
     setErrors((current) => ({ ...current, logo: undefined }));
     setUploading(true);
     try {
+      // Every logo is stored on a square canvas (see normalizeClubLogo), so all look alike.
+      const isPicture = ["image/jpeg", "image/png", "image/webp"].includes(picked.type);
+      const file = isPicture && picked.size > 0 ? await normalizeClubLogo(picked) : picked;
+      const problem = validateClubLogo(file);
+      if (problem) {
+        setErrors((current) => ({ ...current, logo: ru.admin.clubs.logoErrors[problem] }));
+        return;
+      }
       const path = buildClubLogoPath(file.type, crypto.randomUUID());
       const supabase = createClient();
       const { error } = await supabase.storage
@@ -81,7 +93,8 @@ export function ClubForm({ club }: { club?: Club }) {
       if (club) {
         await api("/admin/clubs", { method: "PATCH", json: { id: club.id, ...parsed.data } });
       } else {
-        await api("/admin/clubs", { method: "POST", json: parsed.data });
+        const created = await api<Club>("/admin/clubs", { method: "POST", json: parsed.data });
+        onCreated?.(created);
         setName("");
         setShortName("");
         setLogoPath(null);
@@ -108,6 +121,7 @@ export function ClubForm({ club }: { club?: Club }) {
     setRemoveError(null);
     try {
       await api("/admin/clubs", { method: "DELETE", json: { id: club.id } });
+      onDeleted?.(club.id);
       router.refresh();
     } catch (cause) {
       const inUse = cause instanceof ApiClientError && cause.problem.code === "admin.in_use";
@@ -120,22 +134,7 @@ export function ClubForm({ club }: { club?: Club }) {
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex flex-col items-start gap-2">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-md bg-surface">
-            {logoUrl ? (
-              <Image
-                src={logoUrl}
-                alt=""
-                width={80}
-                height={80}
-                unoptimized={logoUrl.startsWith("blob:")}
-                className="h-20 w-20 object-contain"
-              />
-            ) : (
-              <span aria-hidden="true" className="text-sm text-muted">
-                {ru.admin.clubs.noLogo}
-              </span>
-            )}
-          </div>
+          <ClubLogo src={logoUrl} name={name || ru.admin.clubs.noLogo} size={80} />
           <input
             ref={fileInput}
             type="file"

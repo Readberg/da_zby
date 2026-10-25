@@ -43,7 +43,7 @@ async function TourContent({
         <Link href={`/admin/seasons/${season.id}`} className="text-sm text-muted underline">
           ← {season.name}
         </Link>
-        <h1 className="mt-3 text-h3 sm:text-h1">
+        <h1 className="mt-3 text-h3 sm:text-h2">
           {ru.admin.tours.tourN.replace("{n}", String(tour.number))}
           {tour.title ? ` · ${tour.title}` : ""}
         </h1>

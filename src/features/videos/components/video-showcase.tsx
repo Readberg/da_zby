@@ -35,7 +35,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
       <article className="flex flex-col gap-3" aria-labelledby="current-video-title">
         <div
           ref={playerRef}
-          className="relative aspect-video w-full scroll-mt-4 overflow-hidden rounded-lg bg-ink shadow-soft"
+          className="relative aspect-video w-full scroll-mt-4 overflow-hidden rounded-lg bg-black shadow-soft"
         >
           <iframe
             key={selected.id}

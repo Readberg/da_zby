@@ -5,7 +5,7 @@ import { ru } from "@/messages/ru";
 export default function AdminHomePage() {
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-h3 sm:text-h1">{ru.admin.title}</h1>
+      <h1 className="text-h3 sm:text-h2">{ru.admin.overview}</h1>
       <div className="grid gap-4 sm:grid-cols-2">
         <Link href="/admin/tournaments" className="group">
           <Card

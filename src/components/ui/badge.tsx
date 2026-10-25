@@ -5,8 +5,8 @@ export type PredictionResult = "exact" | "outcome" | "miss";
 
 const styles: Record<PredictionResult, string> = {
   // Black on green: white text would fall below WCAG AA contrast.
-  exact: "bg-success text-ink",
-  outcome: "bg-accent text-ink",
+  exact: "bg-success text-black",
+  outcome: "bg-accent text-black",
   miss: "bg-surface text-danger border border-line",
 };
 
