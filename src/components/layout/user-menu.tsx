@@ -4,7 +4,7 @@ import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
 
 const itemClass =
-  "inline-flex min-h-11 items-center px-3 font-display text-base uppercase tracking-wide text-white hover:text-accent";
+  "inline-flex min-h-11 items-center rounded-full px-4 text-base font-medium text-ink transition-colors duration-200 hover:bg-surface";
 
 /** Header slot: "Войти" for guests, nickname + sign-out for signed-in users. */
 export async function UserMenu() {
@@ -12,7 +12,7 @@ export async function UserMenu() {
 
   if (!user) {
     return (
-      <Link href="/login" className={buttonClasses("primary", "min-h-11 px-4")}>
+      <Link href="/login" className={buttonClasses("primary")}>
         {ru.auth.login}
       </Link>
     );

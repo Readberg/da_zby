@@ -49,7 +49,7 @@ tests/e2e/                 Playwright
 
 - `@supabase/ssr`, сессия в cookie, `middleware.ts` обновляет токен.
 - Серверные проверки — `supabase.auth.getUser()`, не `getSession()`.
-- Единственный способ входа — Telegram Login Widget (D-054). Виджет в режиме redirect ведёт на `/auth/telegram`: сервер проверяет подпись (`telegram-auth.ts`: HMAC-SHA256 с ключом SHA256 токена бота, свежесть `auth_date`), находит или создаёт пользователя через Admin API (синтетическая почта `tg<id>@telegram.invalid`, подтверждена), получает одноразовый токен `generateLink` и обменивает его на сессию `verifyOtp` обычным серверным клиентом (cookie).
+- Единственный способ входа — Telegram (D-054). Своя кнопка вызывает `Telegram.Login.auth` (скрипт виджета подгружается ради этого вызова; `bot_id` — число до двоеточия в токене, публичное), после подтверждения страница переходит на `/auth/telegram`: сервер проверяет подпись (`telegram-auth.ts`: HMAC-SHA256 с ключом SHA256 токена бота, свежесть `auth_date`), находит или создаёт пользователя через Admin API (синтетическая почта `tg<id>@telegram.invalid`, подтверждена), получает одноразовый токен `generateLink` и обменивает его на сессию `verifyOtp` обычным серверным клиентом (cookie).
 - Путь возврата передаётся cookie `login_next` (Telegram сам управляет query редиректа) и перепроверяется `safeRedirectPath`.
 - `/auth/confirm` (по token_hash) остался служебным: через него e2e-тесты входят тестовым пользователем (DAZBY-52).
 - Нужны серверные секреты `TELEGRAM_BOT_TOKEN` и `SUPABASE_SECRET_KEY`; без любого из них `/auth/telegram` закрыт (fail closed).

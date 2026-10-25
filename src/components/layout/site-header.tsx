@@ -10,11 +10,11 @@ import { UserMenu } from "./user-menu";
 
 export function SiteHeader() {
   return (
-    <header className="bg-ink text-white">
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/80 text-ink backdrop-blur-md">
       <Container className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
         <Link href="/" aria-label={ru.site.homeLink} className="flex items-center gap-3">
           <Image src={logo} alt="" width={48} height={48} priority className="h-12 w-12" />
-          <span className="font-display text-lg uppercase text-accent">{ru.site.name}</span>
+          <span className="font-display text-lg uppercase text-ink">{ru.site.name}</span>
         </Link>
         <div className="flex items-center gap-1">
           <nav aria-label={ru.nav.label}>

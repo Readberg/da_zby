@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 export type CurrentUser = {
@@ -13,8 +14,9 @@ export type CurrentUser = {
 /**
  * The signed-in user with the profile fields the layout needs, or null for guests.
  * Uses getUser() (validated against Supabase Auth), never getSession().
+ * Cached per request: the header and the page share one lookup instead of two.
  */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return null;
@@ -32,7 +34,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     avatarPath: profile?.avatar_path ?? null,
     role: profile?.role ?? "user",
   };
-}
+});
 
 /** For pages that act in the user's name: signed in AND with a nickname (otherwise onboarding first). */
 export async function requireProfile(

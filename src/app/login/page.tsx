@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TelegramLogin } from "@/features/auth/components/telegram-login";
+import { serverEnv } from "@/lib/env.server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
@@ -21,7 +22,16 @@ async function LoginContent({
   // Already signed in: nothing to do here.
   if (await getCurrentUser()) redirect(next);
 
-  return <TelegramLogin next={next} error={params.error ? ru.auth.errors.telegram : null} />;
+  // The bot id is the number before the colon of the token: public (it is in every login URL).
+  const botId = Number(serverEnv.TELEGRAM_BOT_TOKEN?.split(":")[0]) || null;
+
+  return (
+    <TelegramLogin
+      botId={botId}
+      next={next}
+      error={params.error ? ru.auth.errors.telegram : null}
+    />
+  );
 }
 
 export default function LoginPage(props: PageProps<"/login">) {

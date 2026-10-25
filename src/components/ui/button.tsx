@@ -5,14 +5,12 @@ import { cx } from "@/lib/cx";
 export type ButtonVariant = "primary" | "secondary" | "text";
 
 const base =
-  "inline-flex min-h-11 items-center justify-center gap-2 font-display text-base font-bold uppercase tracking-wide cursor-pointer transition-[color,background-color,transform,opacity] duration-200 ease-out active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
+  "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-base font-semibold transition-[color,background-color,transform,opacity,box-shadow] duration-200 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
 const variants: Record<ButtonVariant, string> = {
-  primary:
-    "rounded-md border-2 border-ink bg-accent px-5 text-ink hover:bg-ink hover:text-accent disabled:hover:bg-accent disabled:hover:text-ink",
-  secondary:
-    "rounded-md border-2 border-ink bg-ink px-5 text-white hover:bg-bg hover:text-ink disabled:hover:bg-ink disabled:hover:text-white",
-  text: "px-1 text-ink underline underline-offset-4 hover:decoration-2 disabled:hover:decoration-1",
+  primary: "bg-accent text-ink hover:brightness-95 hover:shadow-soft",
+  secondary: "bg-ink text-white hover:bg-ink/85",
+  text: "rounded-sm px-1 text-ink underline underline-offset-4 hover:decoration-2",
 };
 
 /** Shared look for <button> and link-like buttons. */

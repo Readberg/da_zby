@@ -14,7 +14,7 @@
 1. @BotFather → `/newbot` → username бота (оканчивается на `bot`) → получите токен (секрет!).
 2. @BotFather → `/setdomain` → этот бот → `dazby-production.up.railway.app`.
 3. @userinfobot → скопируйте свой числовой Id.
-4. Railway → сервис → **Variables** → добавьте `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ADMIN_IDS` (ваш Id), `SUPABASE_SECRET_KEY`. Дождитесь деплоя.
+4. Railway → сервис → **Variables** → добавьте `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ADMIN_IDS` (ваш Id), `SUPABASE_SECRET_KEY`. Дождитесь деплоя.
 - ⚠️ Если на шаге 2 BotFather не примет домен Railway — напишите мне: тогда вход заработает только после покупки домена, а пока проверим другим путём.
 - [ ] Готово
 
