@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      PROJECT_REF: lrybmorjxxbogbmmpddj
+      PROJECT_REF: ksykaqwkbfqtkvdxqedv
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
@@ -55,8 +55,8 @@ jobs:
 
       - name: Schema smoke check (as a guest)
         env:
-          NEXT_PUBLIC_SUPABASE_URL: https://lrybmorjxxbogbmmpddj.supabase.co
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_GgweOwuWyidSPX_uWXpcvQ_uJgnxI0K
+          NEXT_PUBLIC_SUPABASE_URL: https://ksykaqwkbfqtkvdxqedv.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_DjwCcM9QbGFZWXtLh97Zdg_NwCrJwpU
         run: pnpm exec tsx scripts/check-schema.ts
 
       - name: Compare generated types
