@@ -56,9 +56,9 @@ describe("SeasonRatingTable", () => {
 
   it("offers full column names, short ones with a legend for phones", () => {
     render(<SeasonRatingTable rows={[row({})]} />);
-    expect(screen.getByText("Сумма очков")).toBeInTheDocument();
+    expect(screen.getByText("Очков")).toBeInTheDocument();
     expect(screen.getByText("Σ")).toBeInTheDocument();
-    expect(screen.getByText(/Н — неверный прогноз/)).toBeInTheDocument();
+    expect(screen.getByText(/Н — неверных прогнозов/)).toBeInTheDocument();
   });
 
   it("does not link a participant without a nickname and handles an empty table", () => {

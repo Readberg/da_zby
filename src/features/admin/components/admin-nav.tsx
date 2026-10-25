@@ -26,7 +26,7 @@ export function AdminNav() {
             aria-current={active ? "page" : undefined}
             className={cx(
               "inline-flex min-h-11 items-center rounded-full px-4 text-base font-medium transition-colors duration-200",
-              active ? "bg-ink text-bg" : "text-muted hover:bg-surface hover:text-ink",
+              active ? "bg-ink text-bg" : "text-muted hover:bg-accent/30 hover:text-ink",
             )}
           >
             {section.label}

@@ -1,12 +1,14 @@
 import { Container } from "@/components/ui/container";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader } from "@/components/ui/loader";
 
-/** Shown at once while a page of the signed-in area is being prepared on the server. */
+/**
+ * Shown instead of the page while it is being prepared (route loading state): the content stays
+ * out of sight until it is ready.
+ */
 export function PageLoading() {
   return (
-    <Container className="flex flex-col gap-4 py-8 sm:py-12">
-      <Skeleton className="h-10 w-48" />
-      <Skeleton className="h-64 max-w-xl" />
+    <Container className="flex flex-1 items-center justify-center py-24">
+      <Loader className="min-h-48 w-full max-w-sm bg-transparent" showLabel />
     </Container>
   );
 }
