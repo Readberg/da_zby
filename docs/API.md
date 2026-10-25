@@ -80,7 +80,7 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 | Эндпоинт | Доступ | Что делает |
 |---|---|---|
 | `GET /me` | user | Свой профиль: ник, имя, контакт, о себе, `avatarUrl`, страна (ISO), город, `utcOffsetMinutes`, роль, `email` (виден только владельцу), даты |
-| `PATCH /me` | user | Частичное обновление. Поля: `nickname`, `fullName`, `contact`, `about` (≤ 1000), `countryCode` (из списка ISO или `null`), `city`, `utcOffsetMinutes` (−720…840). Пустая строка очищает текстовое поле. Роль и email изменить нельзя (лишние поля игнорируются). **Ник задаётся один раз** (онбординг) и затем закреплён: другой ник → `409 profile.nickname_locked`; занятый → `409 profile.nickname_taken` |
+| `PATCH /me` | user | Частичное обновление. Поля: `nickname`, `fullName`, `contact`, `about` (≤ 1000), `countryCode` (из списка ISO или `null`), `city`, `utcOffsetMinutes` (−720…840). Пустая строка очищает текстовое поле. Роль и email изменить нельзя (лишние поля игнорируются). **Ник можно менять в любой момент** (D-061); занятый → `409 profile.nickname_taken`. Код `profile.nickname_locked` больше не возвращается (оставлен в списке для совместимости) |
 | `GET /nickname-availability?nickname=` | public | `{ valid, available }`; проверка без учёта регистра |
 
 Тело запроса описано в OpenAPI (`requestBody`); невалидный JSON → `400 api.invalid_json`, нарушение схемы → `422 api.validation_failed` с `errors[]`. Ответы `/me` — `Cache-Control: private, no-store`.

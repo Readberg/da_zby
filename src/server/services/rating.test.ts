@@ -125,6 +125,36 @@ describe("getRatingPage", () => {
     expect(page.tours).toEqual([{ number: 1, title: null }]);
   });
 
+  it("adds the places gained with the latest graded tour", async () => {
+    const { db } = fakeDb({
+      ...seasonTables(),
+      season_leaderboard: {
+        data: [
+          entry(U1, "Борис", { current_rank: 1, points: 4, predictions_count: 2 }),
+          entry(U2, "Аня", { current_rank: 2, points: 3, predictions_count: 2 }),
+        ],
+      },
+      matches: { data: [{ tour_id: T1 }] },
+      tour_leaderboard: {
+        data: [
+          entry(U1, "Борис", { points: 3, predictions_count: 1 }),
+          entry(U2, "Аня", { points: 0, predictions_count: 1 }),
+        ],
+      },
+    });
+    const page = await getRatingPage(db, {});
+    expect(page.rows.map((r) => [r.nickname, r.trend])).toEqual([
+      ["Борис", 1],
+      ["Аня", -1],
+    ]);
+  });
+
+  it("has no trend while no match is graded", async () => {
+    const { db } = fakeDb({ ...seasonTables(), matches: { data: [] } });
+    const page = await getRatingPage(db, {});
+    expect(page.rows.every((r) => r.trend === null)).toBe(true);
+  });
+
   it("shows one tour with every participant's prediction", async () => {
     const { db } = fakeDb({
       ...seasonTables(),

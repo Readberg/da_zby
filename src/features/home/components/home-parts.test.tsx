@@ -109,6 +109,7 @@ describe("LeadersList", () => {
     missCount: 0,
     points,
     predictionsCount: 0,
+    trend: null,
   });
 
   it("lists the leaders with places, links and a link to the full rating", async () => {

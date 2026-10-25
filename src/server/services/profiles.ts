@@ -75,17 +75,7 @@ export async function updateOwnProfile(
   const update: Database["public"]["Tables"]["profiles"]["Update"] = {};
 
   if (patch.nickname !== undefined) {
-    const same = current.nickname?.toLowerCase() === patch.nickname.toLowerCase();
-    if (current.nickname && !same) {
-      throw new ApiError(
-        409,
-        ERROR_CODES.nicknameLocked,
-        "Conflict",
-        "The nickname is already chosen and cannot be changed.",
-        [{ field: "nickname", message: "Ник уже выбран и не меняется" }],
-      );
-    }
-    if (!current.nickname) update.nickname = patch.nickname;
+    if (patch.nickname !== current.nickname) update.nickname = patch.nickname;
   }
   if (patch.fullName !== undefined) update.full_name = patch.fullName;
   if (patch.contact !== undefined) update.contact = patch.contact;

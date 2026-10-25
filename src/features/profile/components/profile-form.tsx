@@ -9,6 +9,7 @@ import { profilePatchSchema, utcOffsetOptions } from "@/lib/profile-schema";
 import { ru } from "@/messages/ru";
 
 export type ProfileFormValues = {
+  nickname: string;
   fullName: string;
   contact: string;
   about: string;
@@ -45,6 +46,7 @@ export function ProfileForm({
     if (status === "saving") return;
 
     const payload = {
+      nickname: values.nickname,
       fullName: values.fullName,
       contact: values.contact,
       about: values.about,
@@ -86,6 +88,15 @@ export function ProfileForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex max-w-xl flex-col gap-4">
+      <TextField
+        id="profile-nickname"
+        label={ru.profile.nickname}
+        hint={ru.profile.nicknameHint}
+        autoComplete="nickname"
+        value={values.nickname}
+        onChange={(e) => set("nickname", e.target.value)}
+        error={errors.nickname}
+      />
       <TextField
         id="profile-fullName"
         label={ru.profile.fullName}

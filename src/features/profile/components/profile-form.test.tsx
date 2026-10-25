@@ -13,6 +13,7 @@ vi.mock("@/lib/api-client", async (original) => ({
 const { ProfileForm } = await import("./profile-form");
 
 const initial = {
+  nickname: "Readberg",
   fullName: "",
   contact: "",
   about: "",
@@ -54,6 +55,7 @@ describe("ProfileForm", () => {
     expect(api).toHaveBeenCalledWith("/me", {
       method: "PATCH",
       json: {
+        nickname: "Readberg",
         fullName: "Роман",
         contact: "",
         about: "",
@@ -64,6 +66,23 @@ describe("ProfileForm", () => {
     });
     expect(await screen.findByText("Сохранено")).toBeVisible();
     expect(refresh).toHaveBeenCalled();
+  });
+
+  it("changes the nickname and rejects an invalid one before calling the API", async () => {
+    render(<ProfileForm initial={initial} countries={countries} />);
+    const field = screen.getByLabelText("Ник");
+    await userEvent.clear(field);
+    await userEvent.type(field, "ab");
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+    expect(api).not.toHaveBeenCalled();
+    expect(screen.getByText("3–20 символов: буквы, цифры и «_»")).toBeVisible();
+
+    await userEvent.type(field, "c_d");
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+    expect(api).toHaveBeenCalledWith(
+      "/me",
+      expect.objectContaining({ json: expect.objectContaining({ nickname: "abc_d" }) }),
+    );
   });
 
   it("does not call the API when a value is too long and names the field", async () => {

@@ -18,6 +18,7 @@ const row = (over: Partial<RatingRow>): RatingRow => ({
   missCount: 1,
   points: 9,
   predictionsCount: 6,
+  trend: null,
   ...over,
 });
 
@@ -177,5 +178,23 @@ describe("ProfileStats", () => {
   it("has an empty state", () => {
     render(<ProfileStats rows={[]} />);
     expect(screen.getByText("Пока нет прогнозов.")).toBeVisible();
+  });
+});
+
+describe("place trend", () => {
+  it("shows places gained and lost with text, none when unchanged or unknown", () => {
+    render(
+      <SeasonRatingTable
+        rows={[
+          row({ userId: "a", nickname: "Аня", trend: 2 }),
+          row({ userId: "b", nickname: "Боря", place: 2, trend: -1 }),
+          row({ userId: "c", nickname: "Вика", place: 3, trend: 0 }),
+          row({ userId: "d", nickname: "Гоша", place: 4, trend: null }),
+        ]}
+      />,
+    );
+    expect(screen.getByTitle("Поднялись на 2 за последний тур")).toHaveTextContent("▲2");
+    expect(screen.getByTitle("Опустились на 1 за последний тур")).toHaveTextContent("▼1");
+    expect(screen.getAllByText(/[▲▼]/)).toHaveLength(2);
   });
 });

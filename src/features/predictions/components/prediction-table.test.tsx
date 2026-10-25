@@ -175,7 +175,8 @@ describe("PredictionTable", () => {
       { open: false, ratingHref: "/rating?tour=3" },
     );
     expect(screen.getByText("Итог тура")).toBeVisible();
-    expect(screen.getByText("4 очка · точных счетов: 1 · угаданных исходов: 1")).toBeVisible();
+    expect(screen.getByText(/^очка · точных счетов: 1 · угаданных исходов: 1$/)).toBeVisible();
+    expect(screen.getByText("4")).toBeVisible();
     expect(screen.getByRole("link", { name: "Таблица тура" })).toHaveAttribute(
       "href",
       "/rating?tour=3",

@@ -25,11 +25,30 @@ function Participant({ row }: { row: RatingRow }) {
   );
 }
 
+/** Places gained (▲) or lost (▼) with the latest tour; text and colour, never colour alone. */
+function Trend({ value }: { value: number }) {
+  const up = value > 0;
+  return (
+    <span
+      className={`ml-1 inline-block animate-trend-in text-xs font-semibold ${up ? "text-success" : "text-danger"}`}
+      title={
+        up
+          ? ru.rating.trendUp.replace("{n}", String(value))
+          : ru.rating.trendDown.replace("{n}", String(-value))
+      }
+    >
+      {up ? "▲" : "▼"}
+      {Math.abs(value)}
+    </span>
+  );
+}
+
 function Place({ row }: { row: RatingRow }) {
   if (row.place === null) return <>—</>;
   return (
     <span className="whitespace-nowrap">
       {row.place}
+      {row.trend ? <Trend value={row.trend} /> : null}
       {row.final && (
         <span className="ml-1 text-xs font-normal text-muted">{ru.publicProfile.stats.final}</span>
       )}
