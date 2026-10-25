@@ -5,7 +5,9 @@ import { expect, test } from "@playwright/test";
 test("guest pages make no requests to Supabase", async ({ page }) => {
   const supabaseRequests: string[] = [];
   page.on("request", (request) => {
-    if (request.url().includes("supabase.co")) supabaseRequests.push(request.url());
+    // Requests to Supabase itself; club logos go through the site's own /_next/image address.
+    if (new URL(request.url()).hostname.endsWith("supabase.co"))
+      supabaseRequests.push(request.url());
   });
   await page.goto("/");
   await page.waitForLoadState("load");
