@@ -1,0 +1,343 @@
+import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense, type ReactNode } from "react";
+import { buttonClasses } from "@/components/ui/button";
+import { ClubLogo } from "@/components/ui/club-logo";
+import {
+  ArrowRightIcon,
+  BarsIcon,
+  CrownIcon,
+  InstagramIcon,
+  PencilIcon,
+  TelegramIcon,
+  ThreadsIcon,
+  TiktokIcon,
+  TrophyIcon,
+  YoutubeIcon,
+} from "@/components/ui/icons";
+import { Skeleton } from "@/components/ui/skeleton";
+import { siteConfig, type SocialId } from "@/config/site";
+import { formatDateTime } from "@/lib/local-time";
+import { points } from "@/lib/plural";
+import { ru } from "@/messages/ru";
+import { getHomeCached } from "@/server/services/home.cached";
+import { FaqList } from "./faq-list";
+import { composePredictionsPage } from "@/server/services/predictions";
+
+const LOGIN_HREF = "/login?next=%2Fpredictions";
+const DEFAULT_POINTS = { exact: 3, outcome: 1 };
+const t = ru.landing;
+
+const socialIcons: Record<SocialId, (props: { className?: string }) => ReactNode> = {
+  youtube: (p) => <YoutubeIcon {...p} />,
+  telegram: (p) => <TelegramIcon {...p} />,
+  instagram: (p) => <InstagramIcon {...p} />,
+  tiktok: (p) => <TiktokIcon {...p} />,
+  threads: (p) => <ThreadsIcon {...p} />,
+};
+
+function Hero() {
+  return (
+    <section
+      aria-labelledby="landing-title"
+      className="flex flex-col items-center gap-6 pt-6 text-center sm:pt-12"
+    >
+      <h1
+        id="landing-title"
+        className="max-w-4xl font-display text-[clamp(2.5rem,9vw,6rem)] uppercase leading-[0.95] tracking-tight"
+      >
+        {ru.home.headline}
+      </h1>
+      <p className="max-w-md text-lg text-muted">{t.lead}</p>
+      <Link
+        href={LOGIN_HREF}
+        className={buttonClasses("primary", "min-h-14 gap-3 px-8 text-lg shadow-soft")}
+      >
+        <TelegramIcon className="h-6 w-6" />
+        {t.cta}
+        <ArrowRightIcon className="h-5 w-5" />
+      </Link>
+      <p className="text-sm text-muted">{t.ctaNote}</p>
+    </section>
+  );
+}
+
+/** The next tour matches (real data); every row leads to sign-in and then to the tour. */
+export async function UpcomingMatches() {
+  await connection();
+  const { pub } = await getHomeCached();
+  const { tour, matches, tournament } = composePredictionsPage(pub, {}, undefined, new Date());
+
+  return (
+    <div className="rounded-lg bg-surface p-4 shadow-soft sm:p-6">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-h3 normal-case">{t.upcomingTitle}</h2>
+        <Link
+          href={LOGIN_HREF}
+          className="inline-flex min-h-10 items-center gap-2 rounded-full bg-bg px-4 text-sm font-semibold transition-colors hover:bg-line"
+        >
+          {t.allMatches}
+          <ArrowRightIcon className="h-4 w-4" />
+        </Link>
+      </div>
+      {!tournament || !tour || matches.length === 0 ? (
+        <div className="rounded-md bg-bg p-5">
+          <p className="font-semibold">{ru.home.soonTitle}</p>
+          <p className="mt-1 text-muted">{ru.home.soonText}</p>
+        </div>
+      ) : (
+        <ul className="flex flex-col divide-y divide-line rounded-md bg-bg px-3 sm:px-4">
+          {matches.slice(0, 4).map((match) => (
+            <li
+              key={match.id}
+              className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 py-3 sm:grid-cols-[minmax(0,9rem)_1fr_auto]"
+            >
+              <p className="col-span-2 text-sm text-muted sm:col-span-1">
+                {tournament.name} · {ru.home.nextTour.replace("{n}", String(tour.number))}
+              </p>
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
+                  <span className="truncate text-right font-semibold">{match.home.name}</span>
+                  <ClubLogo src={match.home.logoUrl} name={match.home.name} size={32} />
+                </span>
+                <span className="shrink-0 px-1 text-center text-xs text-muted">
+                  {formatDateTime(match.kickoffAt)}
+                </span>
+                <span className="flex min-w-0 flex-1 items-center gap-2">
+                  <ClubLogo src={match.away.logoUrl} name={match.away.name} size={32} />
+                  <span className="truncate font-semibold">{match.away.name}</span>
+                </span>
+              </div>
+              <Link
+                href={LOGIN_HREF}
+                className={buttonClasses("primary", "min-h-10 px-4 text-sm sm:px-5")}
+              >
+                {t.predict}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Community() {
+  const links = siteConfig.social.filter((link) => link.url);
+  return (
+    <aside aria-labelledby="community-title" className="flex flex-col gap-3">
+      <h2 id="community-title" className="text-h3 normal-case">
+        {t.communityTitle}
+      </h2>
+      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+        {links.map((link) => (
+          <li key={link.id}>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-14 items-center gap-3 rounded-md bg-surface px-4 py-3 shadow-soft transition-transform duration-200 hover:-translate-y-0.5"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white">
+                {socialIcons[link.id]({ className: "h-5 w-5" })}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold">{ru.footer.social[link.id]}</span>
+                <span className="block text-xs text-muted">{t.follow}</span>
+              </span>
+              <span className="sr-only">{ru.common.opensInNewTab}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
+}
+
+function Steps({ exact, outcome }: { exact: number; outcome: number }) {
+  const steps = [
+    { icon: <TelegramIcon className="h-5 w-5 text-telegram" />, ...ru.home.steps.one },
+    { icon: <PencilIcon className="h-5 w-5" />, ...ru.home.steps.two },
+    {
+      icon: <TrophyIcon className="h-5 w-5" />,
+      ...ru.home.steps.three,
+      text: ru.home.steps.three.text
+        .replace("{exact}", points(exact))
+        .replace("{outcome}", points(outcome)),
+    },
+  ];
+  return (
+    <ol className="flex flex-col gap-5">
+      {steps.map((step, index) => (
+        <li key={step.title} className="flex gap-4">
+          <span
+            aria-hidden="true"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black font-display text-lg text-white"
+          >
+            {index + 1}
+          </span>
+          <div className="min-w-0">
+            <h3 className="flex items-center gap-2 text-lg normal-case">
+              {step.title}
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/70 text-black">
+                {step.icon}
+              </span>
+            </h3>
+            <p className="mt-1 text-black/70">{step.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+async function StepsWithPoints() {
+  await connection();
+  const { pub } = await getHomeCached();
+  return (
+    <Steps
+      exact={pub.tournament?.pointsExact ?? DEFAULT_POINTS.exact}
+      outcome={pub.tournament?.pointsOutcome ?? DEFAULT_POINTS.outcome}
+    />
+  );
+}
+
+/** Illustration only: the nicknames are invented, so it is labelled as an example. */
+function RatingMock() {
+  const rows = [
+    { place: 1, name: "GoalKing", points: 128, trend: "▲3", up: true },
+    { place: 2, name: "MatchMind", points: 121, trend: "▲1", up: true },
+    { place: 3, name: "VARmaster", points: 115, trend: "▼1", up: false },
+    { place: 4, name: "ScoreHunter", points: 110, trend: "▲4", up: true },
+  ];
+  return (
+    <figure className="flex flex-col items-center gap-3">
+      <div
+        aria-hidden="true"
+        className="w-64 rounded-[2.5rem] border-[10px] border-black bg-bg p-4 shadow-soft"
+      >
+        <div className="mx-auto mb-3 h-5 w-24 rounded-full bg-black" />
+        <p className="font-display text-2xl uppercase">{ru.rating.title}</p>
+        <div className="mt-2 grid grid-cols-2 rounded-full bg-surface p-1 text-center text-xs font-semibold">
+          <span className="rounded-full bg-bg py-1 shadow-soft">{t.mockSeason}</span>
+          <span className="py-1 text-muted">{t.mockTour}</span>
+        </div>
+        <ul className="mt-3 flex flex-col gap-2">
+          {rows.map((row) => (
+            <li
+              key={row.place}
+              className={`flex items-center gap-2 rounded-md p-2 ${row.place === 1 ? "bg-accent/25" : "bg-surface"}`}
+            >
+              <span className="w-4 text-center text-sm font-semibold">{row.place}</span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-xs text-white">
+                {row.name[0]}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold">{row.name}</span>
+              <span className="text-right text-xs leading-tight">
+                <span className="block font-semibold">{row.points}</span>
+                <span className={row.up ? "text-success" : "text-danger"}>{row.trend}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <figcaption className="text-sm text-muted">{t.mockCaption}</figcaption>
+    </figure>
+  );
+}
+
+function Benefits() {
+  const items = [
+    { icon: <BarsIcon className="h-6 w-6" />, text: t.benefits.predict, tone: "bg-accent" },
+    { icon: <TrophyIcon className="h-6 w-6" />, text: t.benefits.points, tone: "bg-white" },
+    { icon: <CrownIcon className="h-6 w-6" />, text: t.benefits.lead, tone: "bg-accent" },
+  ];
+  return (
+    <ul className="flex flex-col gap-3">
+      {items.map((item) => (
+        <li
+          key={item.text}
+          className={`flex min-h-16 items-center gap-3 rounded-lg px-5 font-display text-2xl uppercase text-black ${item.tone}`}
+        >
+          {item.icon}
+          {item.text}
+        </li>
+      ))}
+      <li className="flex min-h-14 items-center justify-between rounded-full bg-white px-5 font-display text-xl uppercase text-black">
+        {t.benefits.free}
+        <span
+          aria-hidden="true"
+          className="flex h-8 w-14 items-center justify-end rounded-full bg-accent p-1"
+        >
+          <span className="h-6 w-6 rounded-full bg-white shadow-soft" />
+        </span>
+      </li>
+    </ul>
+  );
+}
+
+function Panels() {
+  return (
+    <section id="how" aria-labelledby="how-title" className="flex scroll-mt-20 flex-col gap-4">
+      <h2 id="how-title" className="sr-only">
+        {ru.home.howTitle}
+      </h2>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="flex flex-col gap-4">
+          <div className="flex-1 rounded-lg bg-accent p-6 text-black shadow-soft">
+            <Suspense
+              fallback={<Steps exact={DEFAULT_POINTS.exact} outcome={DEFAULT_POINTS.outcome} />}
+            >
+              <StepsWithPoints />
+            </Suspense>
+          </div>
+          <p className="font-semibold">{t.captionOne}</p>
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-1 items-center justify-center rounded-lg bg-surface p-6">
+            <RatingMock />
+          </div>
+          <p className="font-semibold">{t.captionTwo}</p>
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex-1 rounded-lg bg-black p-6 text-white shadow-soft">
+            <Benefits />
+          </div>
+          <p className="font-semibold">{t.captionThree}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Faq() {
+  return (
+    <section
+      aria-labelledby="faq-title"
+      className="grid gap-8 py-4 lg:grid-cols-[1fr_1.4fr] lg:gap-16"
+    >
+      <h2 id="faq-title" className="font-display text-5xl uppercase leading-none sm:text-6xl">
+        {t.faqTitle}
+      </h2>
+      <FaqList items={t.faq} />
+    </section>
+  );
+}
+
+/** Landing for guests: the promise, the next matches, how it works, videos and questions. */
+export function GuestLanding({ videos }: { videos: ReactNode }) {
+  return (
+    <div className="mx-auto flex w-full max-w-site flex-col gap-14 px-4 py-6 sm:gap-20 sm:px-6 sm:py-10">
+      <Hero />
+      <div className="grid gap-6 lg:grid-cols-[1fr_17rem] lg:items-start">
+        <Suspense fallback={<Skeleton className="h-80 w-full rounded-lg" />}>
+          <UpcomingMatches />
+        </Suspense>
+        <Community />
+      </div>
+      <Panels />
+      {videos}
+      <Faq />
+    </div>
+  );
+}
