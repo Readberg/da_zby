@@ -20,7 +20,7 @@ export function Card({
   return (
     <Tag
       className={cx(
-        "rounded-lg p-5 sm:p-8",
+        "rounded-lg p-5 shadow-soft sm:p-8",
         accent ? "bg-black text-white" : "bg-surface text-ink",
         className,
       )}

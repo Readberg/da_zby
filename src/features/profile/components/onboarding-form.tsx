@@ -83,7 +83,7 @@ export function OnboardingForm({ next }: { next: string }) {
           : ru.onboarding.hint;
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex max-w-md flex-col gap-4">
+    <form onSubmit={onSubmit} noValidate className="flex w-full flex-col gap-4">
       <TextField
         id="onboarding-nickname"
         label={ru.onboarding.nicknameLabel}

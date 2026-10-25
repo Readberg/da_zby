@@ -8,8 +8,8 @@ export const metadata: Metadata = { title: ru.notFound.title };
 
 export default function NotFound() {
   return (
-    <Container className="flex flex-1 flex-col items-start justify-center gap-4 py-16">
-      <p className="font-display text-h2 text-muted sm:text-h1">404</p>
+    <Container className="flex flex-1 flex-col items-center justify-center gap-4 py-16 text-center">
+      <p className="font-display text-[clamp(5rem,22vw,10rem)] leading-none text-accent">404</p>
       <h1 className="text-h3 sm:text-h2">{ru.notFound.title}</h1>
       <p className="max-w-prose">{ru.notFound.text}</p>
       <Link href="/" className={buttonClasses("primary")}>

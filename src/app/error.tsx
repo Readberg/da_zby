@@ -12,10 +12,10 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <Container className="flex flex-1 flex-col items-start justify-center gap-4 py-16">
+    <Container className="flex flex-1 flex-col items-center justify-center gap-4 py-16 text-center">
       <h1 className="text-h3 sm:text-h2">{ru.error.title}</h1>
       <p className="max-w-prose">{ru.error.text}</p>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap justify-center gap-3">
         <Button onClick={reset}>{ru.error.retry}</Button>
         <Link href="/" className={buttonClasses("secondary")}>
           {ru.error.home}
