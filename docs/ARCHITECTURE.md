@@ -60,6 +60,8 @@ tests/e2e/                 Playwright
 
 ## Кеширование
 
+- Рейтинг и статистика (`rating.cached.ts`): `'use cache'` + `cacheLife` (свежесть 5 минут, обновление раз в 30, срок 24 часа) и тег `rating`; читают анонимным клиентом без cookie (`createAnonClient`). Админские маршруты после мутаций вызывают `invalidateRating()` (`revalidateTag(…, { expire: 0 })`).
+
 | Данные | Стратегия |
 |---|---|
 | Видео YouTube | кеш в памяти процесса 1 ч + последний удачный список при сбое (`src/server/services/videos.ts`, D-045) |

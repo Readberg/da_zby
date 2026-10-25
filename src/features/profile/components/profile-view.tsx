@@ -1,13 +1,23 @@
 import type { ReactNode } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { ProfileStats } from "@/features/rating/components/profile-stats";
 import { countryName } from "@/lib/countries";
 import { formatDate } from "@/lib/time";
 import { ru } from "@/messages/ru";
 import type { PublicProfile } from "@/server/services/public-profiles";
+import type { StatsRow } from "@/server/services/rating";
 
 /** What everybody sees on a profile; the owner gets the same view plus an action slot. */
-export function ProfileView({ profile, actions }: { profile: PublicProfile; actions?: ReactNode }) {
+export function ProfileView({
+  profile,
+  stats,
+  actions,
+}: {
+  profile: PublicProfile;
+  stats: StatsRow[];
+  actions?: ReactNode;
+}) {
   const place = [profile.countryCode ? countryName(profile.countryCode) : null, profile.city]
     .filter(Boolean)
     .join(", ");
@@ -46,7 +56,7 @@ export function ProfileView({ profile, actions }: { profile: PublicProfile; acti
       </dl>
 
       <Card title={ru.publicProfile.statsTitle}>
-        <p className="text-muted">{ru.publicProfile.statsEmpty}</p>
+        <ProfileStats rows={stats} />
       </Card>
     </div>
   );

@@ -4,7 +4,7 @@ import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
 
 const itemClass =
-  "inline-flex min-h-11 items-center rounded-full px-4 text-base font-medium text-ink transition-colors duration-200 hover:bg-surface";
+  "inline-flex min-h-11 items-center rounded-full px-3 text-base sm:px-4 font-medium text-ink transition-colors duration-200 hover:bg-surface";
 
 /** Header slot: "Войти" for guests, nickname + sign-out for signed-in users. */
 export async function UserMenu() {

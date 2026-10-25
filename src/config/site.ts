@@ -13,6 +13,7 @@ export const siteConfig = {
   nav: [
     { id: "home", href: "/" },
     { id: "predictions", href: "/predictions" },
+    { id: "rating", href: "/rating" },
   ],
 } as const;
 
