@@ -50,11 +50,10 @@
      (Или в браузере: репозиторий → **Settings → Secrets and variables → Actions → New repository secret**.)
    - Напишите Claude «секреты Supabase на месте» — он запустит workflow `db-migrate` и проверит схему сам.
 4. **Проверка схемы:** **Table Editor** → видны таблицы `profiles`, `tournaments`, `seasons`, `clubs`, `season_clubs`, `tours`, `matches`, `predictions`, `season_standings`, `profile_private`, `admin_bootstrap`. **Storage** → бакеты `avatars` и `club-logos`.
-5. **Вход по email.** **Authentication → Sign In / Providers** (в старом интерфейсе **Providers**) → **Email** включён; **Confirm email** включён. Вход «по ссылке из письма» работает без дополнительных настроек.
-6. **Адреса возврата.** **Authentication → URL Configuration**: **Site URL** = `http://localhost:3000`; **Redirect URLs** → **Add URL** → `http://localhost:3000/auth/callback` → **Save**. (Позже добавите адрес Railway и домен.)
-7. **Письма.** Встроенная отправка Supabase имеет жёсткий лимит писем в час — для тестов хватит, для регулярной работы подключите свой SMTP (🟡 раздел F).
+5. **Провайдер Email оставьте включённым** (Authentication → Sign In / Providers): технически аккаунты Telegram-пользователей — это пользователи Supabase с синтетической почтой, письма им не отправляются.
+6. **Адреса и письма** для входа настраивать не нужно (вход идёт через Telegram, D-054).
 
-**Вы — первый админ автоматически:** когда вы впервые войдёте с почтой `wayreadberg@gmail.com` (через ссылку из письма или Google) и почта подтверждена, система сама выдаст роль админа и ник `Readberg`. Вручную ничего вводить не нужно.
+**Вы — первый админ:** укажите свой Telegram-id в переменной `TELEGRAM_ADMIN_IDS` (раздел E), при первом входе роль админа выдастся автоматически; ник выберете в онбординге.
 
 ## 🔴 D. Локальные файлы (≈3 минуты)
 
@@ -62,15 +61,17 @@
 2. Заполните пустые значения: `SUPABASE_SECRET_KEY` (пункт C.2) и при способе 2 — `JIRA_*`. Остальное уже есть.
 3. Файл `.env.local` не коммитится (он в `.gitignore`). Проверка: `git status` его не показывает.
 
-## 🔴 E. Вход через Google (основной способ входа, D-053) (≈20 минут)
+## 🔴 E. Вход через Telegram (единственный способ входа, D-054) (≈15 минут)
 
-1. https://console.cloud.google.com → сверху выпадающий список проектов → **New project** → имя «da-zby» → **Create**.
-2. Меню **APIs & Services → OAuth consent screen** (или **Google Auth Platform**): нажмите **Get started** → App name «Да забей», User support email — ваш → Audience **External** → контактный email → **Create**.
-3. Раздел **Audience / Publishing status**: пока приложение в режиме **Testing**, войти могут только добавленные **Test users** — добавьте `wayreadberg@gmail.com` и тестировщиков; перед публичным запуском нажмите **Publish app** (запрашиваются только базовые данные профиля — проверка Google не нужна).
-4. **Clients → Create client** (или **Credentials → Create credentials → OAuth client ID**) → тип **Web application** → имя «da-zby web» → **Authorized redirect URIs → Add URI**: `https://lrybmorjxxbogbmmpddj.supabase.co/auth/v1/callback` → **Create**. Скопируйте **Client ID** и **Client secret**.
-5. Supabase → **Authentication → Sign In / Providers → Google** → включите → вставьте Client ID и Client secret → **Save**.
-6. Включите кнопку: в Railway → Variables добавьте `NEXT_PUBLIC_GOOGLE_AUTH=1` (и в `.env.local` для локальной проверки), дождитесь деплоя. Без флага кнопка скрыта.
-7. Проверка: на странице входа кнопка «Войти через Google» ведёт на окно Google и возвращает на сайт.
+1. В Telegram откройте **@BotFather** → `/newbot` → имя «Да забей вход» → username, оканчивающийся на `bot` (например `dazby_login_bot`). BotFather пришлёт **токен** вида `123456789:AA…` — это секрет: только в Railway Variables, в чат не присылайте.
+2. Там же: `/setdomain` → выберите бота → домен сайта **без https://** (сейчас `dazby-production.up.railway.app`; после покупки домена повторите команду). Telegram показывает виджет только на этом домене. Если BotFather не принял адрес Railway — напишите Claude, решим (обычно — подождать домен).
+3. Свой числовой Telegram-id: напишите боту **@userinfobot** → он ответит «Id: 123456789». Это не секрет.
+4. Railway → сервис → **Variables** → добавьте:
+   - `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` = username бота без @;
+   - `TELEGRAM_BOT_TOKEN` = токен из шага 1;
+   - `TELEGRAM_ADMIN_IDS` = ваш id из шага 3;
+   - `SUPABASE_SECRET_KEY` = секретный ключ Supabase (C.2; только здесь и в `.env.local`).
+5. Дождитесь деплоя (переменная с `NEXT_PUBLIC_` вшивается при сборке) и проверьте: **Войти** → кнопка Telegram → подтвердите в приложении → вы на сайте, просят выбрать ник; в профиле роль админа.
 
 ## 🟡 F. Почта для писем входа (SMTP) (≈15 минут, когда начнёте тесты с другими людьми)
 
@@ -94,15 +95,14 @@
 6. **Settings → Networking → Public Networking → Generate Domain** → скопируйте адрес вида `https://da-zby-production-xxxx.up.railway.app`.
 7. `NEXT_PUBLIC_SITE_URL` менять не нужно: на Railway адрес сайта берётся из сгенерированного домена автоматически (DAZBY-42). Задайте его явно, только когда появится свой домен (схема `https://` добавится сама, если забыть).
 8. **Deployments** → дождитесь статуса **Active** (зелёный). Откройте адрес — должна открыться главная.
-9. Supabase → **Authentication → URL Configuration → Redirect URLs → Add URL** → `<адрес>/auth/callback` → **Save** (понадобится для входа в E3).
-10. Пришлите Claude адрес стенда (это не секрет) — он сам прогонит health и e2e по нему и закроет DAZBY-42.
+9. Пришлите Claude адрес стенда (это не секрет) — он сам прогонит health и e2e по нему и закроет DAZBY-42.
 
 ## 🟢 G. В самом конце
 
 - **Прод на Railway:** отдельный сервис/окружение из ветки `main` с прод-Supabase (E8).
 - **Telegram-вход (эпик E7):** в Telegram откройте @BotFather → `/newbot` → имя и username → получите токен бота (секрет!) → `/setdomain` → укажите домен сайта. Домен нужен заранее, поэтому этап после покупки домена.
 - **Прод-проект Supabase:** создать отдельный проект, применить те же миграции, заменить ключи и адреса.
-- **Домен:** купить, привязать в Railway, добавить в Supabase и Google (Authorized domains/Redirect URIs).
+- **Домен:** купить, привязать в Railway, повторить в @BotFather `/setdomain` с новым доменом.
 - **Смена всех ключей:** заменить все ключи и токены, которые использовались при разработке (в т.ч. публиковавшиеся в чате).
 
 ---
