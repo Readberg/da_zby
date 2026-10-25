@@ -90,6 +90,12 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 - `GET /api/v1/admin/users?search=&page=&pageSize=` (admin): `{ items, total, page, pageSize }`, новые сверху; `search` — часть ника или имени.
 - `PATCH /api/v1/admin/users/role` (admin): тело `{ userId, role: user | admin }`; последнего админа снять нельзя — 409 `admin.last_admin`. Права проверяются трижды: `withApi` (уровень admin → `is_admin()`), RLS и сама функция `set_user_role`.
 
+### Админка: турниры и клубы (DAZBY-61, 62)
+- `GET|POST|PATCH /api/v1/admin/tournaments` (admin): список; создание `{ name, slug, pointsExact, pointsOutcome, isActive }`; частичное изменение по `id` (тело `{ id, …поля }`). Занятые slug/название — 409 `admin.duplicate` с `errors[].field`.
+- `POST /api/v1/admin/tournaments/recalculate` (admin): тело `{ tournamentId }` — пересчитать все сезоны турнира после смены очков (`recalculate_season`); ответ `{ seasons }`.
+- `GET|POST|PATCH|DELETE /api/v1/admin/clubs` (admin): справочник клубов (`name`, `shortName`, `logoPath`, `logoUrl`). Логотип загружается прямо в бакет `club-logos` (только админ, до 1 МБ, jpeg/png/webp) и привязывается через `logoPath`. Удаление клуба с матчами — 409 `admin.in_use`.
+- Изменение и удаление идут по `id` в теле (путевых параметров в v1 пока нет).
+
 ### Вход через Telegram (D-056)
 - `POST /api/v1/auth/telegram/start` (публичный): создаёт попытку, отвечает `{ token, code, appUrl, webUrl, expiresInSeconds }`; 429 `api.too_many_requests` при слишком большом числе незавершённых попыток, 503 `auth.telegram_unavailable`, если вход не настроен.
 - `GET /api/v1/auth/telegram/status?token=` (публичный): `{ status: pending | confirmed | expired }`. При `confirmed` браузер переходит на `/auth/telegram?token=…` (не часть API: ставит cookie сессии).

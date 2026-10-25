@@ -8,7 +8,11 @@ import { requireAdmin } from "@/server/services/current-user";
 
 export const metadata: Metadata = { title: ru.admin.title, robots: { index: false } };
 
-const sections = [{ href: "/admin/users", label: ru.admin.nav.users }];
+const sections = [
+  { href: "/admin/tournaments", label: ru.admin.nav.tournaments },
+  { href: "/admin/clubs", label: ru.admin.nav.clubs },
+  { href: "/admin/users", label: ru.admin.nav.users },
+];
 
 async function AdminGate({ children }: { children: ReactNode }) {
   const admin = await requireAdmin("/admin");

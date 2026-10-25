@@ -41,6 +41,10 @@
 - Где используется: вход (`/login`), онбординг, профиль (`/profile`), `/styleguide`.
 - Снимок: `components/field.png`
 
+### Админ-формы (турниры, клубы)
+- `src/features/admin/components/{tournament-form,club-form,role-button}.tsx` — карточка `Card` с формой: поля `TextField`, флажок, кнопка с индикатором, статус «Сохранено» / «Проверьте поля», ошибки полей приходят и от сервера (`errors[].field`).
+- Правила проверки общие для формы и API: `src/lib/admin-schema.ts`.
+
 ### Дизайн v2 (D-055)
 - Кнопки: «таблетка», `primary` — жёлтая, `secondary` — чёрная, `text` — ссылка; без жирных рамок, Inter semibold. Кнопка Telegram — цвет `telegram`.
 - Поля: рамка `line` 1 px, радиус 14, фокус — тёмная рамка и жёлтое кольцо. Карточки: радиус 24, фон `surface`, без рамки.

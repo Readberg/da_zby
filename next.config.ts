@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
       new URL("https://i.ytimg.com/vi/**"),
       // User photos from the public Supabase Storage bucket "avatars".
       new URL("https://*.supabase.co/storage/v1/object/public/avatars/**"),
+      // Club logos uploaded by admins.
+      new URL("https://*.supabase.co/storage/v1/object/public/club-logos/**"),
     ],
   },
   env: {
