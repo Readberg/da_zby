@@ -20,15 +20,9 @@ export async function UserMenu() {
 
   return (
     <nav aria-label={ru.auth.userMenu} className="flex items-center gap-1">
-      {user.nickname ? (
-        <Link href="/profile" className={itemClass}>
-          {user.nickname}
-        </Link>
-      ) : (
-        <Link href="/onboarding" className={itemClass}>
-          {ru.auth.onboarding}
-        </Link>
-      )}
+      <Link href="/profile" className={itemClass}>
+        {ru.auth.profile}
+      </Link>
       <form action="/auth/signout" method="post">
         <button type="submit" className={itemClass}>
           {ru.auth.logout}
