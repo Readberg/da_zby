@@ -14,21 +14,19 @@ describe("UserMenu", () => {
     expect(screen.queryByRole("button", { name: "Выйти" })).not.toBeInTheDocument();
   });
 
-  it("shows the nickname and a POST sign-out for users", async () => {
+  it("offers a Profile link and a POST sign-out for users", async () => {
     getCurrentUser.mockResolvedValue({ id: "u1", nickname: "Readberg", role: "admin" });
     render(await UserMenu());
-    expect(screen.getByRole("link", { name: "Readberg" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByRole("link", { name: "Профиль" })).toHaveAttribute("href", "/profile");
     const form = screen.getByRole("button", { name: "Выйти" }).closest("form");
     expect(form).toHaveAttribute("method", "post");
     expect(form).toHaveAttribute("action", "/auth/signout");
   });
 
-  it("sends users without a nickname to onboarding", async () => {
+  it("shows the same Profile link before a nickname is chosen", async () => {
     getCurrentUser.mockResolvedValue({ id: "u1", nickname: null, role: "user" });
     render(await UserMenu());
-    expect(screen.getByRole("link", { name: "Выбрать ник" })).toHaveAttribute(
-      "href",
-      "/onboarding",
-    );
+    expect(screen.getByRole("link", { name: "Профиль" })).toHaveAttribute("href", "/profile");
+    expect(screen.queryByText("Выбрать ник")).not.toBeInTheDocument();
   });
 });

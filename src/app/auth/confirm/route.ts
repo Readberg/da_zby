@@ -1,6 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { publicOrigin } from "@/lib/public-origin";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { destinationAfterLogin } from "@/server/services/post-login";
 
@@ -12,7 +13,8 @@ const OTP_TYPES: readonly EmailOtpType[] = ["magiclink", "email", "signup", "rec
  * which matters when the link is opened from a mail app or an in-app browser.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  const origin = publicOrigin(request);
   const next = safeRedirectPath(searchParams.get("next"));
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
