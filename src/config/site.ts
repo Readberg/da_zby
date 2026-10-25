@@ -10,7 +10,10 @@ export const siteConfig = {
     { id: "threads", url: "https://www.threads.com/@da_zby" },
   ],
   /** Header navigation: only pages that already exist. */
-  nav: [{ id: "home", href: "/" }],
+  nav: [
+    { id: "home", href: "/" },
+    { id: "predictions", href: "/predictions" },
+  ],
 } as const;
 
 export type SocialId = (typeof siteConfig.social)[number]["id"];
