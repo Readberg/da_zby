@@ -14,7 +14,7 @@
 src/
   app/
     (public)/              главная, рейтинг, публичные профили
-    (auth)/login, auth/callback, onboarding
+    (auth)/login, auth/telegram, auth/confirm, onboarding
     predictions/ profile/
     admin/                 layout с серверной проверкой роли
     api/v1/**/route.ts     тонкие handlers версии 1 (позже api/v2/…)
@@ -49,11 +49,13 @@ tests/e2e/                 Playwright
 
 - `@supabase/ssr`, сессия в cookie, `middleware.ts` обновляет токен.
 - Серверные проверки — `supabase.auth.getUser()`, не `getSession()`.
-- Провайдеры: email (magic link), Google; Telegram — этап 2 (способ выбрать при старте и согласовать с владельцем: Login Widget с проверкой подписи и выдачей сессии через Admin API либо OIDC, если актуален).
-- Callback `/auth/callback`; dev-redirect `http://localhost:3000/auth/callback`.
+- Единственный способ входа — Telegram Login Widget (D-054). Виджет в режиме redirect ведёт на `/auth/telegram`: сервер проверяет подпись (`telegram-auth.ts`: HMAC-SHA256 с ключом SHA256 токена бота, свежесть `auth_date`), находит или создаёт пользователя через Admin API (синтетическая почта `tg<id>@telegram.invalid`, подтверждена), получает одноразовый токен `generateLink` и обменивает его на сессию `verifyOtp` обычным серверным клиентом (cookie).
+- Путь возврата передаётся cookie `login_next` (Telegram сам управляет query редиректа) и перепроверяется `safeRedirectPath`.
+- `/auth/confirm` (по token_hash) остался служебным: через него e2e-тесты входят тестовым пользователем (DAZBY-52).
+- Нужны серверные секреты `TELEGRAM_BOT_TOKEN` и `SUPABASE_SECRET_KEY`; без любого из них `/auth/telegram` закрыт (fail closed).
 - `profiles.nickname IS NULL` → `/onboarding` (кроме выхода и статики).
 - Админ: `requireAdmin()` в layout `/admin` + RLS + уровень `admin` в `withApi`.
-- Первый админ назначается автоматически по подтверждённой почте из `admin_bootstrap` (миграция `…000100`).
+- Админы: Telegram-id из `TELEGRAM_ADMIN_IDS` перед созданием аккаунта записываются в `admin_bootstrap` (по синтетической почте) — дальше срабатывает существующий триггер (миграция `…000100`).
 
 ## Кеширование
 
