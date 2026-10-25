@@ -4,13 +4,12 @@ import { NICKNAME_PATTERN, type ProfilePatch } from "@/lib/profile-schema";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
 import type { ProfileMe } from "@/server/api/v1/schemas/profile";
 import type { Database, Tables } from "@/types/database";
+import { UNIQUE_VIOLATION, CHECK_VIOLATION } from "./pg-errors";
 
 type Db = SupabaseClient<Database>;
 type AuthUser = { id: string; email?: string | null };
 
 // Postgres error codes we translate into API errors.
-const UNIQUE_VIOLATION = "23505";
-const CHECK_VIOLATION = "23514";
 
 function toDto(row: Tables<"profiles">, email: string | null): ProfileMe {
   return {

@@ -7,6 +7,7 @@ import { ClubLogo } from "@/components/ui/club-logo";
 import { TextField } from "@/components/ui/field";
 import { clubFieldsSchema } from "@/lib/admin-schema";
 import { ApiClientError, api } from "@/lib/api-client";
+import { fieldErrorsFromIssues } from "@/lib/form-errors";
 import { CLUB_LOGO_ACCEPT, buildClubLogoPath, validateClubLogo } from "@/lib/club-logo";
 import { normalizeClubLogo } from "@/lib/club-logo-normalize";
 import { createClient } from "@/lib/supabase/client";
@@ -77,12 +78,7 @@ export function ClubForm({
 
     const parsed = clubFieldsSchema.safeParse({ name, shortName, logoPath });
     if (!parsed.success) {
-      const next: Errors = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof Errors | undefined;
-        if (key && key !== "logo" && !next[key]) next[key] = issue.message;
-      }
-      setErrors(next);
+      setErrors(fieldErrorsFromIssues<keyof Errors>(parsed.error.issues, ["logo"]));
       setStatus("failed");
       return;
     }
