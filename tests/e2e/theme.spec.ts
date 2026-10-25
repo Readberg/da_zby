@@ -33,6 +33,7 @@ test.describe("themes", () => {
     for (const scheme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: scheme });
       await page.goto("/");
+      await expect(page.locator("h1")).toHaveCount(1);
       const login = page.getByRole("banner").getByRole("link", { name: "Войти" });
       await expect(login).toBeVisible();
       const {
@@ -53,6 +54,7 @@ test.describe("themes", () => {
     for (const scheme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: scheme });
       await page.goto("/");
+      await expect(page.locator("h1")).toHaveCount(1);
       const cta = page.getByRole("link", { name: "Войти через Telegram" });
       await expect(cta).toBeVisible();
       expect(await cta.evaluate((el) => getComputedStyle(el).color)).toBe("rgb(0, 0, 0)");
