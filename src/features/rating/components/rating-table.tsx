@@ -46,8 +46,20 @@ function Trend({ value }: { value: number }) {
 function Place({ row }: { row: RatingRow }) {
   if (row.place === null) return <>—</>;
   return (
-    <span className="whitespace-nowrap">
-      {row.place}
+    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+      <span
+        className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1 ${
+          row.place === 1
+            ? "bg-accent text-black"
+            : row.place === 2
+              ? "bg-line text-ink"
+              : row.place === 3
+                ? "bg-accent/40 text-ink"
+                : ""
+        }`}
+      >
+        {row.place}
+      </span>
       {row.trend ? <Trend value={row.trend} /> : null}
       {row.final && (
         <span className="ml-1 text-xs font-normal text-muted">{ru.publicProfile.stats.final}</span>

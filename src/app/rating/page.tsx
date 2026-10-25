@@ -52,7 +52,7 @@ async function RatingContent({
             <p className="text-sm text-muted">{ru.rating.seasonClosed}</p>
           )}
           {mine && (
-            <p className="rounded-md bg-surface px-4 py-3">
+            <p className="rounded-lg bg-accent/25 px-5 py-4 font-semibold">
               {ru.rating.yourPlace
                 .replace("{place}", String(mine.place ?? "—"))
                 .replace("{points}", points(mine.points))}

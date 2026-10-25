@@ -15,7 +15,7 @@ export function Table({
   ...props
 }: TableHTMLAttributes<HTMLTableElement> & { caption?: ReactNode }) {
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto rounded-lg border border-line p-1 sm:p-3">
       <table className={cx("w-full border-collapse text-sm sm:text-base", className)} {...props}>
         {caption && <caption className="mb-2 text-left text-sm text-muted">{caption}</caption>}
         {children}
@@ -25,7 +25,7 @@ export function Table({
 }
 
 export function THead(props: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className="border-b-2 border-ink" {...props} />;
+  return <thead className="border-b border-line text-muted" {...props} />;
 }
 
 export function TBody(props: HTMLAttributes<HTMLTableSectionElement>) {

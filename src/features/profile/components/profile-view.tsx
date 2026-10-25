@@ -24,7 +24,7 @@ export function ProfileView({
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-wrap items-center gap-4">
+      <header className="flex flex-wrap items-center gap-4 rounded-lg bg-surface p-5 sm:p-6">
         <Avatar src={profile.avatarUrl} name={profile.nickname} size="lg" />
         <div className="flex flex-col gap-1">
           <h1 className="text-h3 normal-case sm:text-h2">{profile.nickname}</h1>

@@ -165,3 +165,19 @@ export function ChevronDownIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function UserIcon(props: IconProps) {
+  return (
+    <svg
+      {...base}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      {...props}
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c1-4 4-6 8-6s7 2 8 6" />
+    </svg>
+  );
+}
