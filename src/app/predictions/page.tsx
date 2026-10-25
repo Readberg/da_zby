@@ -69,7 +69,13 @@ async function PredictionsContent({
               {ru.admin.tours.tourN.replace("{n}", String(tour.number))}
               {tour.title ? ` · ${tour.title}` : ""}
             </h2>
-            <p className="mt-1 text-sm text-muted">
+            <p
+              className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                tour.open && season.status !== "closed"
+                  ? "bg-accent/30 text-ink"
+                  : "bg-surface text-muted"
+              }`}
+            >
               {season.status === "closed"
                 ? ru.predictions.seasonIsClosed
                 : tour.deadlineAt
@@ -80,12 +86,15 @@ async function PredictionsContent({
             </p>
           </div>
           <p className="text-sm">
-            <Link href={`/rating?${query}`} className="underline">
+            <Link
+              href={`/rating?${query}`}
+              className="inline-flex min-h-10 items-center rounded-full bg-surface px-4 font-semibold transition-colors hover:bg-line"
+            >
               {ru.predictions.toRating}
             </Link>
           </p>
           {data.tournament && (
-            <details className="group rounded-md bg-surface px-4 py-3">
+            <details className="group rounded-lg bg-surface px-5 py-4">
               <summary className="cursor-pointer font-semibold">
                 {ru.predictions.rulesTitle}
               </summary>

@@ -18,7 +18,7 @@ export function NavLink({ href, children }: { href: string; children: ReactNode 
       aria-current={active ? "page" : undefined}
       className={cx(
         base,
-        active ? "bg-surface font-semibold text-ink" : "text-ink hover:bg-surface",
+        active ? "bg-accent/30 font-semibold text-ink" : "text-ink hover:bg-surface",
       )}
     >
       {children}

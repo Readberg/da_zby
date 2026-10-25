@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { buttonClasses } from "@/components/ui/button";
+import { UserIcon } from "@/components/ui/icons";
 import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
 
@@ -12,7 +13,8 @@ export async function UserMenu() {
 
   if (!user) {
     return (
-      <Link href="/login" className={buttonClasses("primary")}>
+      <Link href="/login" className={buttonClasses("secondary", "gap-2 px-5")}>
+        <UserIcon className="h-5 w-5" />
         {ru.auth.login}
       </Link>
     );
@@ -25,7 +27,8 @@ export async function UserMenu() {
           {ru.admin.title}
         </Link>
       )}
-      <Link href="/profile" className={itemClass}>
+      <Link href="/profile" className={buttonClasses("secondary", "gap-2 px-5")}>
+        <UserIcon className="h-5 w-5" />
         {ru.auth.profile}
       </Link>
       <form action="/auth/signout" method="post">
