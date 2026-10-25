@@ -1,15 +1,26 @@
 import { expect, test } from "@playwright/test";
 
+// Email sign-in is hidden by default (Google is the main method); these tests run when the app under
+// test was built with NEXT_PUBLIC_EMAIL_AUTH=1.
+const emailAuth = process.env.NEXT_PUBLIC_EMAIL_AUTH === "1";
+
 test.describe("guest and login", () => {
   test("header offers sign-in and it leads to the login form", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("banner").getByRole("link", { name: "Войти" }).click();
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole("heading", { level: 1, name: "Вход" })).toBeVisible();
-    await expect(page.getByLabel("Почта")).toBeVisible();
+  });
+
+  test("login page offers no email field unless email sign-in is switched on", async ({ page }) => {
+    test.skip(emailAuth, "email sign-in is on in this build");
+    await page.goto("/login");
+    await expect(page.getByRole("heading", { level: 1, name: "Вход" })).toBeVisible();
+    await expect(page.getByLabel("Почта")).toHaveCount(0);
   });
 
   test("an invalid email is rejected on the page without sending anything", async ({ page }) => {
+    test.skip(!emailAuth, "email sign-in is off in this build");
     const authRequests: string[] = [];
     page.on("request", (request) => {
       if (request.url().includes("/auth/v1/")) authRequests.push(request.url());
@@ -22,6 +33,7 @@ test.describe("guest and login", () => {
   });
 
   test("login page has no horizontal scroll and a 44px tall submit button", async ({ page }) => {
+    test.skip(!emailAuth, "email sign-in is off in this build");
     await page.goto("/login");
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -41,7 +53,7 @@ test.describe("onboarding", () => {
   test("a guest is sent to login and brought back to onboarding afterwards", async ({ page }) => {
     await page.goto("/onboarding");
     await expect(page).toHaveURL(/\/login\?next=%2Fonboarding$/);
-    await expect(page.getByLabel("Почта")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Вход" })).toBeVisible();
   });
 });
 
@@ -63,7 +75,9 @@ test.describe("auth routes", () => {
   test("a callback without a code sends the guest back with an error message", async ({ page }) => {
     await page.goto("/auth/callback");
     await expect(page).toHaveURL(/\/login\?error=link$/);
-    await expect(page.locator("#login-email-error")).toContainText("Ссылка недействительна");
+    await expect(page.locator("#login-email-error, #login-error")).toContainText(
+      "Ссылка недействительна",
+    );
   });
 
   test("a callback never leaves the site, even with a hostile next parameter", async ({ page }) => {

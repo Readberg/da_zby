@@ -36,7 +36,9 @@ export const ru = {
   },
   auth: {
     loginTitle: "Вход",
-    loginIntro: "Введите почту — пришлём ссылку для входа. Пароль не нужен.",
+    loginIntro: "Войдите через Google — отдельный пароль не нужен.",
+    loginIntroEmail: "Введите почту — пришлём ссылку для входа. Пароль не нужен.",
+    unavailable: "Вход временно недоступен. Загляните позже.",
     emailLabel: "Почта",
     emailPlaceholder: "name@example.com",
     send: "Получить ссылку",

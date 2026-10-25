@@ -1,14 +1,22 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const signInWithOtp = vi.fn();
-vi.mock("@/lib/supabase/client", () => ({ createClient: () => ({ auth: { signInWithOtp } }) }));
+const signInWithOAuth = vi.fn();
+vi.mock("@/lib/supabase/client", () => ({
+  createClient: () => ({ auth: { signInWithOtp, signInWithOAuth } }),
+}));
 
 const { LoginForm } = await import("./login-form");
 
-describe("LoginForm", () => {
-  beforeEach(() => signInWithOtp.mockReset().mockResolvedValue({ error: null }));
+afterEach(() => vi.unstubAllEnvs());
+
+describe("LoginForm — email link", () => {
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_EMAIL_AUTH", "1");
+    signInWithOtp.mockReset().mockResolvedValue({ error: null });
+  });
 
   it("does not call Supabase for an invalid email", async () => {
     render(<LoginForm next="/" />);
@@ -54,27 +62,48 @@ describe("LoginForm", () => {
   });
 });
 
-describe("LoginForm — Google", () => {
-  beforeEach(() => vi.resetModules());
+describe("LoginForm — Google first", () => {
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_AUTH", "1");
+    vi.stubEnv("NEXT_PUBLIC_EMAIL_AUTH", "");
+    signInWithOAuth.mockReset().mockResolvedValue({ error: null });
+  });
 
-  it("hides the Google button unless the flag is on", () => {
+  it("shows only the Google button when email sign-in is off", () => {
     render(<LoginForm next="/" />);
-    expect(screen.queryByRole("button", { name: "Войти через Google" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Войти через Google" })).toBeVisible();
+    expect(screen.queryByLabelText("Почта")).not.toBeInTheDocument();
   });
 
   it("starts Google sign-in that returns through /auth/callback", async () => {
-    vi.stubEnv("NEXT_PUBLIC_GOOGLE_AUTH", "1");
-    const signInWithOAuth = vi.fn().mockResolvedValue({ error: null });
-    vi.doMock("@/lib/supabase/client", () => ({
-      createClient: () => ({ auth: { signInWithOtp, signInWithOAuth } }),
-    }));
-    const { LoginForm: Enabled } = await import("./login-form");
-    render(<Enabled next="/profile" />);
+    render(<LoginForm next="/profile" />);
     await userEvent.click(screen.getByRole("button", { name: "Войти через Google" }));
-
     const arg = signInWithOAuth.mock.calls[0]![0];
     expect(arg.provider).toBe("google");
     expect(arg.options.redirectTo).toMatch(/\/auth\/callback\?next=%2Fprofile$/);
-    vi.unstubAllEnvs();
+  });
+
+  it("reports a failed start and shows a failed link without an email field", async () => {
+    signInWithOAuth.mockResolvedValue({ error: { message: "x" } });
+    render(<LoginForm next="/" linkError />);
+    expect(screen.getByRole("alert")).toHaveTextContent("Ссылка недействительна");
+    await userEvent.click(screen.getByRole("button", { name: "Войти через Google" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Не удалось отправить письмо");
+  });
+
+  it("offers both methods when email is switched on too", () => {
+    vi.stubEnv("NEXT_PUBLIC_EMAIL_AUTH", "1");
+    render(<LoginForm next="/" />);
+    expect(screen.getByRole("button", { name: "Войти через Google" })).toBeVisible();
+    expect(screen.getByLabelText("Почта")).toBeVisible();
+  });
+});
+
+describe("LoginForm — no method configured", () => {
+  it("says sign-in is unavailable instead of showing an empty page", () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_AUTH", "");
+    vi.stubEnv("NEXT_PUBLIC_EMAIL_AUTH", "");
+    render(<LoginForm next="/" />);
+    expect(screen.getByText("Вход временно недоступен. Загляните позже.")).toBeVisible();
   });
 });
