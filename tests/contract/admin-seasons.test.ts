@@ -15,6 +15,8 @@ import {
 import { ApiError } from "@/server/api/v1/problem";
 import { apiRequest, expectProblem } from "./helpers";
 
+import { invalidateRating } from "@/server/cache";
+
 const createClient = vi.fn();
 const seasons = {
   listSeasons: vi.fn(),
@@ -293,5 +295,29 @@ describe("request handling", () => {
       fn.mockRejectedValue(error);
     }
     await expectProblem(await run(), 409, code);
+  });
+});
+
+describe("rating cache", () => {
+  it("is cleared after a result is entered, a season closed or a tour created", async () => {
+    client("admin");
+    vi.mocked(invalidateRating).mockClear();
+    for (const index of [12, 4, 7]) await operations[index]![1]();
+    expect(invalidateRating).toHaveBeenCalledTimes(3);
+  });
+
+  it("is left alone for reads and for rejected requests", async () => {
+    vi.mocked(invalidateRating).mockClear();
+    client("admin");
+    await operations[0]![1]();
+    await operations[10]![1]();
+    client("user");
+    await operations[12]![1]();
+    client("admin");
+    matches.updateMatch.mockRejectedValue(
+      new ApiError(409, "admin.season_closed", "Conflict", "x"),
+    );
+    await operations[12]![1]();
+    expect(invalidateRating).not.toHaveBeenCalled();
   });
 });

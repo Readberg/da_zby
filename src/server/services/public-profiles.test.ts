@@ -24,6 +24,7 @@ function fakeDb(data: Record<string, unknown> | null, error: unknown = null) {
 }
 
 const row = {
+  id: "u1",
   nickname: "Readberg",
   full_name: "Роман",
   contact: "@readberg",
@@ -40,6 +41,7 @@ describe("getPublicProfile", () => {
     const { db } = fakeDb(row);
     const profile = await getPublicProfile(db, "Readberg");
     expect(profile).toEqual({
+      id: "u1",
       nickname: "Readberg",
       fullName: "Роман",
       contact: "@readberg",

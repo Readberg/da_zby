@@ -3,6 +3,7 @@ import { avatarUrl } from "@/lib/avatar";
 import type { Database } from "@/types/database";
 
 export type PublicProfile = {
+  id: string;
   nickname: string;
   fullName: string | null;
   contact: string | null;
@@ -25,7 +26,7 @@ export async function getPublicProfile(
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "nickname, full_name, contact, about, avatar_path, country_code, city, created_at, last_login_at",
+      "id, nickname, full_name, contact, about, avatar_path, country_code, city, created_at, last_login_at",
     )
     // citext column: equality ignores case.
     .eq("nickname", nickname)
@@ -35,6 +36,7 @@ export async function getPublicProfile(
   if (!data || !data.nickname) return null;
 
   return {
+    id: data.id,
     nickname: data.nickname,
     fullName: data.full_name,
     contact: data.contact,
