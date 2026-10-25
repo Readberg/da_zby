@@ -8,8 +8,8 @@ const base =
   "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-base font-semibold transition-[color,background-color,transform,opacity,box-shadow] duration-200 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
 const variants: Record<ButtonVariant, string> = {
-  primary: "bg-accent text-ink hover:brightness-95 hover:shadow-soft",
-  secondary: "bg-ink text-white hover:bg-ink/85",
+  primary: "bg-accent text-black hover:brightness-95 hover:shadow-soft",
+  secondary: "bg-ink text-bg hover:bg-ink/85",
   text: "rounded-sm px-1 text-ink underline underline-offset-4 hover:decoration-2",
 };
 

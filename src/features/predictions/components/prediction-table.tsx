@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { ResultBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ClubLogo } from "@/components/ui/club-logo";
 import { Input } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { formatDateTime } from "@/lib/local-time";
@@ -19,17 +19,7 @@ function ClubName({ club, align }: { club: PageClub; align: "left" | "right" }) 
     <span
       className={`flex min-w-0 items-center gap-2 ${align === "right" ? "flex-row-reverse text-right" : ""}`}
     >
-      {club.logoUrl ? (
-        <Image
-          src={club.logoUrl}
-          alt=""
-          width={28}
-          height={28}
-          className="h-7 w-7 shrink-0 object-contain"
-        />
-      ) : (
-        <span aria-hidden="true" className="h-7 w-7 shrink-0 rounded-full bg-surface" />
-      )}
+      <ClubLogo src={club.logoUrl} name={club.name} size={32} />
       <span className="truncate font-semibold">{club.name}</span>
     </span>
   );

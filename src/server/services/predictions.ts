@@ -36,7 +36,13 @@ export type MatchView = {
 
 export type PredictionsPageData = {
   tournaments: { id: string; slug: string; name: string }[];
-  tournament: { id: string; slug: string; name: string } | null;
+  tournament: {
+    id: string;
+    slug: string;
+    name: string;
+    pointsExact: number;
+    pointsOutcome: number;
+  } | null;
   seasons: { id: string; name: string; status: "active" | "closed" }[];
   season: { id: string; name: string; status: "active" | "closed" } | null;
   tours: { number: number; title: string | null; deadlineAt: string | null }[];
@@ -52,19 +58,51 @@ export type PredictionsPageData = {
 
 const UNKNOWN_CLUB: PageClub = { id: "", name: "?", logoUrl: null };
 
+type SeasonRef = { id: string; name: string; status: "active" | "closed" };
+type TournamentRef = {
+  id: string;
+  slug: string;
+  name: string;
+  pointsExact: number;
+  pointsOutcome: number;
+};
+
+/** Match as everybody sees it: no visitor-specific data, no clock-dependent flags. */
+export type PublicMatch = {
+  id: string;
+  tourId: string;
+  kickoffAt: string;
+  status: MatchView["status"];
+  home: PageClub;
+  away: PageClub;
+  homeScore: number | null;
+  awayScore: number | null;
+};
+
 /**
- * Everything the predictions page shows, in two rounds of queries: the catalogue first, then the
- * tours, matches and the visitor's predictions of the chosen season. All of it is readable by
- * guests (RLS), predictions only for the signed-in visitor.
+ * Public part of the predictions page: the catalogue and every tour and match of the chosen
+ * season. It is the same for all visitors and does not depend on the current time, so it can be
+ * cached; the visitor's own predictions and the deadline checks are added by `composePredictionsPage`.
  */
-export async function getPredictionsPage(
+export type PredictionsPublic = {
+  tournaments: TournamentRef[];
+  tournament: TournamentRef | null;
+  seasons: SeasonRef[];
+  season: SeasonRef | null;
+  tours: { id: string; number: number; title: string | null; deadlineOverride: string | null }[];
+  matches: PublicMatch[];
+};
+
+export async function getPredictionsPublic(
   db: Db,
-  userId: string | null,
-  choice: { tournament?: string; season?: string; tour?: number },
-  now: Date = new Date(),
-): Promise<PredictionsPageData> {
+  choice: { tournament?: string; season?: string },
+): Promise<PredictionsPublic> {
   const [tournamentsResult, seasonsResult, clubsResult] = await Promise.all([
-    db.from("tournaments").select("id, slug, name").eq("is_active", true).order("created_at"),
+    db
+      .from("tournaments")
+      .select("id, slug, name, points_exact, points_outcome")
+      .eq("is_active", true)
+      .order("created_at"),
     db.from("seasons").select("id, name, status, tournament_id, created_at"),
     db.from("clubs").select("id, name, logo_path"),
   ]);
@@ -72,30 +110,31 @@ export async function getPredictionsPage(
     if (result.error) throw result.error;
   }
 
-  const tournaments = tournamentsResult.data ?? [];
+  const tournaments: TournamentRef[] = (tournamentsResult.data ?? []).map((t) => ({
+    id: t.id,
+    slug: t.slug,
+    name: t.name,
+    pointsExact: t.points_exact,
+    pointsOutcome: t.points_outcome,
+  }));
   const tournament =
     tournaments.find((t) => t.slug === choice.tournament) ?? tournaments[0] ?? null;
 
-  const seasons = (seasonsResult.data ?? [])
+  const seasons: SeasonRef[] = (seasonsResult.data ?? [])
     .filter((s) => s.tournament_id === tournament?.id)
     .sort((a, b) => {
       if (a.status !== b.status) return a.status === "active" ? -1 : 1;
       return b.created_at.localeCompare(a.created_at);
     })
-    .map((s) => ({
-      id: s.id,
-      name: s.name,
-      status: (s.status === "closed" ? "closed" : "active") as "active" | "closed",
-    }));
+    .map((s) => ({ id: s.id, name: s.name, status: s.status === "closed" ? "closed" : "active" }));
   const season = seasons.find((s) => s.id === choice.season) ?? seasons[0] ?? null;
 
-  const empty: PredictionsPageData = {
+  const empty: PredictionsPublic = {
     tournaments,
     tournament,
     seasons,
     season,
     tours: [],
-    tour: null,
     matches: [],
   };
   if (!season) return empty;
@@ -107,81 +146,105 @@ export async function getPredictionsPage(
     ]),
   );
 
-  const [toursResult, matchesResult, predictionsResult] = await Promise.all([
+  const [toursResult, matchesResult] = await Promise.all([
     db.from("tours").select("*").eq("season_id", season.id).order("number"),
     db
       .from("matches")
       .select("*, tours!inner(season_id)")
       .eq("tours.season_id", season.id)
       .order("kickoff_at"),
-    userId
-      ? db
-          .from("predictions")
-          .select(
-            "match_id, home_score, away_score, result, points, matches!inner(tours!inner(season_id))",
-          )
-          .eq("user_id", userId)
-          .eq("matches.tours.season_id", season.id)
-      : Promise.resolve({ data: [], error: null }),
   ]);
-  for (const result of [toursResult, matchesResult, predictionsResult]) {
-    if (result.error) throw result.error;
-  }
+  for (const result of [toursResult, matchesResult]) if (result.error) throw result.error;
 
-  const matchRows = matchesResult.data ?? [];
-  const tourRows = toursResult.data ?? [];
-  const tours = tourRows.map((t) => ({
-    id: t.id,
-    number: t.number,
-    title: t.title,
+  return {
+    ...empty,
+    tours: (toursResult.data ?? []).map((t) => ({
+      id: t.id,
+      number: t.number,
+      title: t.title,
+      deadlineOverride: t.deadline_override ? new Date(t.deadline_override).toISOString() : null,
+    })),
+    matches: (matchesResult.data ?? []).map((m) => ({
+      id: m.id,
+      tourId: m.tour_id,
+      kickoffAt: new Date(m.kickoff_at).toISOString(),
+      status: m.status as MatchView["status"],
+      home: clubs.get(m.home_club_id) ?? UNKNOWN_CLUB,
+      away: clubs.get(m.away_club_id) ?? UNKNOWN_CLUB,
+      homeScore: m.home_score,
+      awayScore: m.away_score,
+    })),
+  };
+}
+
+/** The visitor's own predictions for a season by match id: always read live, never cached. */
+export async function getMyPredictions(
+  db: Db,
+  userId: string,
+  seasonId: string,
+): Promise<Record<string, PredictionView>> {
+  const { data, error } = await db
+    .from("predictions")
+    .select(
+      "match_id, home_score, away_score, result, points, matches!inner(tours!inner(season_id))",
+    )
+    .eq("user_id", userId)
+    .eq("matches.tours.season_id", seasonId);
+  if (error) throw error;
+  return Object.fromEntries(
+    (data ?? []).map((p) => [
+      p.match_id,
+      {
+        homeScore: p.home_score,
+        awayScore: p.away_score,
+        result: (p.result as PredictionView["result"]) ?? null,
+        points: p.points,
+      },
+    ]),
+  );
+}
+
+/** Puts the clock and the visitor's predictions on top of the public data. */
+export function composePredictionsPage(
+  pub: PredictionsPublic,
+  mine: Record<string, PredictionView>,
+  tourNumber: number | undefined,
+  now: Date = new Date(),
+): PredictionsPageData {
+  const { season } = pub;
+  const base: PredictionsPageData = {
+    tournaments: pub.tournaments,
+    tournament: pub.tournament,
+    seasons: pub.seasons,
+    season,
+    tours: [],
+    tour: null,
+    matches: [],
+  };
+  if (!season) return base;
+
+  const tours = pub.tours.map((t) => ({
+    ...t,
     deadline: tourDeadline(
-      t.deadline_override,
-      matchRows
-        .filter((m) => m.tour_id === t.id)
-        .map((m) => ({ kickoffAt: m.kickoff_at, status: m.status })),
+      t.deadlineOverride,
+      pub.matches
+        .filter((m) => m.tourId === t.id)
+        .map((m) => ({ kickoffAt: m.kickoffAt, status: m.status })),
     ),
   }));
-
-  const wanted =
-    choice.tour !== undefined ? tours.find((t) => t.number === choice.tour) : undefined;
-  const current = wanted ?? pickCurrentTour(tours, now);
   const toursView = tours.map((t) => ({
     number: t.number,
     title: t.title,
     deadlineAt: t.deadline ? t.deadline.toISOString() : null,
   }));
-  if (!current) return { ...empty, tours: toursView };
+
+  const wanted = tourNumber !== undefined ? tours.find((t) => t.number === tourNumber) : undefined;
+  const current = wanted ?? pickCurrentTour(tours, now);
+  if (!current) return { ...base, tours: toursView };
 
   const open = isTourOpen(season.status, current.deadline, now);
-  const predictions = new Map((predictionsResult.data ?? []).map((p) => [p.match_id, p] as const));
-
-  const matches: MatchView[] = matchRows
-    .filter((m) => m.tour_id === current.id)
-    .map((m) => {
-      const mine = predictions.get(m.id);
-      const status = m.status as MatchView["status"];
-      return {
-        id: m.id,
-        kickoffAt: new Date(m.kickoff_at).toISOString(),
-        status,
-        home: clubs.get(m.home_club_id) ?? UNKNOWN_CLUB,
-        away: clubs.get(m.away_club_id) ?? UNKNOWN_CLUB,
-        homeScore: m.home_score,
-        awayScore: m.away_score,
-        prediction: mine
-          ? {
-              homeScore: mine.home_score,
-              awayScore: mine.away_score,
-              result: (mine.result as PredictionView["result"]) ?? null,
-              points: mine.points,
-            }
-          : null,
-        editable: open && isMatchOpen(status),
-      };
-    });
-
   return {
-    ...empty,
+    ...base,
     tours: toursView,
     tour: {
       id: current.id,
@@ -190,8 +253,32 @@ export async function getPredictionsPage(
       deadlineAt: current.deadline ? current.deadline.toISOString() : null,
       open,
     },
-    matches,
+    matches: pub.matches
+      .filter((m) => m.tourId === current.id)
+      .map((m) => ({
+        id: m.id,
+        kickoffAt: m.kickoffAt,
+        status: m.status,
+        home: m.home,
+        away: m.away,
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+        prediction: mine[m.id] ?? null,
+        editable: open && isMatchOpen(m.status),
+      })),
   };
+}
+
+/** Everything the predictions page shows in one call (no caching): used by tests and scripts. */
+export async function getPredictionsPage(
+  db: Db,
+  userId: string | null,
+  choice: { tournament?: string; season?: string; tour?: number },
+  now: Date = new Date(),
+): Promise<PredictionsPageData> {
+  const pub = await getPredictionsPublic(db, choice);
+  const mine = userId && pub.season ? await getMyPredictions(db, userId, pub.season.id) : {};
+  return composePredictionsPage(pub, mine, choice.tour, now);
 }
 
 function closed() {

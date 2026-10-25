@@ -1,6 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { getPredictionsPage, savePredictions } from "./predictions";
+import {
+  composePredictionsPage,
+  getMyPredictions,
+  getPredictionsPage,
+  getPredictionsPublic,
+  savePredictions,
+} from "./predictions";
 import { fakeDb } from "./fake-db";
 
 const USER = "99999999-9999-4999-8999-999999999999";
@@ -15,7 +21,17 @@ const B = "33333333-3333-4333-8333-333333333332";
 const NOW = new Date("2026-10-30T00:00:00Z");
 
 const catalogue = () => ({
-  tournaments: { data: [{ id: TOURNAMENT, slug: "vysshaya-liga", name: "Высшая лига" }] },
+  tournaments: {
+    data: [
+      {
+        id: TOURNAMENT,
+        slug: "vysshaya-liga",
+        name: "Высшая лига",
+        points_exact: 3,
+        points_outcome: 1,
+      },
+    ],
+  },
   seasons: {
     data: [
       {
@@ -225,5 +241,72 @@ describe("savePredictions", () => {
       predictions: { data: [], writeError: { code: "XX000", message: "boom" } },
     });
     await expect(savePredictions(db, USER, body)).rejects.toMatchObject({ message: "boom" });
+  });
+});
+
+describe("public part and live part", () => {
+  const tables = () =>
+    ({
+      ...catalogue(),
+      tours,
+      matches: {
+        data: [match(M1, T1, "2026-10-01T15:00:00Z"), match(M2, T2, "2026-11-05T15:00:00Z")],
+      },
+    }) as Parameters<typeof fakeDb>[0];
+
+  it("the public data has no clock-dependent or visitor-specific fields", async () => {
+    const { db } = fakeDb(tables());
+    const pub = await getPredictionsPublic(db, {});
+    expect(pub.tournament).toMatchObject({
+      slug: "vysshaya-liga",
+      pointsExact: 3,
+      pointsOutcome: 1,
+    });
+    expect(pub.tours.map((t) => t.number)).toEqual([1, 2]);
+    expect(pub.matches).toHaveLength(2);
+    expect(JSON.stringify(pub)).not.toContain("editable");
+    expect(JSON.stringify(pub)).not.toContain("prediction");
+  });
+
+  it("the same cached data gives different pages for different moments and visitors", async () => {
+    const { db } = fakeDb(tables());
+    const pub = await getPredictionsPublic(db, {});
+
+    const early = composePredictionsPage(pub, {}, undefined, new Date("2026-10-30T00:00:00Z"));
+    expect(early.tour).toMatchObject({ number: 2, open: true });
+    expect(early.matches[0]!.editable).toBe(true);
+
+    const late = composePredictionsPage(pub, {}, undefined, new Date("2026-11-06T00:00:00Z"));
+    expect(late.tour).toMatchObject({ number: 2, open: false });
+    expect(late.matches[0]!.editable).toBe(false);
+
+    const mine = { [M2]: { homeScore: 1, awayScore: 0, result: null, points: null } };
+    const withMine = composePredictionsPage(pub, mine, 2, new Date("2026-10-30T00:00:00Z"));
+    expect(withMine.matches[0]!.prediction).toEqual(mine[M2]);
+
+    const other = composePredictionsPage(pub, {}, 1, new Date("2026-10-30T00:00:00Z"));
+    expect(other.tour?.number).toBe(1);
+    expect(other.matches[0]!.prediction).toBeNull();
+  });
+
+  it("reads the visitor's predictions by match id", async () => {
+    const { db } = fakeDb({
+      predictions: {
+        data: [{ match_id: M1, home_score: 2, away_score: 2, result: "outcome", points: 1 }],
+      },
+    });
+    expect(await getMyPredictions(db, USER, SEASON)).toEqual({
+      [M1]: { homeScore: 2, awayScore: 2, result: "outcome", points: 1 },
+    });
+  });
+
+  it("composes an empty page when there is no season", async () => {
+    const empty = fakeDb({ tournaments: { data: [] }, seasons: { data: [] }, clubs: { data: [] } });
+    const pub = await getPredictionsPublic(empty.db, {});
+    expect(composePredictionsPage(pub, {}, undefined)).toMatchObject({
+      season: null,
+      tour: null,
+      matches: [],
+    });
   });
 });

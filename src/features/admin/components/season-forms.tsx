@@ -7,14 +7,17 @@ import { SelectField, TextField } from "@/components/ui/field";
 import { seasonCreateSchema } from "@/lib/admin-season-schema";
 import { ApiClientError, api } from "@/lib/api-client";
 import { ru } from "@/messages/ru";
+import type { SeasonSummary } from "@/server/api/v1/schemas/admin-season";
 
 /** New season: tournament, name and, optionally, the roster copied from an earlier season. */
 export function SeasonCreateForm({
   tournaments,
   seasons,
+  onCreated,
 }: {
   tournaments: { id: string; name: string }[];
   seasons: { id: string; name: string; tournamentName: string }[];
+  onCreated?: (season: SeasonSummary) => void;
 }) {
   const router = useRouter();
   const [tournamentId, setTournamentId] = useState(tournaments[0]?.id ?? "");
@@ -48,7 +51,11 @@ export function SeasonCreateForm({
     setErrors({});
     setBusy(true);
     try {
-      await api("/admin/seasons", { method: "POST", json: parsed.data });
+      const created = await api<SeasonSummary>("/admin/seasons", {
+        method: "POST",
+        json: parsed.data,
+      });
+      onCreated?.(created);
       setName("");
       setCopyFrom("");
       router.refresh();

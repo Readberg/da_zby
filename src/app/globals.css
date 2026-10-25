@@ -6,6 +6,7 @@
  * never raw colours or fonts.
  */
 :root {
+  color-scheme: light;
   --color-bg: #ffffff;
   --color-ink: #000000;
   --color-accent: #fede06;
@@ -25,10 +26,42 @@
   --container-max: 1200px;
 }
 
+/*
+ * Dark theme (D-057): the same tokens with dark values. It applies when the visitor chose it
+ * (data-theme="dark") or, without a choice, when the system prefers dark. The accent stays yellow;
+ * text on it is always black (text-black), text on the inverse surface is text-bg.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #0e0e10;
+    --color-ink: #f2f2f3;
+    --color-muted: #9a9aa2;
+    --color-line: #2e2e33;
+    --color-surface: #19191c;
+    --color-success: #3ecf70;
+    --color-danger: #ff6b6b;
+    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.45);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0e0e10;
+  --color-ink: #f2f2f3;
+  --color-muted: #9a9aa2;
+  --color-line: #2e2e33;
+  --color-surface: #19191c;
+  --color-success: #3ecf70;
+  --color-danger: #ff6b6b;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.45);
+}
+
 @theme inline {
   /* Only our palette exists: Tailwind's default colours are switched off on purpose. */
   --color-*: initial;
   --color-white: #ffffff;
+  --color-black: #000000;
   --color-transparent: transparent;
   --color-current: currentColor;
   --color-bg: var(--color-bg);
@@ -158,5 +191,24 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Theme toggle: the icon shows the theme a click switches to. */
+.theme-sun {
+  display: none;
+}
+:root[data-theme="dark"] .theme-sun {
+  display: inline;
+}
+:root[data-theme="dark"] .theme-moon {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-sun {
+    display: inline;
+  }
+  :root:not([data-theme="light"]) .theme-moon {
+    display: none;
   }
 }
