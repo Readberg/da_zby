@@ -1,7 +1,7 @@
 // One-off move of the catalogue (tournaments, clubs, seasons, tours, matches, club logos) between
 // Supabase projects when the region changes (D-062). Users and predictions are not copied.
 //   pnpm db:copy-catalog dump      project in .env.local  →  .catalog-dump/ (gitignored)
-//   pnpm db:copy-catalog restore   .catalog-dump/         →  project in .env.new.local
+//   pnpm db:copy-catalog restore   .catalog-dump/         →  project in .env.local
 // Keys are read from the env files (never from the command line); the secret key bypasses RLS.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -70,7 +70,7 @@ async function dump() {
 }
 
 async function restore() {
-  const to = project(".env.new.local");
+  const to = project(".env.local");
   for (const table of TABLES) {
     const rows: Row[] = JSON.parse(readFileSync(join(DUMP, `${table}.json`), "utf8"));
     if (table === "clubs") {

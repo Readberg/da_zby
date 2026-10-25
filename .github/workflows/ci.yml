@@ -18,8 +18,8 @@ jobs:
       CI: "true"
       NEXT_TELEMETRY_DISABLED: "1"
       # Public (non-secret) values of the dev Supabase project, same as .env.example.
-      NEXT_PUBLIC_SUPABASE_URL: https://lrybmorjxxbogbmmpddj.supabase.co
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_GgweOwuWyidSPX_uWXpcvQ_uJgnxI0K
+      NEXT_PUBLIC_SUPABASE_URL: https://ksykaqwkbfqtkvdxqedv.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_DjwCcM9QbGFZWXtLh97Zdg_NwCrJwpU
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       YOUTUBE_CHANNEL_ID: UCsfcA6cY0bSL781TE3XMEPA
     steps:
