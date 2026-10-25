@@ -20,6 +20,7 @@ export const ERROR_CODES = {
   inUse: "admin.in_use",
   seasonClosed: "admin.season_closed",
   seasonState: "admin.season_state",
+  predictionsClosed: "predictions.closed",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});

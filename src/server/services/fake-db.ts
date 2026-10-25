@@ -5,6 +5,10 @@ type TableScript = {
   data?: unknown[];
   count?: number;
   error?: { code?: string; message: string } | null;
+  /** Rows returned by insert / update / delete chains (defaults to `data`). */
+  writeData?: unknown[];
+  /** Error of insert / update / delete chains only; plain reads still succeed. */
+  writeError?: { code?: string; message: string } | null;
 };
 
 /**
@@ -20,6 +24,7 @@ export function fakeDb(
   function chainFor(table: string) {
     const script = tables[table] ?? {};
     let single = false;
+    let write = false;
     const log = (method: string, args: unknown[]) => {
       (calls[table] ??= []).push({ method, args });
     };
@@ -37,6 +42,7 @@ export function fakeDb(
     ]) {
       chain[method] = (...args: unknown[]) => {
         log(method, args);
+        if (method === "insert" || method === "update" || method === "delete") write = true;
         return chain;
       };
     }
@@ -48,11 +54,11 @@ export function fakeDb(
       };
     }
     chain.then = (resolve: (value: unknown) => unknown) => {
-      const rows = script.data ?? [];
+      const rows = (write ? (script.writeData ?? script.data) : script.data) ?? [];
       return Promise.resolve({
         data: single ? (rows[0] ?? null) : rows,
         count: script.count ?? rows.length,
-        error: script.error ?? null,
+        error: (write ? script.writeError : null) ?? script.error ?? null,
       }).then(resolve);
     };
     return chain;

@@ -6,6 +6,7 @@ import {
   nicknameAvailabilitySchema,
   profileMeSchema,
 } from "./schemas/profile";
+import { predictionsSaveBodySchema, predictionsSavedSchema } from "./schemas/predictions";
 import {
   deleteBodySchema,
   deletedSchema,
@@ -118,6 +119,19 @@ export const endpoints = {
     output: nicknameAvailabilitySchema,
     cacheControl: "no-store",
     errors: [422],
+  }),
+  predictionsSave: defineEndpoint({
+    method: "put",
+    path: "/predictions",
+    summary: "Save the caller's predictions for matches of one tour",
+    description:
+      "New predictions are inserted, existing ones changed. Allowed while the season is active, the match is not played or cancelled and the tour deadline has not passed (the database enforces it): otherwise 409 predictions.closed. A match outside the tour is 422. Scores are whole numbers 0–99.",
+    tags: ["predictions"],
+    auth: "user",
+    body: predictionsSaveBodySchema,
+    output: predictionsSavedSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 409, 422],
   }),
   adminUsersList: defineEndpoint({
     method: "get",
