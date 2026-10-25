@@ -42,8 +42,12 @@ export const ru = {
     logout: "Выйти",
     profile: "Профиль",
     userMenu: "Меню пользователя",
+    telegram: "Войти через Telegram",
+    waiting: "Ждём подтверждения…",
     errors: {
       telegram: "Не удалось войти через Telegram. Попробуйте ещё раз.",
+      telegramScript:
+        "Не удалось открыть окно Telegram. Проверьте соединение и попробуйте ещё раз.",
     },
   },
   avatar: {

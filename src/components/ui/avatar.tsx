@@ -16,7 +16,7 @@ export function Avatar({
   className?: string;
 }) {
   const px = sizes[size];
-  const box = cx("shrink-0 overflow-hidden rounded-full border-2 border-ink", className);
+  const box = cx("shrink-0 overflow-hidden rounded-full ring-1 ring-line", className);
 
   if (src) {
     return (

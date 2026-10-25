@@ -8,13 +8,13 @@ import type {
 import { cx } from "@/lib/cx";
 
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cx("block text-sm font-semibold text-ink", className)} {...props} />;
+  return <label className={cx("block text-sm font-medium text-ink", className)} {...props} />;
 }
 
 const controlBase =
-  "w-full rounded-sm border-2 bg-bg px-3 text-base text-ink placeholder:text-muted focus-visible:border-ink disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted";
+  "w-full rounded-md border bg-bg px-4 text-base text-ink placeholder:text-muted hover:border-muted focus-visible:border-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/60 disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted";
 
-const controlBorder = (invalid?: boolean) => (invalid ? "border-danger" : "border-ink");
+const controlBorder = (invalid?: boolean) => (invalid ? "border-danger" : "border-line");
 
 export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   invalid?: boolean;
