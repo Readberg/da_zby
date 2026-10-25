@@ -9,6 +9,11 @@ export const siteConfig = {
     { id: "tiktok", url: "https://www.tiktok.com/@da_zby" },
     { id: "threads", url: "https://www.threads.com/@da_zby" },
   ],
+  /** Umami Cloud (D-064): page views without cookies. The id is public; it counts only on the site's own domain. */
+  analytics: {
+    scriptUrl: "https://cloud.umami.is/script.js",
+    websiteId: "8db86c05-ed7a-4581-ae16-6194582ad3dc",
+  },
   /** Header navigation: only pages that already exist. */
   nav: [
     { id: "home", href: "/" },

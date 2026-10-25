@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Suspense } from "react";
+import { siteConfig } from "@/config/site";
 import { publicEnv } from "@/lib/env";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -54,6 +56,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         <main className="flex flex-1 flex-col">{children}</main>
         <SiteFooter />
+        {siteConfig.analytics.websiteId && (
+          <Script
+            defer
+            src={siteConfig.analytics.scriptUrl}
+            data-website-id={siteConfig.analytics.websiteId}
+            data-domains={new URL(publicEnv.NEXT_PUBLIC_SITE_URL).hostname}
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );
