@@ -5,6 +5,8 @@ import { siteConfig } from "@/config/site";
 import { publicEnv } from "@/lib/env";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteLoader } from "@/components/layout/site-loader";
+import { HydrationMark } from "@/features/home/components/home-fallback";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ru } from "@/messages/ru";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -50,6 +52,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col bg-bg text-ink">
+        <SiteLoader />
+        <HydrationMark />
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>

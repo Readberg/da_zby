@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { buttonClasses } from "@/components/ui/button";
 import { ClubLogo } from "@/components/ui/club-logo";
+import { Container } from "@/components/ui/container";
 import {
   ArrowRightIcon,
   BarsIcon,
@@ -136,7 +137,7 @@ function Community() {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex min-h-14 items-center gap-3 rounded-md bg-surface px-4 py-3 shadow-soft transition-transform duration-200 hover:-translate-y-0.5"
+              className="flex min-h-14 items-center gap-3 rounded-md bg-surface px-4 py-3 shadow-soft transition-shadow duration-200 hover:ring-2 hover:ring-accent"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white">
                 {socialIcons[link.id]({ className: "h-5 w-5" })}
@@ -327,7 +328,7 @@ function Faq() {
 /** Landing for guests: the promise, the next matches, how it works, videos and questions. */
 export function GuestLanding({ videos }: { videos: ReactNode }) {
   return (
-    <div className="mx-auto flex w-full max-w-site flex-col gap-14 px-4 py-6 sm:gap-20 sm:px-6 sm:py-10">
+    <Container className="flex flex-col gap-14 py-6 sm:gap-20 sm:py-10">
       <Hero />
       <div className="grid gap-6 lg:grid-cols-[1fr_17rem] lg:items-start">
         <Suspense fallback={<Skeleton className="h-80 w-full rounded-lg" />}>
@@ -338,6 +339,6 @@ export function GuestLanding({ videos }: { videos: ReactNode }) {
       <Panels />
       {videos}
       <Faq />
-    </div>
+    </Container>
   );
 }

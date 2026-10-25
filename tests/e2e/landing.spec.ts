@@ -50,6 +50,12 @@ test.describe("landing (guest)", () => {
     await expect(page.getByText(/Это сайт канала/)).toBeHidden();
   });
 
+  test("the first-visit cover lifts once the page has loaded", async ({ page }) => {
+    await openHome(page);
+    await expect(page.locator("html")).toHaveAttribute("data-ready", "");
+    await expect(page.locator("#site-loader")).toBeHidden();
+  });
+
   test("fits the screen and the action is reachable without scrolling far", async ({ page }) => {
     await openHome(page);
     const overflow = await page.evaluate(

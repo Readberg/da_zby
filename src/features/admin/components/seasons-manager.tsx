@@ -38,7 +38,7 @@ export function SeasonsManager({
           {list.items.map((season) => (
             <li key={season.id} className={list.isNew(season.id) ? "animate-page-in" : undefined}>
               <Link href={`/admin/seasons/${season.id}`} className="group block">
-                <Card as="article" className="h-full transition-shadow group-hover:shadow-soft">
+                <Card as="article" interactive className="h-full">
                   <p className="text-sm text-muted">{season.tournamentName}</p>
                   <h2 className="text-lg normal-case">{season.name}</h2>
                   <p className="mt-2 text-sm text-muted">

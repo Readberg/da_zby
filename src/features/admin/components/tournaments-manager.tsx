@@ -24,7 +24,7 @@ export function TournamentsManager({ initial }: { initial: Tournament[] }) {
               key={tournament.id}
               className={list.isNew(tournament.id) ? "animate-page-in" : undefined}
             >
-              <Card as="article" title={tournament.name}>
+              <Card as="article" interactive title={tournament.name}>
                 <p className="mb-4 text-sm text-muted">
                   {tournament.slug} ·{" "}
                   {tournament.isActive
