@@ -23,7 +23,7 @@
 
   --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
 
-  --container-max: 1200px;
+  --container-max: 1920px;
 }
 
 /*
@@ -159,7 +159,7 @@
 }
 
 @theme inline {
-  --animate-page-in: page-in 0.35s ease-out both;
+  --animate-page-in: page-in 0.25s ease-out both;
   --animate-trend-in: trend-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-progress: progress 8s cubic-bezier(0.1, 0.6, 0.2, 1) forwards;
 
@@ -186,13 +186,44 @@
   @keyframes page-in {
     from {
       opacity: 0;
-      transform: translateY(6px);
     }
     to {
       opacity: 1;
-      transform: none;
     }
   }
+}
+
+/*
+ * First-visit cover (SiteLoader): visible until the page has loaded (data-ready on <html>, set by
+ * a script) and lifted anyway by a timer, so a script failure can never leave the page hidden.
+ */
+.site-loader {
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+  animation: site-loader-failsafe 0.01s 6s forwards;
+}
+html[data-ready] .site-loader {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+@keyframes site-loader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* No grey flash on tap, no double-tap delay. */
+a,
+button,
+summary,
+select,
+input {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 @media (prefers-reduced-motion: reduce) {

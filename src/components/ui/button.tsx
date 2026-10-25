@@ -5,7 +5,7 @@ import { cx } from "@/lib/cx";
 export type ButtonVariant = "primary" | "secondary" | "text";
 
 const base =
-  "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-base font-semibold transition-[color,background-color,transform,opacity,box-shadow] duration-200 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
+  "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-base font-semibold transition-[color,background-color,transform,opacity,box-shadow] duration-150 ease-out active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-accent text-black hover:brightness-95 hover:shadow-soft",

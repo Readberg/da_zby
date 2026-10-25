@@ -1,9 +1,11 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
+import { Loader } from "@/components/ui/loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { GuestLanding } from "@/features/home/components/guest-landing";
-import { Hero } from "@/features/home/components/hero";
-import { HowItWorks } from "@/features/home/components/how-it-works";
+import { HomeFallback } from "@/features/home/components/home-fallback";
+import { HeroAction, NextTour } from "@/features/home/components/hero";
 import { Leaders } from "@/features/home/components/leaders";
 import { LatestVideos, LatestVideosSkeleton } from "@/features/videos/components/latest-videos";
 import { ru } from "@/messages/ru";
@@ -30,12 +32,23 @@ function Videos() {
   );
 }
 
-/** Signed-in visitors: the next tour with one main action, how it works, leaders and videos. */
+/** Signed-in visitors: the next tour with the main action, the season leaders and the videos. */
 function MemberHome() {
   return (
-    <Container className="flex flex-col gap-16 py-8 sm:gap-20 sm:py-14">
-      <Hero />
-      <HowItWorks />
+    <Container className="flex flex-col gap-12 py-8 sm:gap-16 sm:py-12">
+      <section aria-labelledby="next-tour-title" className="flex flex-col gap-4">
+        <h1 id="next-tour-title" className="text-h3 sm:text-h2">
+          {ru.home.memberTitle}
+        </h1>
+        <Suspense fallback={<Skeleton className="h-72 w-full" />}>
+          <NextTour />
+        </Suspense>
+        <div>
+          <Suspense fallback={null}>
+            <HeroAction />
+          </Suspense>
+        </div>
+      </section>
       <Leaders />
       <Videos />
     </Container>
@@ -53,7 +66,14 @@ async function HomeBody() {
  */
 export default function Home() {
   return (
-    <Suspense fallback={<GuestLanding videos={<Videos />} />}>
+    <Suspense
+      fallback={
+        <HomeFallback
+          guest={<GuestLanding videos={<Videos />} />}
+          loader={<Loader className="m-8 min-h-96 flex-1" showLabel />}
+        />
+      }
+    >
       <HomeBody />
     </Suspense>
   );

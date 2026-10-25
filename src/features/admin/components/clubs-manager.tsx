@@ -23,7 +23,7 @@ export function ClubsManager({ initial }: { initial: Club[] }) {
         <ul className="flex flex-col gap-4">
           {list.items.map((club) => (
             <li key={club.id} className={list.isNew(club.id) ? "animate-page-in" : undefined}>
-              <Card as="article">
+              <Card as="article" interactive>
                 <ClubForm club={club} onDeleted={list.remove} />
               </Card>
             </li>

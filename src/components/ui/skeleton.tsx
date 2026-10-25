@@ -1,19 +1,9 @@
-import { cx } from "@/lib/cx";
-import { ru } from "@/messages/ru";
+import { Loader } from "@/components/ui/loader";
 
-/** Loading placeholder; size it with classes (`h-6 w-40`, `aspect-video`, …). */
-export function Skeleton({
-  className,
-  label = ru.common.loading,
-}: {
-  className?: string;
-  label?: string;
-}) {
-  return (
-    <div
-      role="status"
-      aria-label={label}
-      className={cx("animate-pulse rounded-md bg-line", className)}
-    />
-  );
+/**
+ * Loading placeholder; size it with classes (`h-6 w-40`, `aspect-video`, …). It shows the site's
+ * own loader instead of a grey box, so every waiting block says that it is loading.
+ */
+export function Skeleton({ className, label }: { className?: string; label?: string }) {
+  return <Loader className={className} label={label} />;
 }
