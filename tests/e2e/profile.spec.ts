@@ -30,13 +30,14 @@ test.describe("signed-in flow (needs SUPABASE_SECRET_KEY)", () => {
     await expect(page.getByText("Ник свободен")).toBeVisible();
     await page.getByRole("button", { name: "Продолжить" }).click();
     await expect(page).toHaveURL(/\/profile/);
-    await expect(page.getByRole("heading", { level: 1, name: "Профиль" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: nickname })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Редактировать" })).toBeVisible();
   });
 
   test("profile edits are saved and the public page shows them without private data", async ({
     page,
   }) => {
-    await signInAs(page, user, "/profile");
+    await signInAs(page, user, "/profile/edit");
     await page.getByLabel("О себе").fill("Люблю белорусский футбол");
     await page.getByRole("button", { name: "Сохранить" }).click();
     await expect(page.getByText("Сохранено")).toBeVisible();

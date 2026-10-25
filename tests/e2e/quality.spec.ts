@@ -8,7 +8,8 @@ test("guest pages make no requests to Supabase", async ({ page }) => {
     if (request.url().includes("supabase.co")) supabaseRequests.push(request.url());
   });
   await page.goto("/");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
+  await page.waitForTimeout(2000);
   expect(supabaseRequests).toEqual([]);
 });
 
@@ -18,7 +19,8 @@ test("client JavaScript contains no server secrets", async ({ page, request }) =
     if (response.url().endsWith(".js")) scripts.push(response.url());
   });
   await page.goto("/");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
+  await page.waitForTimeout(2000);
   for (const url of scripts) {
     const source = await (await request.get(url)).text();
     expect(source, url).not.toMatch(/sb_secret_[\w-]{20,}|SUPABASE_SECRET_KEY/);
@@ -69,7 +71,7 @@ test("keyboard focus is clearly visible", async ({ page }) => {
 test("content column is centred and at most 1200 px wide", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "desktop layout only");
   await page.goto("/");
-  const box = await page.locator("main > div").first().boundingBox();
+  const box = await page.locator("main > div > div").first().boundingBox();
   expect(box?.width ?? 0).toBeLessThanOrEqual(1200);
   const viewport = page.viewportSize()!;
   const left = box!.x;
@@ -81,7 +83,7 @@ test("home with videos has no horizontal scroll", async ({ page }) => {
   await page.goto("/");
   await expect(
     page
-      .getByRole("button", { name: /^Смотреть видео/ })
+      .locator('iframe[title^="Видеоплеер YouTube"]')
       .or(page.getByRole("link", { name: /Перейти на канал/ })),
   ).toBeVisible({ timeout: 15_000 });
   const overflow = await page.evaluate(

@@ -1,10 +1,11 @@
 import type { ButtonHTMLAttributes } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { cx } from "@/lib/cx";
 
 export type ButtonVariant = "primary" | "secondary" | "text";
 
 const base =
-  "inline-flex min-h-11 items-center justify-center gap-2 font-display text-base font-bold uppercase tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 font-display text-base font-bold uppercase tracking-wide cursor-pointer transition-[color,background-color,transform,opacity] duration-200 ease-out active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
@@ -21,8 +22,29 @@ export function buttonClasses(variant: ButtonVariant = "primary", className?: st
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  /** Shows a spinner and blocks repeated clicks while an action is running. */
+  loading?: boolean;
 };
 
-export function Button({ variant = "primary", className, type = "button", ...props }: ButtonProps) {
-  return <button type={type} className={buttonClasses(variant, className)} {...props} />;
+export function Button({
+  variant = "primary",
+  className,
+  type = "button",
+  loading = false,
+  disabled,
+  children,
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      type={type}
+      className={buttonClasses(variant, className)}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {loading && <Spinner />}
+      {children}
+    </button>
+  );
 }
