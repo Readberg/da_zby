@@ -16,6 +16,8 @@ export const ERROR_CODES = {
   tooManyRequests: "api.too_many_requests",
   loginUnavailable: "auth.telegram_unavailable",
   lastAdmin: "admin.last_admin",
+  duplicate: "admin.duplicate",
+  inUse: "admin.in_use",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});
