@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { securityHeaders } from "./src/config/security-headers";
 import { resolveSiteUrl } from "./src/lib/site-url";
 
 const siteUrl = resolveSiteUrl(process.env);
@@ -17,6 +18,12 @@ const nextConfig: NextConfig = {
       // Club logos uploaded by admins.
       new URL("https://*.supabase.co/storage/v1/object/public/club-logos/**"),
     ],
+  },
+  // Not in development: the dev server needs eval and websockets that the policy would report.
+  async headers() {
+    return process.env.NODE_ENV === "production"
+      ? [{ source: "/:path*", headers: securityHeaders() }]
+      : [];
   },
   env: {
     // Exposed by GET /api/v1/version.
