@@ -54,11 +54,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-bg text-ink">
         <SiteLoader />
         <HydrationMark />
+        {/* First stop of the keyboard: jumps over the header to the page. */}
+        <a
+          href="#content"
+          className="sr-only z-[110] rounded-full bg-accent px-5 py-3 font-semibold text-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        >
+          {ru.site.skipToContent}
+        </a>
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>
         <SiteHeader />
-        <main className="flex flex-1 flex-col">{children}</main>
+        <main id="content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+          {children}
+        </main>
         <SiteFooter />
         {siteConfig.analytics.websiteId && (
           <Script

@@ -55,7 +55,16 @@ async function PredictionsContent({
 
   return (
     <>
-      <PredictionPicker data={data} />
+      <PredictionPicker
+        data={{
+          tournaments: data.tournaments,
+          tournament: data.tournament,
+          seasons: data.seasons,
+          season: data.season,
+          tours: data.tours,
+          tour: data.tour,
+        }}
+      />
 
       {!season || !tour ? (
         <p className="text-muted">{season ? ru.predictions.noTours : ru.predictions.noSeasons}</p>

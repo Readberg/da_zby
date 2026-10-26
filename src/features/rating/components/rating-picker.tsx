@@ -15,7 +15,13 @@ function address(params: { tournament?: string; season?: string; tour?: number }
 }
 
 /** Tournament → season → tour (or the whole season); a change opens the page for the new choice. */
-export function RatingPicker({ data }: { data: RatingPageData }) {
+/** Only what the selectors need: the rows of the table must not travel to the browser a second time. */
+export type RatingPickerData = Pick<
+  RatingPageData,
+  "tournaments" | "tournament" | "seasons" | "season" | "tours" | "tour"
+>;
+
+export function RatingPicker({ data }: { data: RatingPickerData }) {
   const router = useRouter();
   const { tournament, season, tour } = data;
   if (!tournament) return null;

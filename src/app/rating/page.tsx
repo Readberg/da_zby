@@ -40,7 +40,16 @@ async function RatingContent({
 
   return (
     <>
-      <RatingPicker data={data} />
+      <RatingPicker
+        data={{
+          tournaments: data.tournaments,
+          tournament: data.tournament,
+          seasons: data.seasons,
+          season: data.season,
+          tours: data.tours,
+          tour: data.tour,
+        }}
+      />
       {!season ? (
         <p className="text-muted">{ru.rating.noSeasons}</p>
       ) : (

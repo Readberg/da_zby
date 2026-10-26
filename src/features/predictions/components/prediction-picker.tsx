@@ -15,7 +15,13 @@ function address(params: { tournament?: string; season?: string; tour?: number }
 }
 
 /** Tournament → season → tour selectors; every change opens the page for the new choice. */
-export function PredictionPicker({ data }: { data: PredictionsPageData }) {
+/** Only what the selectors need: the matches must not travel to the browser a second time. */
+export type PredictionPickerData = Pick<
+  PredictionsPageData,
+  "tournaments" | "tournament" | "seasons" | "season" | "tours" | "tour"
+>;
+
+export function PredictionPicker({ data }: { data: PredictionPickerData }) {
   const router = useRouter();
   const { tournament, season, tour } = data;
   if (!tournament) return null;
