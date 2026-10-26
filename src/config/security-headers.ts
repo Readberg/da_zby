@@ -1,10 +1,11 @@
 /**
  * Response headers for every page and API answer (D-074).
  *
- * The content security policy is sent as Report-Only first: the browser reports what it would have
- * blocked without blocking it, and an e2e test fails on any such report, so the policy can be
- * made enforcing without breaking a page. Inline scripts are allowed because Next.js and the theme
- * and loader scripts are inline; nonces would make every page dynamic.
+ * The content security policy is enforcing (since the owner's go-ahead, D-076). It was run as
+ * Report-Only first and e2e tests fail on any violation message (guest pages, the signed-in live
+ * cycle, profile and photo upload, admin and logo upload), so a new external resource has to be
+ * added here on purpose. Inline scripts are allowed because Next.js and the theme and loader
+ * scripts are inline; nonces would make every page dynamic.
  */
 export const contentSecurityPolicy = [
   "default-src 'self'",
@@ -23,7 +24,7 @@ export const contentSecurityPolicy = [
 
 export function securityHeaders(): { key: string; value: string }[] {
   return [
-    { key: "Content-Security-Policy-Report-Only", value: contentSecurityPolicy },
+    { key: "Content-Security-Policy", value: contentSecurityPolicy },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "X-Frame-Options", value: "DENY" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

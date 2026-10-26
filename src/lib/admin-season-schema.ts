@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "./zod";
 
 /** Rules shared by the season / tour / match admin forms (browser) and the admin API (server). */
 

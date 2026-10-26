@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "./zod";
 
 /** Rules shared by the admin forms (browser) and the admin API (server). */
 
