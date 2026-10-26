@@ -58,3 +58,29 @@ export async function setProfile(
   const { error } = await admin().from("profiles").update(patch).eq("id", user.id);
   if (error) throw new Error(`profile update failed: ${error.message}`);
 }
+
+const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+/** A client that acts like a guest: the publishable key only, no session. */
+export function guestClient() {
+  return createClient(url!, publishableKey!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+/** A client that acts like the signed-in test user: the database sees their session and nothing else. */
+export async function signedInClient(user: TestUser) {
+  const { data, error } = await admin().auth.admin.generateLink({
+    type: "magiclink",
+    email: user.email,
+  });
+  if (error || !data.properties?.hashed_token)
+    throw new Error(`generateLink failed: ${error?.message}`);
+  const client = guestClient();
+  const { error: verifyError } = await client.auth.verifyOtp({
+    token_hash: data.properties.hashed_token,
+    type: "email",
+  });
+  if (verifyError) throw new Error(`verifyOtp failed: ${verifyError.message}`);
+  return client;
+}

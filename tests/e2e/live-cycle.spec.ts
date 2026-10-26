@@ -72,6 +72,18 @@ test.describe("live cycle (needs SUPABASE_SECRET_KEY)", () => {
     await setProfile(outcomeUser, { nickname: outcomeNick });
   });
 
+  // The signed-in pages must satisfy the (report-only) content policy as well (D-074).
+  const violations: string[] = [];
+  test.beforeEach(({ page }) => {
+    page.on("console", (message) => {
+      if (/content security policy|[report only]/i.test(message.text()))
+        violations.push(message.text());
+    });
+  });
+  test.afterEach(() => {
+    expect(violations).toEqual([]);
+  });
+
   test.afterAll(async () => {
     await removeTestData(true);
     for (const user of [admin, exactUser, outcomeUser]) if (user) await deleteTestUser(user);
