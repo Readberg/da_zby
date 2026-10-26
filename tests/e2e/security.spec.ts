@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 // Security headers (D-074). The content policy is Report-Only, so a violation is only a console
 // message: this test turns every such message into a failure and keeps the policy honest.

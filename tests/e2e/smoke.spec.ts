@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 test("home page opens and shows the site title", async ({ page }) => {
   const errors: string[] = [];

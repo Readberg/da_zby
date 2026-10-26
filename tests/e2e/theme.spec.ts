@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 test.describe("themes", () => {
   test("the toggle switches the theme and the choice survives a reload", async ({ page }) => {

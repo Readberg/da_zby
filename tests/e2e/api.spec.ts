@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 // Former manual curl test cases of DAZBY-16 and DAZBY-21, run against the real server.
 test.describe("API v1", () => {
