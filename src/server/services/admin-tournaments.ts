@@ -3,10 +3,9 @@ import type { TournamentFields, TournamentUpdate } from "@/lib/admin-schema";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
 import type { Tournament } from "@/server/api/v1/schemas/admin-catalog";
 import type { Database, Tables } from "@/types/database";
+import { UNIQUE_VIOLATION } from "./pg-errors";
 
 type Db = SupabaseClient<Database>;
-
-const UNIQUE_VIOLATION = "23505";
 
 function toDto(row: Tables<"tournaments">): Tournament {
   return {

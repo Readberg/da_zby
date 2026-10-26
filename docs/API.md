@@ -84,6 +84,8 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 | `GET /nickname-availability?nickname=` | public | `{ valid, available }`; проверка без учёта регистра |
 
 Тело запроса описано в OpenAPI (`requestBody`); невалидный JSON → `400 api.invalid_json`, нарушение схемы → `422 api.validation_failed` с `errors[]`. Ответы `/me` — `Cache-Control: private, no-store`.
+Код `system.degraded` (503) — строгая проверка `/health/strict`: сломана база данных или вебхук входа через Telegram.
+
 Новые коды: `api.invalid_json`, `profile.not_found`, `profile.nickname_taken`, `profile.nickname_locked`.
 
 ### Админка: пользователи (DAZBY-60)

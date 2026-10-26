@@ -2,14 +2,13 @@ import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PredictionsPublic } from "@/server/services/predictions";
 
-const { home, user } = vi.hoisted(() => ({ home: vi.fn(), user: vi.fn() }));
+const { home } = vi.hoisted(() => ({ home: vi.fn() }));
 vi.mock("next/server", () => ({ connection: async () => {} }));
 vi.mock("next/image", () => ({ default: () => null }));
 vi.mock("@/server/services/home.cached", () => ({ getHomeCached: () => home() }));
-vi.mock("@/server/services/current-user", () => ({ getCurrentUser: () => user() }));
 
-const { HeroAction, NextTour } = await import("./hero");
-const { StepsWithPoints } = await import("./how-it-works");
+const { MemberAction, NextTour } = await import("./next-tour");
+const { StepsWithPoints } = await import("./guest-landing");
 const { LeadersList } = await import("./leaders");
 
 const club = (name: string) => ({ id: name, name, logoUrl: null });
@@ -38,19 +37,11 @@ function pub(over: Partial<PredictionsPublic> = {}): PredictionsPublic {
 
 beforeEach(() => {
   home.mockReset().mockResolvedValue({ pub: pub(), leaders: [] });
-  user.mockReset().mockResolvedValue(null);
 });
 
-describe("HeroAction", () => {
-  it("sends a guest through sign-in to the predictions", async () => {
-    render(await HeroAction());
-    const link = screen.getByRole("link", { name: "Войти и сделать прогноз" });
-    expect(link).toHaveAttribute("href", "/login?next=%2Fpredictions");
-  });
-
-  it("sends a signed-in visitor straight to the predictions", async () => {
-    user.mockResolvedValue({ id: "u1", nickname: "Readberg", role: "user" });
-    render(await HeroAction());
+describe("MemberAction", () => {
+  it("sends a signed-in visitor straight to the predictions", () => {
+    render(<MemberAction />);
     const link = screen.getByRole("link", { name: "Сделать прогноз" });
     expect(link).toHaveAttribute("href", "/predictions");
   });

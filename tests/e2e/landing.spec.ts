@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 /**
  * The home page streams: until the session is known the static copy (the guest landing) is in the

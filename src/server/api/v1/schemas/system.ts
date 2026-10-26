@@ -4,6 +4,11 @@ export const healthSchema = z.object({
   status: z.literal("ok").describe("The app is up and answering requests."),
   checks: z.object({
     database: z.enum(["ok", "error"]).describe("Whether the database answered a probe query."),
+    telegramWebhook: z
+      .enum(["ok", "error", "skipped"])
+      .describe(
+        "Whether the sign-in bot's webhook points at this site and delivers; skipped where the bot is not configured.",
+      ),
   }),
 });
 

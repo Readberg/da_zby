@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 // Former manual curl test cases of DAZBY-16 and DAZBY-21, run against the real server.
 test.describe("API v1", () => {
@@ -10,6 +10,16 @@ test.describe("API v1", () => {
     const body = await response.json();
     expect(body.data.status).toBe("ok");
     expect(["ok", "error"]).toContain(body.data.checks.database);
+  });
+
+  test("strict health is 200 with every check passing or skipped, and says what it checks", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/v1/health/strict");
+    expect(response.status()).toBe(200);
+    const { checks } = (await response.json()).data;
+    expect(checks.database).toBe("ok");
+    expect(["ok", "skipped"]).toContain(checks.telegramWebhook);
   });
 
   test("version reports package version and supported API versions", async ({ request }) => {

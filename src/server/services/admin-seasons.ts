@@ -7,11 +7,9 @@ import type {
   TourSummary,
 } from "@/server/api/v1/schemas/admin-season";
 import type { Database, Tables } from "@/types/database";
+import { UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION } from "./pg-errors";
 
 type Db = SupabaseClient<Database>;
-
-const UNIQUE_VIOLATION = "23505";
-const FOREIGN_KEY_VIOLATION = "23503";
 
 export function seasonNotFound() {
   return new ApiError(404, ERROR_CODES.notFound, "Not Found", "Season does not exist.");

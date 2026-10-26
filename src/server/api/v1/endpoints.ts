@@ -67,6 +67,18 @@ export const endpoints = {
     output: healthSchema,
     cacheControl: "no-store",
   }),
+  healthStrict: defineEndpoint({
+    method: "get",
+    path: "/health/strict",
+    summary: "Health check that fails (503) when any check fails",
+    description:
+      "Same payload as `/health`, but the status is 503 when the database or the sign-in bot's webhook is broken. For monitors that alert on a non-2xx answer.",
+    tags: ["system"],
+    auth: "public",
+    output: healthSchema,
+    cacheControl: "no-store",
+    errors: [503],
+  }),
   version: defineEndpoint({
     method: "get",
     path: "/version",

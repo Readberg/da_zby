@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 test("header and footer are present and fit the screen", async ({ page }) => {
   await page.goto("/");

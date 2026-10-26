@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 test("home has title, lang, Open Graph and icons", async ({ page }) => {
   await page.goto("/");

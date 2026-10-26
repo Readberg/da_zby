@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
 import { tournamentFieldsSchema } from "@/lib/admin-schema";
 import { ApiClientError, api } from "@/lib/api-client";
+import { fieldErrorsFromIssues } from "@/lib/form-errors";
 import { ru } from "@/messages/ru";
 import type { Tournament } from "@/server/api/v1/schemas/admin-catalog";
 
@@ -45,12 +46,7 @@ export function TournamentForm({
       isActive,
     });
     if (!parsed.success) {
-      const next: Errors = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof Errors | undefined;
-        if (key && !next[key]) next[key] = issue.message;
-      }
-      setErrors(next);
+      setErrors(fieldErrorsFromIssues<keyof Errors>(parsed.error.issues));
       setStatus("failed");
       return;
     }

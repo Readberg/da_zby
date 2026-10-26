@@ -10,6 +10,7 @@ import { formatDateTime } from "@/lib/local-time";
 import { points } from "@/lib/plural";
 import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_UTC_OFFSET_MINUTES } from "@/lib/time";
+import { firstParam } from "@/lib/search-params";
 import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
 import { composePredictionsPage, getMyPredictions } from "@/server/services/predictions";
@@ -17,10 +18,6 @@ import { getPredictionsPublicCached } from "@/server/services/predictions.cached
 import { getUtcOffsetMinutes } from "@/server/services/profiles";
 
 export const metadata: Metadata = { title: ru.predictions.title };
-
-function first(value: string | string[] | undefined): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 async function PredictionsContent({
   searchParams,
@@ -30,13 +27,13 @@ async function PredictionsContent({
   // Deadlines depend on the current time: render at request time, never in the static shell.
   await connection();
   const params = await searchParams;
-  const tourNumber = Number(first(params.tour));
+  const tourNumber = Number(firstParam(params.tour));
   const supabase = await createClient();
   // The shared part comes from the cache (in parallel with finding the visitor); the visitor's own
   // predictions are read live.
   const [user, pub] = await Promise.all([
     getCurrentUser(),
-    getPredictionsPublicCached(first(params.tournament), first(params.season)),
+    getPredictionsPublicCached(firstParam(params.tournament), firstParam(params.season)),
   ]);
   const [mine, offset] = await Promise.all([
     user && pub.season ? getMyPredictions(supabase, user.id, pub.season.id) : Promise.resolve({}),
