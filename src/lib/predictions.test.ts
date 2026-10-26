@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  hiddenUntil,
   isMatchOpen,
   isTourOpen,
   pickCurrentTour,
@@ -108,5 +109,19 @@ describe("predictionsBodySchema", () => {
   it("needs at least one item and valid ids", () => {
     expect(predictionsBodySchema.safeParse({ tourId: ID, items: [] }).success).toBe(false);
     expect(predictionsBodySchema.safeParse({ tourId: "x", items: [item] }).success).toBe(false);
+  });
+});
+
+describe("hiddenUntil", () => {
+  const now = new Date("2026-10-26T12:00:00Z");
+
+  it("gives the deadline while it is ahead", () => {
+    expect(hiddenUntil("2026-10-26T12:00:01Z", now)).toBe("2026-10-26T12:00:01Z");
+  });
+
+  it("gives nothing once the deadline has come or when there is none", () => {
+    expect(hiddenUntil("2026-10-26T12:00:00Z", now)).toBeNull();
+    expect(hiddenUntil("2026-10-25T12:00:00Z", now)).toBeNull();
+    expect(hiddenUntil(null, now)).toBeNull();
   });
 });
