@@ -59,10 +59,20 @@
                                 "error"
                               ],
                               "description": "Whether the database answered a probe query."
+                            },
+                            "telegramWebhook": {
+                              "type": "string",
+                              "enum": [
+                                "ok",
+                                "error",
+                                "skipped"
+                              ],
+                              "description": "Whether the sign-in bot's webhook points at this site and delivers; skipped where the bot is not configured."
                             }
                           },
                           "required": [
-                            "database"
+                            "database",
+                            "telegramWebhook"
                           ],
                           "additionalProperties": false
                         }
@@ -87,6 +97,114 @@
           },
           "500": {
             "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/strict": {
+      "get": {
+        "operationId": "healthStrict",
+        "summary": "Health check that fails (503) when any check fails",
+        "description": "Same payload as `/health`, but the status is 503 when the database or the sign-in bot's webhook is broken. For monitors that alert on a non-2xx answer.",
+        "tags": [
+          "system"
+        ],
+        "security": [],
+        "x-auth-level": "public",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "ok",
+                          "description": "The app is up and answering requests."
+                        },
+                        "checks": {
+                          "type": "object",
+                          "properties": {
+                            "database": {
+                              "type": "string",
+                              "enum": [
+                                "ok",
+                                "error"
+                              ],
+                              "description": "Whether the database answered a probe query."
+                            },
+                            "telegramWebhook": {
+                              "type": "string",
+                              "enum": [
+                                "ok",
+                                "error",
+                                "skipped"
+                              ],
+                              "description": "Whether the sign-in bot's webhook points at this site and delivers; skipped where the bot is not configured."
+                            }
+                          },
+                          "required": [
+                            "database",
+                            "telegramWebhook"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "checks"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
             "content": {
               "application/problem+json": {
                 "schema": {

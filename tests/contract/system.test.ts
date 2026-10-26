@@ -7,8 +7,11 @@ import { apiRequest, expectApiHeaders, expectProblem, fakeSupabase } from "./hel
 
 const createClient = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
+const checkWebhook = vi.fn();
+vi.mock("@/server/services/webhook-health", () => ({ checkWebhook }));
 
 const health = await import("@/app/api/v1/health/route");
+const healthStrict = await import("@/app/api/v1/health/strict/route");
 const version = await import("@/app/api/v1/version/route");
 const openapi = await import("@/app/api/v1/openapi.json/route");
 const fallback = await import("@/app/api/[version]/[[...path]]/route");
@@ -18,7 +21,10 @@ function ctx(versionParam: string, path?: string[]) {
 }
 
 describe("GET /api/v1/health", () => {
-  beforeEach(() => createClient.mockReset());
+  beforeEach(() => {
+    createClient.mockReset();
+    checkWebhook.mockReset().mockResolvedValue("skipped");
+  });
 
   it("returns ok with a healthy database", async () => {
     createClient.mockResolvedValue(fakeSupabase({ error: null }));
@@ -28,7 +34,10 @@ describe("GET /api/v1/health", () => {
     expectApiHeaders(response);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     const body = await response.json();
-    expect(healthSchema.parse(body.data)).toEqual({ status: "ok", checks: { database: "ok" } });
+    expect(healthSchema.parse(body.data)).toEqual({
+      status: "ok",
+      checks: { database: "ok", telegramWebhook: "skipped" },
+    });
     expect(body.meta).toEqual({});
   });
 
@@ -39,12 +48,58 @@ describe("GET /api/v1/health", () => {
     expect(response.status).toBe(200);
     expect((await response.json()).data.checks.database).toBe("error");
   });
+  it("reports a broken sign-in webhook but stays a 200 liveness probe", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ error: null }));
+    checkWebhook.mockResolvedValue("error");
+    const response = await health.GET(apiRequest("/api/v1/health"));
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).data.checks.telegramWebhook).toBe("error");
+  });
+
   it("echoes a valid incoming X-Request-Id", async () => {
     createClient.mockResolvedValue(fakeSupabase());
     const response = await health.GET(
       apiRequest("/api/v1/health", { headers: { "x-request-id": "trace-123" } }),
     );
     expect(response.headers.get("X-Request-Id")).toBe("trace-123");
+  });
+});
+
+describe("GET /api/v1/health/strict", () => {
+  beforeEach(() => {
+    createClient.mockReset();
+    checkWebhook.mockReset().mockResolvedValue("ok");
+  });
+
+  it("answers 200 while every check passes (a skipped check is not a failure)", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ error: null }));
+    checkWebhook.mockResolvedValue("skipped");
+    const response = await healthStrict.GET(apiRequest("/api/v1/health/strict"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect((await response.json()).data.checks).toEqual({
+      database: "ok",
+      telegramWebhook: "skipped",
+    });
+  });
+
+  it("answers 503 naming the failed check when the webhook is broken", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ error: null }));
+    checkWebhook.mockResolvedValue("error");
+    const response = await healthStrict.GET(apiRequest("/api/v1/health/strict"));
+
+    const problem = await expectProblem(response, 503, "system.degraded");
+    expect(problem.detail).toContain("telegramWebhook");
+  });
+
+  it("answers 503 when the database is down", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ error: { code: "PGRST205" } }));
+    const response = await healthStrict.GET(apiRequest("/api/v1/health/strict"));
+
+    const problem = await expectProblem(response, 503, "system.degraded");
+    expect(problem.detail).toContain("database");
   });
 });
 
