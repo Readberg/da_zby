@@ -1,7 +1,7 @@
 import { expect, test } from "./helpers/fixtures";
 
-// Security headers (D-074). The content policy is Report-Only, so a violation is only a console
-// message: this test turns every such message into a failure and keeps the policy honest.
+// Security headers (D-074, D-076). The content policy is enforced: a blocked resource shows up as a
+// console message, and this test turns every such message into a failure.
 test.describe("security headers", () => {
   test("every page carries the headers", async ({ request }) => {
     const response = await request.get("/");
@@ -10,7 +10,8 @@ test.describe("security headers", () => {
     expect(headers["x-content-type-options"]).toBe("nosniff");
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
     expect(headers["permissions-policy"]).toContain("camera=()");
-    expect(headers["content-security-policy-report-only"]).toContain("frame-ancestors 'none'");
+    expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
+    expect(headers["content-security-policy-report-only"]).toBeUndefined();
   });
 
   test("the API answers carry them too", async ({ request }) => {

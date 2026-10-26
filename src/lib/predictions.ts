@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "./zod";
 
 /** Prediction rules shared by the page (browser/server) and the API; the database enforces them again. */
 
