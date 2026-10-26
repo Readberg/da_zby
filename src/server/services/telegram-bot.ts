@@ -75,6 +75,18 @@ export function isValidWebhookSecret(botToken: string, given: string | null): bo
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
+export type WebhookInfo = {
+  url: string;
+  pending_update_count: number;
+  last_error_date?: number;
+  last_error_message?: string;
+};
+
+/** The webhook as Telegram sees it: where it points and whether deliveries are failing. */
+export function getWebhookInfo(botToken: string): Promise<WebhookInfo> {
+  return call<WebhookInfo>(botToken, "getWebhookInfo");
+}
+
 /** Points the bot's webhook to this site (idempotent: does nothing when it already points here). */
 export async function ensureWebhook(botToken: string, siteUrl: string): Promise<"set" | "ok"> {
   const url = `${siteUrl.replace(/\/+$/, "")}/api/telegram/webhook`;

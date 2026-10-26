@@ -12,6 +12,16 @@ test.describe("API v1", () => {
     expect(["ok", "error"]).toContain(body.data.checks.database);
   });
 
+  test("strict health is 200 with every check passing or skipped, and says what it checks", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/v1/health/strict");
+    expect(response.status()).toBe(200);
+    const { checks } = (await response.json()).data;
+    expect(checks.database).toBe("ok");
+    expect(["ok", "skipped"]).toContain(checks.telegramWebhook);
+  });
+
   test("version reports package version and supported API versions", async ({ request }) => {
     const { data } = await (await request.get("/api/v1/version")).json();
     expect(data.version).toMatch(/^\d+\.\d+\.\d+$/);

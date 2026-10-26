@@ -21,6 +21,7 @@ export const ERROR_CODES = {
   seasonClosed: "admin.season_closed",
   seasonState: "admin.season_state",
   predictionsClosed: "predictions.closed",
+  degraded: "system.degraded",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] | (string & {});
