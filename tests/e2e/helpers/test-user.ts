@@ -44,3 +44,17 @@ export async function signInAs(page: Page, user: TestUser, next = "/"): Promise<
   const token = data.properties.hashed_token;
   await page.goto(`/auth/confirm?token_hash=${token}&type=email&next=${encodeURIComponent(next)}`);
 }
+
+/** Service-role client for test set-up and clean-up (never used by the app code under test). */
+export function serviceClient() {
+  return admin();
+}
+
+/** Gives a test user a nickname (and optionally the admin role) without going through the UI. */
+export async function setProfile(
+  user: TestUser,
+  patch: { nickname?: string; role?: "admin" | "user" },
+): Promise<void> {
+  const { error } = await admin().from("profiles").update(patch).eq("id", user.id);
+  if (error) throw new Error(`profile update failed: ${error.message}`);
+}
