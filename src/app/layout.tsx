@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { siteConfig } from "@/config/site";
 import { publicEnv } from "@/lib/env";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
+import { ErrorReporter } from "@/components/layout/error-reporter";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteLoader } from "@/components/layout/site-loader";
 import { HydrationMark } from "@/features/home/components/home-fallback";
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-bg text-ink">
         <SiteLoader />
         <HydrationMark />
+        <ErrorReporter />
         {/* First stop of the keyboard: jumps over the header to the page. */}
         <a
           href="#content"

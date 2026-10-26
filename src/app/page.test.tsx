@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/services/videos.server", () => ({
@@ -42,6 +43,22 @@ describe("Home page (landing)", () => {
     expect(questions.filter((q) => q.hasAttribute("aria-controls"))).toHaveLength(8);
     expect(screen.getAllByRole("button", { expanded: true })).toHaveLength(1);
     expect(screen.getByText("Это бесплатно?")).toBeVisible();
+  });
+
+  it("tells Umami which question was opened", async () => {
+    const umami = { track: vi.fn() };
+    (window as unknown as { umami: typeof umami }).umami = umami;
+    render(<Home />);
+    await userEvent.click(screen.getByRole("button", { name: "Это бесплатно?" }));
+    expect(umami.track).toHaveBeenCalledWith("faq-open", { question: 6 });
+    delete (window as unknown as { umami?: unknown }).umami;
+  });
+
+  it("marks the calls to action so Umami counts their clicks by place", () => {
+    render(<Home />);
+    const hero = screen.getByRole("link", { name: "Войти через Telegram" });
+    expect(hero).toHaveAttribute("data-umami-event", "cta-click");
+    expect(hero).toHaveAttribute("data-umami-event-where", "hero");
   });
 
   it("links the community, labels the rating example as an example", () => {

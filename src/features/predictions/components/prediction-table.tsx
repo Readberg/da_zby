@@ -7,6 +7,7 @@ import { ResultBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ClubLogo } from "@/components/ui/club-logo";
 import { Input } from "@/components/ui/field";
+import { EVENTS, track } from "@/lib/analytics";
 import { ApiClientError, api } from "@/lib/api-client";
 import { formatDateTime } from "@/lib/local-time";
 import { CountUp } from "@/components/ui/count-up";
@@ -160,11 +161,13 @@ export function PredictionTable({
     setMessage(null);
     try {
       await api("/predictions", { method: "PUT", json: { tourId, items } });
+      track(EVENTS.predictionSaved, { count: items.length });
       setMessage({ text: ru.predictions.saved, failed: false });
       router.refresh();
     } catch (cause) {
       const isClosed =
         cause instanceof ApiClientError && cause.problem.code === "predictions.closed";
+      track(EVENTS.predictionFailed, { reason: isClosed ? "closed" : "error" });
       setMessage({
         text: isClosed ? ru.predictions.closedNow : ru.predictions.saveFailed,
         failed: true,

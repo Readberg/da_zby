@@ -77,6 +77,17 @@ test.describe("landing (guest)", () => {
     }
   });
 
+  test("the calls to action carry their Umami event, so clicks are counted by place", async ({
+    page,
+  }) => {
+    await openHome(page);
+    const hero = page.getByRole("link", { name: "Войти через Telegram" });
+    await expect(hero).toHaveAttribute("data-umami-event", "cta-click");
+    await expect(hero).toHaveAttribute("data-umami-event-where", "hero");
+    const header = page.getByRole("banner").getByRole("link", { name: "Войти" });
+    await expect(header).toHaveAttribute("data-umami-event-where", "header");
+  });
+
   test("the first-visit cover lifts once the page has loaded", async ({ page }) => {
     await openHome(page);
     await expect(page.locator("html")).toHaveAttribute("data-ready", "");
