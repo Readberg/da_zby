@@ -57,6 +57,7 @@ pnpm db:push        # supabase db push (dev)
 pnpm db:types       # генерация src/types/database.ts
 pnpm api:openapi    # перегенерация docs/api/openapi.v1.json
 pnpm design:snap    # скриншоты компонентов в docs/design/components/
+pnpm release <patch|minor|major> --title "…" --task DAZBY-N [--dry-run]   # весь релиз одной командой (D-085)
 ```
 
 Перед PR зелёные: `lint`, `typecheck`, `test`, `build`, e2e smoke.
