@@ -51,6 +51,15 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
+      - name: API snapshot matches the code
+        run: |
+          pnpm api:openapi
+          if ! git diff --quiet -- docs/api; then
+            echo "::error::docs/api/openapi.v1.json is out of date: run pnpm api:openapi and commit the result."
+            git diff --stat -- docs/api
+            exit 1
+          fi
+
       - name: No server secrets in the client bundle
         run: |
           if grep -rlE "sb_secret_[A-Za-z0-9_-]{20,}|SUPABASE_SECRET_KEY" .next/static; then
