@@ -20,13 +20,7 @@ export const ru = {
   footer: {
     socialLabel: "Мы в соцсетях",
     rights: "© 2026 «Да забей». Все права защищены.",
-    info: "Информация",
-    about: "О проекте",
-    legal: "Правовая информация",
-    privacy: "Политика конфиденциальности",
-    trust: "Доверие и безопасность",
     contacts: "Контакты",
-    email: "hello@dazabey.com",
     language: "Русский",
     social: {
       youtube: "YouTube",
