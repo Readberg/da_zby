@@ -52,6 +52,8 @@ function Hero() {
       <p className="max-w-md text-lg text-muted">{t.lead}</p>
       <Link
         href={LOGIN_HREF}
+        data-umami-event="cta-click"
+        data-umami-event-where="hero"
         className={buttonClasses(
           "primary",
           "min-h-14 gap-2 whitespace-nowrap px-5 text-base shadow-soft sm:gap-3 sm:px-8 sm:text-lg",
@@ -78,6 +80,8 @@ export async function UpcomingMatches() {
         <h2 className="text-2xl normal-case sm:text-h3">{t.upcomingTitle}</h2>
         <Link
           href={LOGIN_HREF}
+          data-umami-event="cta-click"
+          data-umami-event-where="matches-all"
           className="inline-flex min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-bg px-4 text-sm font-semibold transition-colors hover:bg-line"
         >
           {t.allMatches}
@@ -118,6 +122,8 @@ export async function UpcomingMatches() {
               </div>
               <Link
                 href={LOGIN_HREF}
+                data-umami-event="cta-click"
+                data-umami-event-where="match"
                 className={buttonClasses(
                   "primary",
                   "min-h-11 w-full px-4 text-sm sm:w-auto sm:min-h-10 sm:px-5",

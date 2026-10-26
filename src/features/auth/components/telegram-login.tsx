@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import { EVENTS, track } from "@/lib/analytics";
 import { ApiClientError, api } from "@/lib/api-client";
 import { LOGIN_NEXT_COOKIE, LOGIN_NEXT_MAX_AGE_SECONDS } from "@/lib/login-next";
 import { ru } from "@/messages/ru";
@@ -109,9 +110,11 @@ export function TelegramLogin({
         if (finished.current) return;
         if (status === "confirmed") {
           finished.current = true;
+          track(EVENTS.loginConfirmed);
           navigate(`/auth/telegram?token=${encodeURIComponent(token!)}`);
         } else if (status === "expired") {
           finished.current = true;
+          track(EVENTS.loginFailed, { reason: "expired" });
           reset(ru.auth.errors.expired);
         }
       } catch {
@@ -147,10 +150,12 @@ export function TelegramLogin({
         expiresAt: Date.now() + created.expiresInSeconds * 1000,
       };
       writeStored(JSON.stringify(fresh));
+      track(EVENTS.loginCodeShown);
       // Opens the Telegram app directly; without the app nothing happens and the links below work.
       window.location.href = fresh.appUrl;
     } catch (cause) {
       const unavailable = cause instanceof ApiClientError && cause.problem.status === 503;
+      track(EVENTS.loginFailed, { reason: unavailable ? "unavailable" : "start" });
       setMessage(unavailable ? ru.auth.unavailable : ru.auth.errors.start);
     } finally {
       setStarting(false);

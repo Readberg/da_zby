@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
+import { errorFields, log } from "@/lib/log";
 import type { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -135,7 +136,13 @@ export function withApi<
       if (error instanceof ApiError) {
         return problemResponse(error, requestId, instance);
       }
-      console.error(`[api] ${request.method} ${instance} failed (requestId=${requestId})`, error);
+      log("error", "api.error", {
+        requestId,
+        method: request.method,
+        route: instance,
+        status: 500,
+        ...errorFields(error),
+      });
       return problemResponse(
         new ApiError(500, ERROR_CODES.internal, "Internal Server Error", "Unexpected error."),
         requestId,

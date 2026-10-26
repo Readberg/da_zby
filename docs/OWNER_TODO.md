@@ -23,6 +23,10 @@
 Каждые 15 минут GitHub проверяет `/api/v1/health/strict`; при поломке (база или вебхук бота) вам придёт письмо «workflow failed». Проверьте, что письма Actions не уходят в спам (Settings → Notifications на GitHub).
 - [ ] Готово (DAZBY-87)
 
+### A3a. Воронка в Umami (5 минут, один раз) — D-079
+Umami → ваш сайт → Funnels → создать воронку «Первый прогноз» по шагам из `docs/ANALYTICS.md` (просмотр /, cta-click, login-code-shown, login-confirmed, prediction-saved). Через пару дней увидите, где отваливаются новички. Событие client-error в разделе Events — ошибки в браузерах посетителей.
+- [ ] Готово
+
 ### A4. Umami и превью ссылок
 - В панели Umami виден просмотр с сайта.
 - Ссылка на сайт в Telegram показывает превью с логотипом и описанием (DAZBY-23).
