@@ -14,9 +14,23 @@ export async function getRatingPageCached(
   tour: number | undefined,
 ) {
   "use cache";
-  cacheLife(LIFE);
   cacheTag(RATING_TAG);
-  return getRatingPage(createAnonClient(), { tournament, season, tour });
+  const data = await getRatingPage(createAnonClient(), { tournament, season, tour });
+  cacheLife(lifeUntil(data.tour?.deadlineAt ?? null));
+  return data;
+}
+
+/**
+ * Other people's predictions open at the tour's deadline (D-084), so the cached tour table must not
+ * outlive it: until then the entry expires at the deadline, which makes the first visitor after it
+ * wait for a fresh table instead of seeing the hidden one. Floor of 15 s keeps the cache useful.
+ */
+export function lifeUntil(deadlineAt: string | null, now: number = Date.now()) {
+  if (!deadlineAt) return LIFE;
+  const seconds = Math.ceil((new Date(deadlineAt).getTime() - now) / 1000);
+  if (seconds <= 0 || seconds >= LIFE.revalidate) return LIFE;
+  const until = Math.max(15, seconds);
+  return { stale: Math.min(LIFE.stale, until), revalidate: until, expire: until } as const;
 }
 
 export async function getProfileStatsCached(userId: string) {
