@@ -100,6 +100,30 @@ test("home with videos has no horizontal scroll", async ({ page }) => {
   expect(overflow).toBe(0);
 });
 
+for (const path of ["/", "/predictions", "/rating", "/login"]) {
+  test(`nothing sticks out of the screen on ${path}`, async ({ page }) => {
+    await page.goto(path);
+    await page.waitForLoadState("load");
+    const viewport = page.viewportSize()!;
+    const outside = await page.evaluate((width) => {
+      return [...document.querySelectorAll("main *")]
+        .filter((element) => {
+          const box = element.getBoundingClientRect();
+          // Wide tables scroll inside their own frame on purpose.
+          return (
+            box.width > 0 &&
+            (box.right > width + 1 || box.left < -1) &&
+            !element.closest("[class*='overflow-x-auto']")
+          );
+        })
+        .map(
+          (element) => `${element.tagName.toLowerCase()}.${String(element.className).slice(0, 50)}`,
+        );
+    }, viewport.width);
+    expect(outside).toEqual([]);
+  });
+}
+
 test("styleguide is hidden in production", async ({ request }) => {
   test.skip(
     !process.env.CI && !process.env.E2E_BASE_URL,

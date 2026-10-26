@@ -51,6 +51,32 @@ test.describe("landing (guest)", () => {
     await expect(page.getByText(/Это сайт канала/)).toBeHidden();
   });
 
+  test("match rows keep both clubs, the time and the button inside the screen", async ({
+    page,
+  }) => {
+    await openHome(page);
+    const card = page
+      .getByRole("heading", { name: "Ближайшие матчи" })
+      .locator("xpath=ancestor::div[contains(@class,'rounded-lg')][1]");
+    const rows = card.locator("ul > li");
+    test.skip((await rows.count()) === 0, "no matches in the next tour right now");
+    const viewport = page.viewportSize()!;
+    for (const row of await rows.all()) {
+      const names = row.locator("span.font-semibold");
+      await expect(names).toHaveCount(2);
+      for (const name of await names.all()) {
+        const box = await name.boundingBox();
+        expect(box!.width, "a club name must not be squeezed out").toBeGreaterThan(40);
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      }
+      const button = await row.getByRole("link", { name: "Сделать прогноз" }).boundingBox();
+      expect(button!.x).toBeGreaterThanOrEqual(0);
+      expect(button!.x + button!.width).toBeLessThanOrEqual(viewport.width);
+      expect(button!.height).toBeGreaterThanOrEqual(40);
+    }
+  });
+
   test("the first-visit cover lifts once the page has loaded", async ({ page }) => {
     await openHome(page);
     await expect(page.locator("html")).toHaveAttribute("data-ready", "");
