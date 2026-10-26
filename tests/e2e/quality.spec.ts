@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers/fixtures";
 
 // Former manual test cases of DAZBY-14, 17, 18, 19, 20, 22.
 
