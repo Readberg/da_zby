@@ -11,9 +11,9 @@ describe("securityHeaders", () => {
     expect(headers["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
   });
 
-  it("sends the policy in report-only mode", () => {
-    expect(headers["Content-Security-Policy-Report-Only"]).toBe(contentSecurityPolicy);
-    expect(headers["Content-Security-Policy"]).toBeUndefined();
+  it("enforces the policy", () => {
+    expect(headers["Content-Security-Policy"]).toBe(contentSecurityPolicy);
+    expect(headers["Content-Security-Policy-Report-Only"]).toBeUndefined();
   });
 
   it("allows exactly what the site loads from other origins", () => {
