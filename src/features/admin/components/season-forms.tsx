@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SelectField, TextField } from "@/components/ui/field";
 import { seasonCreateSchema } from "@/lib/admin-season-schema";
 import { ApiClientError, api } from "@/lib/api-client";
+import { fieldErrorsFromIssues } from "@/lib/form-errors";
 import { ru } from "@/messages/ru";
 import type { SeasonSummary } from "@/server/api/v1/schemas/admin-season";
 
@@ -39,12 +40,7 @@ export function SeasonCreateForm({
       copyFromSeasonId: copyFrom || null,
     });
     if (!parsed.success) {
-      const next: typeof errors = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof typeof errors | undefined;
-        if (key && !next[key]) next[key] = issue.message;
-      }
-      setErrors(next);
+      setErrors(fieldErrorsFromIssues<keyof typeof errors>(parsed.error.issues));
       return;
     }
 

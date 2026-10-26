@@ -4,10 +4,9 @@ import { clubLogoUrl } from "@/lib/club-logo-url";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
 import type { Club } from "@/server/api/v1/schemas/admin-catalog";
 import type { Database, Tables } from "@/types/database";
+import { FOREIGN_KEY_VIOLATION } from "./pg-errors";
 
 type Db = SupabaseClient<Database>;
-
-const FOREIGN_KEY_VIOLATION = "23503";
 
 function toDto(row: Tables<"clubs">): Club {
   return {

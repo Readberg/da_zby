@@ -37,6 +37,12 @@ docs/                      документация; docs/design — библи�
 tests/e2e/                 Playwright
 ```
 
+## Общие помощники (D-071)
+- `src/lib/search-params.ts` — `firstParam`: параметр адреса как одна строка.
+- `src/lib/form-errors.ts` — `fieldErrorsFromIssues`: ошибки Zod → ошибки полей формы.
+- `src/server/services/pg-errors.ts` — коды SQLSTATE (`UNIQUE_VIOLATION`, `FOREIGN_KEY_VIOLATION`, `CHECK_VIOLATION`), которые сервисы превращают в проблемы API.
+- Новый код, которому нужно то же самое, использует их, а не копирует.
+
 ## Поток данных
 
 - **Чтение страниц (RSC):** страница вызывает сервис напрямую (`src/server/services`) — без HTTP-прыжка.

@@ -6,15 +6,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RatingPicker } from "@/features/rating/components/rating-picker";
 import { SeasonRatingTable, TourRatingTable } from "@/features/rating/components/rating-table";
 import { points } from "@/lib/plural";
+import { firstParam } from "@/lib/search-params";
 import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
 import { getRatingPageCached } from "@/server/services/rating.cached";
 
 export const metadata: Metadata = { title: ru.rating.title };
-
-function first(value: string | string[] | undefined): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
 
 async function RatingContent({
   searchParams,
@@ -22,12 +19,12 @@ async function RatingContent({
   searchParams: PageProps<"/rating">["searchParams"];
 }) {
   const params = await searchParams;
-  const tourNumber = Number(first(params.tour));
+  const tourNumber = Number(firstParam(params.tour));
   // The shared table comes from the cache; who is looking is worked out per request, in parallel.
   const [data, user] = await Promise.all([
     getRatingPageCached(
-      first(params.tournament),
-      first(params.season),
+      firstParam(params.tournament),
+      firstParam(params.season),
       Number.isInteger(tourNumber) && tourNumber > 0 ? tourNumber : undefined,
     ),
     getCurrentUser(),

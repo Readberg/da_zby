@@ -1,36 +1,11 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { Suspense } from "react";
 import { buttonClasses } from "@/components/ui/button";
 import { ClubLogo } from "@/components/ui/club-logo";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/local-time";
 import { ru } from "@/messages/ru";
-import { getCurrentUser } from "@/server/services/current-user";
 import { getHomeCached } from "@/server/services/home.cached";
 import { composePredictionsPage } from "@/server/services/predictions";
-
-/** The one main action: signed-in visitors predict, guests sign in first and land on the tour. */
-export async function HeroAction() {
-  const user = await getCurrentUser();
-  return (
-    <Link
-      href={user ? "/predictions" : "/login?next=%2Fpredictions"}
-      className={buttonClasses("primary", "min-h-12 px-8 text-lg")}
-    >
-      {user ? ru.home.ctaUser : ru.home.ctaGuest}
-    </Link>
-  );
-}
-
-function HeroActionFallback() {
-  // Most visitors are guests: show their label until the session is known.
-  return (
-    <span className={buttonClasses("primary", "min-h-12 px-8 text-lg opacity-90")}>
-      {ru.home.ctaGuest}
-    </span>
-  );
-}
 
 /** Next tour: the matches and the deadline, so a newcomer sees what to predict right away. */
 export async function NextTour() {
@@ -92,33 +67,11 @@ export async function NextTour() {
   );
 }
 
-export function Hero() {
+/** The main action of a signed-in visitor on the home page. */
+export function MemberAction() {
   return (
-    <section
-      aria-labelledby="hero-title"
-      className="grid items-center gap-8 py-4 sm:py-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12"
-    >
-      <div className="flex flex-col items-start gap-5">
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted">
-          {ru.home.eyebrow}
-        </p>
-        <h1 id="hero-title" className="text-h2 sm:text-h1">
-          {ru.home.headline}
-        </h1>
-        <p className="max-w-prose text-lg text-muted">{ru.home.lead}</p>
-        <div className="flex flex-wrap items-center gap-4">
-          <Suspense fallback={<HeroActionFallback />}>
-            <HeroAction />
-          </Suspense>
-          <a href="#how" className="inline-flex min-h-11 items-center underline underline-offset-4">
-            {ru.home.howLink}
-          </a>
-        </div>
-        <p className="text-sm text-muted">{ru.home.quickNote}</p>
-      </div>
-      <Suspense fallback={<Skeleton className="h-72 w-full rounded-lg" />}>
-        <NextTour />
-      </Suspense>
-    </section>
+    <Link href="/predictions" className={buttonClasses("primary", "min-h-12 px-8 text-lg")}>
+      {ru.home.ctaUser}
+    </Link>
   );
 }

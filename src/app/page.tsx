@@ -5,7 +5,7 @@ import { Loader } from "@/components/ui/loader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GuestLanding } from "@/features/home/components/guest-landing";
 import { HomeFallback } from "@/features/home/components/home-fallback";
-import { HeroAction, NextTour } from "@/features/home/components/hero";
+import { MemberAction, NextTour } from "@/features/home/components/next-tour";
 import { Leaders } from "@/features/home/components/leaders";
 import { LatestVideos, LatestVideosSkeleton } from "@/features/videos/components/latest-videos";
 import { ru } from "@/messages/ru";
@@ -44,9 +44,7 @@ function MemberHome() {
           <NextTour />
         </Suspense>
         <div>
-          <Suspense fallback={null}>
-            <HeroAction />
-          </Suspense>
+          <MemberAction />
         </div>
       </section>
       <Leaders />

@@ -192,7 +192,7 @@ function Steps({ exact, outcome }: { exact: number; outcome: number }) {
   );
 }
 
-async function StepsWithPoints() {
+export async function StepsWithPoints() {
   await connection();
   const { pub } = await getHomeCached();
   return (

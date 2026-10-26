@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { SelectField, TextField, TextareaField } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
+import { fieldErrorsFromIssues } from "@/lib/form-errors";
 import { profilePatchSchema, utcOffsetOptions } from "@/lib/profile-schema";
 import { ru } from "@/messages/ru";
 
@@ -57,12 +58,7 @@ export function ProfileForm({
 
     const parsed = profilePatchSchema.safeParse(payload);
     if (!parsed.success) {
-      const next: FieldErrors = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof ProfileFormValues | undefined;
-        if (key && !next[key]) next[key] = issue.message;
-      }
-      setErrors(next);
+      setErrors(fieldErrorsFromIssues<keyof ProfileFormValues>(parsed.error.issues));
       setStatus("failed");
       return;
     }

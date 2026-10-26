@@ -4,10 +4,9 @@ import { ApiError, ERROR_CODES, type FieldError } from "@/server/api/v1/problem"
 import type { MatchDto, TourDetail, TourSummary } from "@/server/api/v1/schemas/admin-season";
 import type { Database, Tables } from "@/types/database";
 import { assertSeasonOpen, seasonNotFound } from "./admin-seasons";
+import { UNIQUE_VIOLATION } from "./pg-errors";
 
 type Db = SupabaseClient<Database>;
-
-const UNIQUE_VIOLATION = "23505";
 
 function notFound(what: string) {
   return new ApiError(404, ERROR_CODES.notFound, "Not Found", `${what} does not exist.`);
