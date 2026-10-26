@@ -272,7 +272,7 @@ export function PredictionTable({
 
               {editable && !errors[match.id] && chip(match) && (
                 <p
-                  className={`text-center text-sm ${chip(match) === "saved" ? "text-success" : "text-muted"}`}
+                  className={`text-center text-sm ${chip(match) === "saved" ? "text-success-ink" : "text-muted"}`}
                 >
                   {chip(match) === "saved" ? ru.predictions.savedChip : ru.predictions.notSaved}
                 </p>

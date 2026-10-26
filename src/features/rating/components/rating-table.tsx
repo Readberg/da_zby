@@ -30,7 +30,7 @@ function Trend({ value }: { value: number }) {
   const up = value > 0;
   return (
     <span
-      className={`ml-1 inline-block animate-trend-in text-xs font-semibold ${up ? "text-success" : "text-danger"}`}
+      className={`ml-1 inline-block animate-trend-in text-xs font-semibold ${up ? "text-success-ink" : "text-danger"}`}
       title={
         up
           ? ru.rating.trendUp.replace("{n}", String(value))

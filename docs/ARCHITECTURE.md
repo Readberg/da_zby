@@ -98,6 +98,8 @@ tests/e2e/                 Playwright
 
 ## Тесты
 
+Качество поверх обычных тестов (D-078): доступность — `tests/e2e/a11y*.spec.ts` (axe), клавиатура и reduced-motion — `keyboard.spec.ts`, бюджеты — `performance.spec.ts`, объём — `pnpm perf:scale`.
+
 - **Unit (Vitest):** `scoring.ts`, `time.ts`, парсинг RSS, фабрики.
 - **Contract (Vitest):** каждый эндпоинт API v1 — успех и ошибки по схеме; права для гостя/пользователя/админа.
 - **SQL-сценарии:** RLS и триггеры (дедлайн, подсчёт, запрет самоповышения роли, bootstrap админа) — скрипты в `supabase/tests/`.

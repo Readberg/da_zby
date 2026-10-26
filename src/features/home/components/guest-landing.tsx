@@ -246,7 +246,7 @@ function RatingMock() {
               <span className="min-w-0 flex-1 truncate text-sm font-semibold">{row.name}</span>
               <span className="text-right text-xs leading-tight">
                 <span className="block font-semibold">{row.points}</span>
-                <span className={row.up ? "text-success" : "text-danger"}>{row.trend}</span>
+                <span className={row.up ? "text-success-ink" : "text-danger"}>{row.trend}</span>
               </span>
             </li>
           ))}

@@ -3,12 +3,17 @@ import logo from "@/assets/logo.png";
 import { BrandSpinner } from "@/components/ui/loader";
 import { ru } from "@/messages/ru";
 
-/** Marks the document as ready once everything has loaded (or at once if it already has). */
-export const READY_SCRIPT = `(function(){var d=document.documentElement;function r(){d.setAttribute('data-ready','')}if(document.readyState==='complete'){r()}else{window.addEventListener('load',r)}})();`;
+/**
+ * Marks the document as ready once what is on the first screen has loaded: the HTML (so the whole
+ * streamed page is in), the fonts and the images in view. Embedded players and pictures far below
+ * are not waited for (YouTube alone held the cover for seconds); a timer lifts it after 4 seconds
+ * whatever happens.
+ */
+export const READY_SCRIPT = `(function(){var d=document.documentElement,done=false;function r(){if(done)return;done=true;d.setAttribute('data-ready','')}function go(){var fonts=document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve();var h=innerHeight;var waits=[].slice.call(document.images).filter(function(i){var b=i.getBoundingClientRect();return !i.complete&&b.bottom>0&&b.top<h}).map(function(i){return new Promise(function(res){i.addEventListener('load',res);i.addEventListener('error',res)})});Promise.all([fonts].concat(waits)).then(r,r)}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',go)}else{go()}setTimeout(r,4000)})();`;
 
 /**
  * Full-page cover for the first visit: the page is not shown until it has loaded. It is part of the
- * server HTML (so it paints first) and lifts on the window load event; a CSS timer lifts it anyway
+ * server HTML (so it paints first) and lifts when the first screen is ready (see READY_SCRIPT); a CSS timer lifts it anyway
  * after a few seconds, and without scripts it never blocks (see globals.css).
  */
 export function SiteLoader() {

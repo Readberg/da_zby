@@ -14,8 +14,11 @@
   --color-line: #d2d2d7;
   --color-surface: #f5f5f7;
   --color-success: #1fa84f;
+  /* Success as text on light surfaces: the fill colour above is too pale for 4.5:1. */
+  --color-success-ink: #17803a;
   --color-danger: #d6232a;
-  --color-telegram: #229ed9;
+  /* Darker than Telegram's own blue so white text on it passes 4.5:1. */
+  --color-telegram: #1a7aad;
 
   --radius-sm: 10px;
   --radius-md: 14px;
@@ -40,6 +43,7 @@
     --color-line: #2e2e33;
     --color-surface: #19191c;
     --color-success: #3ecf70;
+    --color-success-ink: #3ecf70;
     --color-danger: #ff6b6b;
     --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.45);
   }
@@ -53,6 +57,7 @@
   --color-line: #2e2e33;
   --color-surface: #19191c;
   --color-success: #3ecf70;
+  --color-success-ink: #3ecf70;
   --color-danger: #ff6b6b;
   --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.45);
 }
@@ -71,6 +76,7 @@
   --color-line: var(--color-line);
   --color-surface: var(--color-surface);
   --color-success: var(--color-success);
+  --color-success-ink: var(--color-success-ink);
   --color-danger: var(--color-danger);
   --color-telegram: var(--color-telegram);
   --shadow-soft: var(--shadow-soft);
