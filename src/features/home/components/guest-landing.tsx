@@ -52,7 +52,10 @@ function Hero() {
       <p className="max-w-md text-lg text-muted">{t.lead}</p>
       <Link
         href={LOGIN_HREF}
-        className={buttonClasses("primary", "min-h-14 gap-3 px-8 text-lg shadow-soft")}
+        className={buttonClasses(
+          "primary",
+          "min-h-14 gap-2 whitespace-nowrap px-5 text-base shadow-soft sm:gap-3 sm:px-8 sm:text-lg",
+        )}
       >
         <TelegramIcon className="h-6 w-6" />
         {t.cta}
@@ -72,10 +75,10 @@ export async function UpcomingMatches() {
   return (
     <div className="rounded-lg bg-surface p-4 shadow-soft sm:p-6">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-h3 normal-case">{t.upcomingTitle}</h2>
+        <h2 className="text-2xl normal-case sm:text-h3">{t.upcomingTitle}</h2>
         <Link
           href={LOGIN_HREF}
-          className="inline-flex min-h-10 items-center gap-2 rounded-full bg-bg px-4 text-sm font-semibold transition-colors hover:bg-line"
+          className="inline-flex min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-bg px-4 text-sm font-semibold transition-colors hover:bg-line"
         >
           {t.allMatches}
           <ArrowRightIcon className="h-4 w-4" />
@@ -91,27 +94,34 @@ export async function UpcomingMatches() {
           {matches.slice(0, 4).map((match) => (
             <li
               key={match.id}
-              className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 py-3 sm:grid-cols-[minmax(0,9rem)_1fr_auto]"
+              className="flex flex-col gap-3 py-4 sm:grid sm:grid-cols-[minmax(0,9rem)_1fr_auto] sm:items-center sm:gap-x-3 sm:py-3"
             >
-              <p className="col-span-2 text-sm text-muted sm:col-span-1">
+              <p className="text-sm text-muted">
                 {tournament.name} · {ru.home.nextTour.replace("{n}", String(tour.number))}
               </p>
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
-                  <span className="truncate text-right font-semibold">{match.home.name}</span>
-                  <ClubLogo src={match.home.logoUrl} name={match.home.name} size={32} />
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row-reverse sm:justify-start sm:gap-2 sm:text-right">
+                  <ClubLogo src={match.home.logoUrl} name={match.home.name} size={40} />
+                  <span className="min-w-0 break-words font-semibold leading-tight sm:truncate">
+                    {match.home.name}
+                  </span>
                 </span>
-                <span className="shrink-0 px-1 text-center text-xs text-muted">
+                <span className="w-20 shrink-0 text-center text-xs text-muted sm:w-auto sm:px-1">
                   {formatDateTime(match.kickoffAt)}
                 </span>
-                <span className="flex min-w-0 flex-1 items-center gap-2">
-                  <ClubLogo src={match.away.logoUrl} name={match.away.name} size={32} />
-                  <span className="truncate font-semibold">{match.away.name}</span>
+                <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row sm:gap-2 sm:text-left">
+                  <ClubLogo src={match.away.logoUrl} name={match.away.name} size={40} />
+                  <span className="min-w-0 break-words font-semibold leading-tight sm:truncate">
+                    {match.away.name}
+                  </span>
                 </span>
               </div>
               <Link
                 href={LOGIN_HREF}
-                className={buttonClasses("primary", "min-h-10 px-4 text-sm sm:px-5")}
+                className={buttonClasses(
+                  "primary",
+                  "min-h-11 w-full px-4 text-sm sm:w-auto sm:min-h-10 sm:px-5",
+                )}
               >
                 {t.predict}
               </Link>
