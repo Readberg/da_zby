@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import { ResultBadge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
+import { pluralRu } from "@/lib/plural";
 import { ru } from "@/messages/ru";
 import type { PredictionCell, RatingRow, TourMatch } from "@/server/services/rating";
 
@@ -68,13 +70,30 @@ function Place({ row }: { row: RatingRow }) {
   );
 }
 
+/** A skipped stretch of the table: the long list is cut to the top and the viewer's row. */
+function GapRow({ count, colSpan }: { count: number; colSpan: number }) {
+  return (
+    <TR className="text-muted">
+      <TD colSpan={colSpan} className="py-1 text-center text-sm">
+        {ru.rating.hiddenRows
+          .replace("{n}", String(count))
+          .replace("{participants}", pluralRu(count, ru.rating.participantForms))}
+      </TD>
+    </TR>
+  );
+}
+
 /** Season table: place, participant, misses, right outcomes, exact scores, points. */
 export function SeasonRatingTable({
   rows,
   currentUserId,
+  gapBefore = {},
+  gapAfter = 0,
 }: {
   rows: RatingRow[];
   currentUserId?: string | null;
+  gapBefore?: Record<string, number>;
+  gapAfter?: number;
 }) {
   if (rows.length === 0) return <p className="text-muted">{ru.rating.empty}</p>;
   return (
@@ -112,23 +131,26 @@ export function SeasonRatingTable({
         </THead>
         <TBody>
           {rows.map((row) => (
-            <TR
-              key={row.userId}
-              highlight={row.userId === currentUserId}
-              aria-current={row.userId === currentUserId ? "true" : undefined}
-            >
-              <TD className="font-semibold">
-                <Place row={row} />
-              </TD>
-              <TD>
-                <Participant row={row} />
-              </TD>
-              <TD className="text-right">{row.missCount}</TD>
-              <TD className="text-right">{row.outcomeCount}</TD>
-              <TD className="text-right">{row.exactCount}</TD>
-              <TD className="text-right font-semibold">{row.points}</TD>
-            </TR>
+            <Fragment key={row.userId}>
+              {gapBefore[row.userId] ? <GapRow count={gapBefore[row.userId]} colSpan={6} /> : null}
+              <TR
+                highlight={row.userId === currentUserId}
+                aria-current={row.userId === currentUserId ? "true" : undefined}
+              >
+                <TD className="font-semibold">
+                  <Place row={row} />
+                </TD>
+                <TD>
+                  <Participant row={row} />
+                </TD>
+                <TD className="text-right">{row.missCount}</TD>
+                <TD className="text-right">{row.outcomeCount}</TD>
+                <TD className="text-right">{row.exactCount}</TD>
+                <TD className="text-right font-semibold">{row.points}</TD>
+              </TR>
+            </Fragment>
           ))}
+          {gapAfter > 0 && <GapRow count={gapAfter} colSpan={6} />}
         </TBody>
       </Table>
       <p className="text-sm text-muted sm:hidden">{ru.rating.legend}</p>
@@ -159,12 +181,17 @@ export function TourRatingTable({
   matches,
   cells,
   currentUserId,
+  gapBefore = {},
+  gapAfter = 0,
 }: {
   rows: RatingRow[];
   matches: TourMatch[];
   cells: Record<string, Record<string, PredictionCell>>;
   currentUserId?: string | null;
+  gapBefore?: Record<string, number>;
+  gapAfter?: number;
 }) {
+  const colSpan = matches.length + 3;
   if (rows.length === 0) return <p className="text-muted">{ru.rating.emptyTour}</p>;
   return (
     <Table caption={ru.rating.tieNote}>
@@ -189,25 +216,33 @@ export function TourRatingTable({
       </THead>
       <TBody>
         {rows.map((row) => (
-          <TR
-            key={row.userId}
-            highlight={row.userId === currentUserId}
-            aria-current={row.userId === currentUserId ? "true" : undefined}
-          >
-            <TD className="font-semibold">
-              <Place row={row} />
-            </TD>
-            <TD>
-              <Participant row={row} />
-            </TD>
-            {matches.map((match) => (
-              <TD key={match.id} className="text-center">
-                <Cell cell={cells[row.userId]?.[match.id]} finished={match.status === "finished"} />
+          <Fragment key={row.userId}>
+            {gapBefore[row.userId] ? (
+              <GapRow count={gapBefore[row.userId]} colSpan={colSpan} />
+            ) : null}
+            <TR
+              highlight={row.userId === currentUserId}
+              aria-current={row.userId === currentUserId ? "true" : undefined}
+            >
+              <TD className="font-semibold">
+                <Place row={row} />
               </TD>
-            ))}
-            <TD className="text-right font-semibold">{row.points}</TD>
-          </TR>
+              <TD>
+                <Participant row={row} />
+              </TD>
+              {matches.map((match) => (
+                <TD key={match.id} className="text-center">
+                  <Cell
+                    cell={cells[row.userId]?.[match.id]}
+                    finished={match.status === "finished"}
+                  />
+                </TD>
+              ))}
+              <TD className="text-right font-semibold">{row.points}</TD>
+            </TR>
+          </Fragment>
         ))}
+        {gapAfter > 0 && <GapRow count={gapAfter} colSpan={colSpan} />}
       </TBody>
     </Table>
   );
