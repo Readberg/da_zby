@@ -1,0 +1,40 @@
+# Weekly dependency updates as ordinary PRs into `dev` (D-086): they pass the same CI as any change.
+# Minor and patch updates arrive in one grouped PR per ecosystem; major versions are not proposed
+# at all (they are taken on purpose, as a task). Dependabot PRs have no repository secrets, so the
+# signed-in e2e tests skip there and run again when the update lands in `dev`.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Minsk
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Minsk
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      actions:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
