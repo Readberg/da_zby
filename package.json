@@ -1,6 +1,6 @@
 {
   "name": "da-zby",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -18,7 +18,8 @@
     "design:snap": "playwright test -c playwright.design.config.ts",
     "db:check": "tsx --env-file=.env.local scripts/check-schema.ts",
     "db:copy-catalog": "tsx scripts/copy-catalog.ts",
-    "perf:scale": "tsx scripts/scale-check.ts"
+    "perf:scale": "tsx scripts/scale-check.ts",
+    "release": "tsx scripts/release.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -52,6 +53,6 @@
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {
-    "node": ">=20.9"
+    "node": ">=24 <25"
   }
 }

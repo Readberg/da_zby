@@ -44,7 +44,7 @@ Next.js (App Router, последняя стабильная) · TypeScript `str
 
 ## Окружения и секреты
 
-- Сейчас **только dev**: Supabase-проект `ksykaqwkbfqtkvdxqedv` (публичные значения — в `.env.example`). Прод — перед публичным релизом. Домен — в самом конце.
+- **Одно окружение: dev = прод** (решение владельца 26.10.2026, D-080). Supabase-проект `ksykaqwkbfqtkvdxqedv` (публичные значения — в `.env.example`) и стенд Railway — это и есть рабочий сайт; отдельного прода не будет, пока владелец не решит иначе. Домен не покупаем (откладывается на неопределённый срок, D-081).
 - Секреты только в `.env.local` (в `.gitignore`) и переменных Railway. Никогда — в репозиторий, доки, Jira, логи, чат.
   `SUPABASE_SECRET_KEY` (`sb_secret_…`, раньше service_role) и `JIRA_*` — только сервер, без префикса `NEXT_PUBLIC_`.
 
@@ -57,6 +57,7 @@ pnpm db:push        # supabase db push (dev)
 pnpm db:types       # генерация src/types/database.ts
 pnpm api:openapi    # перегенерация docs/api/openapi.v1.json
 pnpm design:snap    # скриншоты компонентов в docs/design/components/
+pnpm release <patch|minor|major> --title "…" --task DAZBY-N [--dry-run]   # весь релиз одной командой (D-085)
 ```
 
 Перед PR зелёные: `lint`, `typecheck`, `test`, `build`, e2e smoke.

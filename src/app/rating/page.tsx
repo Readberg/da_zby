@@ -5,6 +5,9 @@ import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RatingPicker } from "@/features/rating/components/rating-picker";
 import { SeasonRatingTable, TourRatingTable } from "@/features/rating/components/rating-table";
+import { windowRows } from "@/features/rating/window";
+import { formatDateTime } from "@/lib/local-time";
+import { hiddenUntil } from "@/lib/predictions";
 import { points } from "@/lib/plural";
 import { firstParam } from "@/lib/search-params";
 import { ru } from "@/messages/ru";
@@ -30,13 +33,20 @@ async function RatingContent({
     getCurrentUser(),
   ]);
   const mine = user ? data.rows.find((row) => row.userId === user.id) : undefined;
+  const expanded = firstParam(params.around) === "1";
+  const view = windowRows(data.rows, user?.id, expanded);
 
   if (!data.tournament) return <p className="text-muted">{ru.rating.noTournaments}</p>;
 
   const { season, tour } = data;
+  // Until the tour's deadline the others' predictions are hidden by the database (D-084).
+  const hidden = hiddenUntil(tour?.deadlineAt ?? null);
   const toPredictions = new URLSearchParams({ tournament: data.tournament.slug });
   if (season) toPredictions.set("season", season.id);
   if (tour) toPredictions.set("tour", String(tour.number));
+  // The same page with the neighbours of the viewer shown or hidden.
+  const neighbours = new URLSearchParams(toPredictions);
+  if (!expanded) neighbours.set("around", "1");
 
   return (
     <>
@@ -64,15 +74,36 @@ async function RatingContent({
                 .replace("{points}", points(mine.points))}
             </p>
           )}
-          {tour ? (
+          {hidden && (
+            <p role="status" className="rounded-lg border border-line px-5 py-4 text-muted">
+              {ru.rating.predictionsHidden.replace("{date}", formatDateTime(hidden))}
+            </p>
+          )}
+          {tour && hidden && data.rows.length === 0 ? null : tour ? (
             <TourRatingTable
-              rows={data.rows}
+              rows={view.rows}
               matches={data.matches}
               cells={data.cells}
               currentUserId={user?.id}
+              gapBefore={view.gapBefore}
+              gapAfter={view.gapAfter}
             />
           ) : (
-            <SeasonRatingTable rows={data.rows} currentUserId={user?.id} />
+            <SeasonRatingTable
+              rows={view.rows}
+              currentUserId={user?.id}
+              gapBefore={view.gapBefore}
+              gapAfter={view.gapAfter}
+            />
+          )}
+          {(view.canExpand || expanded) && mine && (
+            <Link
+              href={`/rating?${neighbours}`}
+              scroll={false}
+              className="w-fit text-sm font-semibold underline"
+            >
+              {expanded ? ru.rating.hideNeighbours : ru.rating.showNeighbours}
+            </Link>
           )}
           <p className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted">
             <Link href={`/predictions?${toPredictions}`} className="underline">

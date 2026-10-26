@@ -31,7 +31,13 @@ test.describe("permissions on the real database (needs SUPABASE_SECRET_KEY)", ()
   let guest: SupabaseClient;
   let asMember: SupabaseClient;
   let asAdmin: SupabaseClient;
-  const ids = { tournament: "", openMatch: "", closedMatch: "", otherPrediction: "" };
+  const ids = {
+    tournament: "",
+    openMatch: "",
+    closedMatch: "",
+    otherPrediction: "",
+    closedPrediction: "",
+  };
 
   test.beforeAll(async () => {
     const db = serviceClient();
@@ -96,6 +102,15 @@ test.describe("permissions on the real database (needs SUPABASE_SECRET_KEY)", ()
         away_score: 1,
       })
     ).id;
+    // The same person's prediction for a tour whose deadline has passed.
+    ids.closedPrediction = (
+      await insert<{ id: string }>("predictions", {
+        user_id: other.id,
+        match_id: ids.closedMatch,
+        home_score: 2,
+        away_score: 2,
+      })
+    ).id;
   });
 
   test.afterAll(async () => {
@@ -126,6 +141,26 @@ test.describe("permissions on the real database (needs SUPABASE_SECRET_KEY)", ()
         expect(error, table).toBeNull();
       }
     }
+  });
+
+  test("other people's predictions are hidden until the tour deadline (D-084)", async () => {
+    const seen = async (client: SupabaseClient) => {
+      const { data, error } = await client
+        .from("predictions")
+        .select("id")
+        .in("id", [ids.otherPrediction, ids.closedPrediction]);
+      expect(error).toBeNull();
+      return (data ?? []).map((row) => row.id).sort();
+    };
+    const open = ids.otherPrediction;
+    const closed = ids.closedPrediction;
+
+    // Guest and another participant: only the prediction of the tour whose deadline has passed.
+    expect(await seen(guest)).toEqual([closed]);
+    expect(await seen(asMember)).toEqual([closed]);
+    // The author and an admin see both.
+    expect(await seen(await signedInClient(other))).toEqual([open, closed].sort());
+    expect(await seen(asAdmin)).toEqual([open, closed].sort());
   });
 
   test("private tables are closed to guests and participants", async () => {

@@ -33,6 +33,20 @@ describe("SeasonRatingTable", () => {
     );
   });
 
+  it("marks skipped stretches before a row and at the end", () => {
+    render(
+      <SeasonRatingTable
+        rows={[row({ userId: "a", nickname: "Аня" }), row({ userId: "b", nickname: "Боря" })]}
+        gapBefore={{ b: 29 }}
+        gapAfter={1}
+      />,
+    );
+    expect(screen.getByText("… ещё 29 участников")).toBeInTheDocument();
+    expect(screen.getByText("… ещё 1 участник")).toBeInTheDocument();
+    const gap = screen.getByText("… ещё 29 участников").closest("td");
+    expect(gap).toHaveAttribute("colspan", "6");
+  });
+
   it("gives equal participants the same place", () => {
     render(
       <SeasonRatingTable

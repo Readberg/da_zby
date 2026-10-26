@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { avatarUrl } from "@/lib/avatar";
 import { placeChanges, type Standing } from "@/lib/place-change";
+import { tourDeadline } from "@/lib/predictions";
 import type { Database } from "@/types/database";
 
 type Db = SupabaseClient<Database>;
@@ -46,7 +47,13 @@ export type RatingPageData = {
   season: { id: string; name: string; status: "active" | "closed" } | null;
   tours: { number: number; title: string | null }[];
   /** Null: the table of the whole season. */
-  tour: { id: string; number: number; title: string | null } | null;
+  tour: {
+    id: string;
+    number: number;
+    title: string | null;
+    /** When other people's predictions open (ISO); null while the tour has no matches. */
+    deadlineAt: string | null;
+  } | null;
   rows: RatingRow[];
   matches: TourMatch[];
   /** Predictions of the tour by user id, then match id (tour view only). */
@@ -201,7 +208,11 @@ export async function getRatingPage(
   const closed = season.status === "closed";
 
   const [toursResult, boardResult] = await Promise.all([
-    db.from("tours").select("id, number, title").eq("season_id", season.id).order("number"),
+    db
+      .from("tours")
+      .select("id, number, title, deadline_override")
+      .eq("season_id", season.id)
+      .order("number"),
     db
       .from("season_leaderboard")
       .select("*, profiles(nickname, avatar_path)")
@@ -246,6 +257,11 @@ export async function getRatingPage(
     awayScore: m.away_score,
   }));
 
+  const deadline = tourDeadline(
+    chosen.deadline_override,
+    matches.map((m) => ({ kickoffAt: m.kickoffAt, status: m.status })),
+  );
+
   const cells: RatingPageData["cells"] = {};
   if (matchRows.length > 0) {
     const { data: predictions, error } = await db
@@ -269,7 +285,12 @@ export async function getRatingPage(
   return {
     ...base,
     tours,
-    tour: { id: chosen.id, number: chosen.number, title: chosen.title },
+    tour: {
+      id: chosen.id,
+      number: chosen.number,
+      title: chosen.title,
+      deadlineAt: deadline ? deadline.toISOString() : null,
+    },
     rows: toRatingRows((tourBoard.data ?? []) as Raw[], false),
     matches,
     cells,

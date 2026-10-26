@@ -6,7 +6,6 @@ import {
   ChevronDownIcon,
   GlobeIcon,
   InstagramIcon,
-  MailIcon,
   TelegramIcon,
   ThreadsIcon,
   TiktokIcon,
@@ -23,16 +22,6 @@ const socialIcons: Record<SocialId, ReactNode> = {
   threads: <ThreadsIcon className="h-5 w-5" />,
 };
 
-/** A placeholder entry: looks like a link, does nothing until its page or address exists. */
-function Stub({ children, icon }: { children: ReactNode; icon?: ReactNode }) {
-  return (
-    <span className="inline-flex min-h-11 items-center gap-3 text-muted">
-      {icon}
-      {children}
-    </span>
-  );
-}
-
 export function SiteFooter() {
   const social = siteConfig.social.filter((link) => link.url);
   const telegram = social.find((link) => link.id === "telegram");
@@ -41,23 +30,13 @@ export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-line bg-surface text-muted">
       <Container className="flex flex-col gap-8 py-10">
-        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1.2fr_1.2fr]">
+        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr]">
           <div className="flex items-center gap-3 self-start text-ink">
             <Image src={logo} alt="" width={48} height={48} className="h-12 w-12" />
             <span className="font-display text-xl uppercase">{ru.site.name}</span>
           </div>
           <div className="flex flex-col gap-2">
-            <p className="font-semibold text-ink">{ru.footer.info}</p>
-            <Stub>{ru.footer.about}</Stub>
-          </div>
-          <div className="flex flex-col gap-2">
-            <p className="font-semibold text-ink">{ru.footer.legal}</p>
-            <Stub>{ru.footer.privacy}</Stub>
-            <Stub>{ru.footer.trust}</Stub>
-          </div>
-          <div className="flex flex-col gap-2">
             <p className="font-semibold text-ink">{ru.footer.contacts}</p>
-            <Stub icon={<MailIcon className="h-5 w-5 text-ink" />}>{ru.footer.email}</Stub>
             {telegram && (
               <a
                 href={telegram.url}
