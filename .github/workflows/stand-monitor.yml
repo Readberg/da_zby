@@ -1,0 +1,29 @@
+name: stand-monitor
+
+# Every 15 minutes: the stand must answer and its checks (database, Telegram sign-in webhook) must pass.
+# A failed run makes GitHub send the usual "workflow failed" e-mail, which is the alert (DAZBY-87).
+# The address is public, not a secret; change it here (and in stand-check.yml) when the domain is connected.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      STAND_URL: https://dazby-production.up.railway.app
+    steps:
+      - name: Strict health check
+        run: |
+          for i in 1 2 3; do
+            if curl -fsS --max-time 20 "$STAND_URL/api/v1/health/strict"; then exit 0; fi
+            sleep 20
+          done
+          echo "::error::$STAND_URL/api/v1/health/strict failed three times: the site, its database or the Telegram sign-in webhook is broken."
+          exit 1

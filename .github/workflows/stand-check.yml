@@ -24,10 +24,10 @@ jobs:
       - name: Health of the stand
         run: |
           for i in 1 2 3 4 5 6; do
-            curl -fsS "$E2E_BASE_URL/api/v1/health" && exit 0
+            curl -fsS "$E2E_BASE_URL/api/v1/health/strict" && exit 0
             sleep 10
           done
-          echo "::error::$E2E_BASE_URL/api/v1/health did not answer 200"
+          echo "::error::$E2E_BASE_URL/api/v1/health/strict did not answer 200 (database or Telegram webhook broken?)"
           exit 1
 
       - uses: pnpm/action-setup@v4
