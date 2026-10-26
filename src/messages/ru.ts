@@ -420,6 +420,7 @@ export const ru = {
     seasonClosedOption: "закрыт",
     cacheNote: "Данные обновляются не реже чем раз в 30 минут.",
     yourPlace: "Ваше место: {place} · {points}",
+    predictionsHidden: "Прогнозы участников откроются после дедлайна тура — {date}.",
     hiddenRows: "… ещё {n} {participants}",
     participantForms: ["участник", "участника", "участников"] as const,
     showNeighbours: "Показать соседей",

@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RatingPicker } from "@/features/rating/components/rating-picker";
 import { SeasonRatingTable, TourRatingTable } from "@/features/rating/components/rating-table";
 import { windowRows } from "@/features/rating/window";
+import { formatDateTime } from "@/lib/local-time";
+import { hiddenUntil } from "@/lib/predictions";
 import { points } from "@/lib/plural";
 import { firstParam } from "@/lib/search-params";
 import { ru } from "@/messages/ru";
@@ -37,6 +39,8 @@ async function RatingContent({
   if (!data.tournament) return <p className="text-muted">{ru.rating.noTournaments}</p>;
 
   const { season, tour } = data;
+  // Until the tour's deadline the others' predictions are hidden by the database (D-084).
+  const hidden = hiddenUntil(tour?.deadlineAt ?? null);
   const toPredictions = new URLSearchParams({ tournament: data.tournament.slug });
   if (season) toPredictions.set("season", season.id);
   if (tour) toPredictions.set("tour", String(tour.number));
@@ -70,7 +74,12 @@ async function RatingContent({
                 .replace("{points}", points(mine.points))}
             </p>
           )}
-          {tour ? (
+          {hidden && (
+            <p role="status" className="rounded-lg border border-line px-5 py-4 text-muted">
+              {ru.rating.predictionsHidden.replace("{date}", formatDateTime(hidden))}
+            </p>
+          )}
+          {tour && hidden && data.rows.length === 0 ? null : tour ? (
             <TourRatingTable
               rows={view.rows}
               matches={data.matches}

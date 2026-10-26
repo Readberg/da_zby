@@ -160,6 +160,15 @@ test.describe("live cycle (needs SUPABASE_SECRET_KEY)", () => {
     await expect(page.getByLabel(`Голы ${awayName}`)).toHaveValue("0");
   });
 
+  test("before the deadline the tour table does not show other people's predictions", async ({
+    page,
+  }) => {
+    await page.goto(`/rating?tournament=${tag}&season=${ids.season}&tour=1`);
+    await expect(page.getByText(/Прогнозы участников откроются после дедлайна тура/)).toBeVisible();
+    await expect(page.getByText(exactNick)).toHaveCount(0);
+    await expect(page.getByText(outcomeNick)).toHaveCount(0);
+  });
+
   test("after the result the points follow the tournament rules and the rating is ordered", async ({
     page,
   }) => {

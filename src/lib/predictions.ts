@@ -20,6 +20,11 @@ export function tourDeadline(override: string | null, matches: MatchTime[]): Dat
   return new Date(Math.min(...kickoffs) - DEADLINE_LEAD_MS);
 }
 
+/** The deadline while it is still ahead, else null: until then other people's predictions are hidden (D-084). */
+export function hiddenUntil(deadlineAt: string | null, now: Date = new Date()): string | null {
+  return deadlineAt && new Date(deadlineAt).getTime() > now.getTime() ? deadlineAt : null;
+}
+
 /** Predictions are open while the season is active and the deadline has not passed. */
 export function isTourOpen(
   seasonStatus: string,

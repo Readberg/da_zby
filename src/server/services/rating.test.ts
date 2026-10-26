@@ -195,6 +195,33 @@ describe("getRatingPage", () => {
       points: 3,
     });
     expect(page.rows).toHaveLength(1);
+    // Ten minutes before the first match: from then on other people's predictions are visible.
+    expect(page.tour?.deadlineAt).toBe("2026-10-01T14:50:00.000Z");
+  });
+
+  it("uses the pinned deadline of a tour when the admin set one", async () => {
+    const { db } = fakeDb({
+      ...seasonTables(),
+      tours: {
+        data: [{ id: T1, number: 1, title: null, deadline_override: "2026-10-02T10:00:00Z" }],
+      },
+      tour_leaderboard: { data: [] },
+      matches: { data: [] },
+      clubs: { data: [] },
+    });
+    const page = await getRatingPage(db, { tour: 1 });
+    expect(page.tour?.deadlineAt).toBe("2026-10-02T10:00:00.000Z");
+  });
+
+  it("has no deadline for a tour without matches", async () => {
+    const { db } = fakeDb({
+      ...seasonTables(),
+      tour_leaderboard: { data: [] },
+      matches: { data: [] },
+      clubs: { data: [] },
+    });
+    const page = await getRatingPage(db, { tour: 1 });
+    expect(page.tour?.deadlineAt).toBeNull();
   });
 
   it("falls back to the whole season for an unknown tour number", async () => {
