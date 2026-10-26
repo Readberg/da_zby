@@ -2,9 +2,9 @@
 
 Файл ведёт Claude по ходу работы; по нему же возобновляется прерванная сессия. Обновлять после каждой задачи.
 
-**Фаза:** базис готов; идёт «доведение до идеала» (роадмап в `docs/ROADMAP.md`, D-071). Выпущен v0.20.2. Ждёт приёмки владельца (🔑) на реальных устройствах и живого тура.
+**Фаза:** базис готов; идёт «доведение до идеала» (роадмап в `docs/ROADMAP.md`, D-071). Выпущен v0.21.0. Ждёт приёмки владельца (🔑) на реальных устройствах и живого тура.
 **Обновлено:** 2026-10-26
-**Стенд:** https://dazby-production.up.railway.app (версия 0.20.2, Supabase `ksykaqwkbfqtkvdxqedv`, Frankfurt). Домен `dazby.com` ещё не куплен (D-067); `NEXT_PUBLIC_SITE_URL` в Railway задан явно (D-069). Процесс D-046 (🤖/🔑) и D-047 (миграции через GitHub Actions) действуют.
+**Стенд:** https://dazby-production.up.railway.app (версия 0.21.0, Supabase `ksykaqwkbfqtkvdxqedv`, Frankfurt). Домен `dazby.com` ещё не куплен (D-067); `NEXT_PUBLIC_SITE_URL` в Railway задан явно (D-069). Процесс D-046 (🤖/🔑) и D-047 (миграции через GitHub Actions) действуют.
 
 ## Что выпущено
 
@@ -15,9 +15,10 @@
 | 0.4–0.5 | Сезоны/туры/матчи/результаты, прогнозы с дедлайном (E5), рейтинг и статистика (E6) |
 | 0.12–0.13 | Две темы, логотипы клубов, мгновенное добавление, кеш и лоадеры, главная-лендинг |
 | 0.14–0.19 | Анимация очков и тренд места, смена ника, Umami, шапка и все разделы в стиле референса, лоадер, главная вошедшего, Supabase во Frankfurt, рефакторинг |
+| 0.21.0 | Доступность (axe в e2e, контрасты, ссылка «Перейти к содержимому», клавиатура, reduced-motion), бюджеты производительности, крышка-лоадер по готовности первого экрана, `pnpm perf:scale` |
 | 0.20.0 | Сквозной e2e живого цикла, страж вебхука Telegram (`/health/strict` + монитор каждые 15 минут), тесты прав на реальной БД, заголовки безопасности и CSP (с 0.20.1 блокирующая), стабильные e2e |
 
-Полная история — `CHANGELOG.md`; решения — `docs/DECISIONS.md` (последние D-061…D-075).
+Полная история — `CHANGELOG.md`; решения — `docs/DECISIONS.md` (последние D-061…D-078).
 
 ## Jira
 
@@ -40,6 +41,6 @@
 - Next.js 16.4 с Cache Components; документация — `node_modules/next/dist/docs/`. Middleware = `src/proxy.ts`. Публичные данные кешируются тегом `rating` (`invalidateRating()` после каждой мутации в админке).
 - Вход только через Telegram-бота (D-054/056); нужны `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ADMIN_IDS`, `SUPABASE_SECRET_KEY` в Railway. Вебхук бота должен смотреть на адрес сайта (проверка — `/api/v1/health/strict`).
 - Процесс: ветка → `gh pr create --base dev` → зелёный `ci` (смотреть итог, не мержить красное) → `gh pr merge --squash --delete-branch`; релиз — PR `dev` → `main` (merge commit), тег, GitHub Release.
-- Проверки перед PR: `pnpm format; pnpm lint; pnpm typecheck; pnpm test; pnpm build; CI=1 pnpm test:e2e`. Состояние: 622 unit/contract, 117 e2e (часть — на реальной БД, нужен `SUPABASE_SECRET_KEY`).
+- Проверки перед PR: `pnpm format; pnpm lint; pnpm typecheck; pnpm test; pnpm build; CI=1 pnpm test:e2e`. Состояние: 622 unit/contract, 154 e2e (часть — на реальной БД, нужен `SUPABASE_SECRET_KEY`).
 - В e2e брать `test`/`expect` из `tests/e2e/helpers/fixtures.ts` (ждёт подмены потоковой главной после каждого перехода).
 - Supabase dev: схема применяется `db-migrate` (D-047), проверка — `pnpm db:check`; каталог между проектами — `pnpm db:copy-catalog dump | restore`.
