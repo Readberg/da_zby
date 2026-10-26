@@ -24,12 +24,12 @@ export function Table({
   );
 }
 
-export function THead(props: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className="border-b border-line text-muted" {...props} />;
+export function THead({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
+  return <thead className={cx("border-b border-line text-muted", className)} {...props} />;
 }
 
-export function TBody(props: HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className="[&>tr:nth-child(even)]:bg-surface" {...props} />;
+export function TBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
+  return <tbody className={cx("[&>tr:nth-child(even)]:bg-surface", className)} {...props} />;
 }
 
 export function TR({
