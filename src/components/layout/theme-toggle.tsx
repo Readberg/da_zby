@@ -1,5 +1,6 @@
 "use client";
 
+import { EVENTS, track } from "@/lib/analytics";
 import { effectiveTheme, otherTheme, THEME_STORAGE_KEY } from "@/lib/theme";
 import { ru } from "@/messages/ru";
 
@@ -10,6 +11,7 @@ export function ThemeToggle() {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const next = otherTheme(effectiveTheme(root, prefersDark));
     root.setAttribute("data-theme", next);
+    track(EVENTS.themeChange, { theme: next });
     try {
       localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {

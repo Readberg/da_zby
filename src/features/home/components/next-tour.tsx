@@ -70,7 +70,12 @@ export async function NextTour() {
 /** The main action of a signed-in visitor on the home page. */
 export function MemberAction() {
   return (
-    <Link href="/predictions" className={buttonClasses("primary", "min-h-12 px-8 text-lg")}>
+    <Link
+      href="/predictions"
+      data-umami-event="cta-click"
+      data-umami-event-where="member"
+      className={buttonClasses("primary", "min-h-12 px-8 text-lg")}
+    >
       {ru.home.ctaUser}
     </Link>
   );

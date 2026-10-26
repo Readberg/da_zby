@@ -74,6 +74,25 @@ describe("PredictionTable", () => {
     expect(await screen.findByText("Сохранено")).toBeVisible();
   });
 
+  it("tells Umami how many predictions were saved, and why a save failed", async () => {
+    const umami = { track: vi.fn() };
+    (window as unknown as { umami: typeof umami }).umami = umami;
+    table([match(m1)]);
+    await userEvent.type(screen.getByLabelText("Голы Динамо"), "2");
+    await userEvent.type(screen.getByLabelText("Голы БАТЭ"), "1");
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить прогнозы" }));
+    await waitFor(() => expect(umami.track).toHaveBeenCalledWith("prediction-saved", { count: 1 }));
+
+    api.mockRejectedValueOnce(new ApiClientError({ status: 409, code: "predictions.closed" }));
+    await userEvent.clear(screen.getByLabelText("Голы Динамо"));
+    await userEvent.type(screen.getByLabelText("Голы Динамо"), "3");
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить прогнозы" }));
+    await waitFor(() =>
+      expect(umami.track).toHaveBeenCalledWith("prediction-failed", { reason: "closed" }),
+    );
+    delete (window as unknown as { umami?: unknown }).umami;
+  });
+
   it("does not offer saving while nothing changed", () => {
     table([match(m1, { prediction: { homeScore: 1, awayScore: 0, result: null, points: null } })]);
     expect(screen.getByRole("button", { name: "Сохранить прогнозы" })).toBeDisabled();

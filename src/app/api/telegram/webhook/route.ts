@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { serverEnv } from "@/lib/env.server";
+import { errorFields, log } from "@/lib/log";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleBotUpdate, type BotUpdate } from "@/server/services/login-tokens";
 import { createTelegramBot, isValidWebhookSecret } from "@/server/services/telegram-bot";
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     const update = (await request.json()) as BotUpdate;
     await handleBotUpdate(createAdminClient(), createTelegramBot(botToken), update);
   } catch (error) {
-    console.error("[telegram] webhook update failed", error);
+    log("error", "telegram.webhook_failed", errorFields(error));
   }
   return NextResponse.json({ ok: true });
 }

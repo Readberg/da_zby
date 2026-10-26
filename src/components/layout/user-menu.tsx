@@ -13,7 +13,12 @@ export async function UserMenu() {
 
   if (!user) {
     return (
-      <Link href="/login" className={buttonClasses("secondary", "gap-2 px-5")}>
+      <Link
+        href="/login"
+        data-umami-event="cta-click"
+        data-umami-event-where="header"
+        className={buttonClasses("secondary", "gap-2 px-5")}
+      >
         <UserIcon className="h-5 w-5" />
         {ru.auth.login}
       </Link>

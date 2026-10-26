@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { EVENTS, track } from "@/lib/analytics";
 import { cx } from "@/lib/cx";
 
 export type FaqEntry = { q: string; a: string };
@@ -21,7 +22,10 @@ export function FaqList({ items }: { items: readonly FaqEntry[] }) {
                 type="button"
                 aria-expanded={open}
                 aria-controls={`${id}-${index}`}
-                onClick={() => setOpenIndex(open ? null : index)}
+                onClick={() => {
+                  if (!open) track(EVENTS.faqOpen, { question: index + 1 });
+                  setOpenIndex(open ? null : index);
+                }}
                 className="flex min-h-12 w-full cursor-pointer items-center gap-4 text-left font-semibold"
               >
                 <span

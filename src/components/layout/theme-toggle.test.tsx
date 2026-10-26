@@ -56,6 +56,16 @@ describe("ThemeToggle", () => {
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
   });
 
+  it("tells Umami which theme was chosen by hand", async () => {
+    systemPrefersDark(false);
+    const umami = { track: vi.fn() };
+    (window as unknown as { umami: typeof umami }).umami = umami;
+    render(<ThemeToggle />);
+    await userEvent.click(screen.getByRole("button", { name: /Переключить тему/ }));
+    expect(umami.track).toHaveBeenCalledWith("theme-change", { theme: "dark" });
+    delete (window as unknown as { umami?: unknown }).umami;
+  });
+
   it("starts from the system theme when nothing was chosen", async () => {
     systemPrefersDark(true);
     render(<ThemeToggle />);

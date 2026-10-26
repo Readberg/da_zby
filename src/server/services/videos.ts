@@ -1,3 +1,4 @@
+import { errorFields, log } from "@/lib/log";
 import { parseYouTubeFeed, type FeedVideo } from "./youtube-feed";
 
 export type Video = {
@@ -101,7 +102,7 @@ export function createVideosService({
         return (await refresh()).slice(0, limit);
       } catch (error) {
         if (cache) {
-          console.warn("[videos] YouTube feed failed, serving the cached list", error);
+          log("warn", "videos.feed_failed", { serving: "cached list", ...errorFields(error) });
           return cache.videos.slice(0, limit);
         }
         throw new VideosUnavailableError(error);

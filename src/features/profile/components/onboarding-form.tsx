@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
+import { EVENTS, track } from "@/lib/analytics";
 import { ApiClientError, api } from "@/lib/api-client";
 import { ru } from "@/messages/ru";
 import { nicknameSchema } from "@/lib/profile-schema";
@@ -61,6 +62,7 @@ export function OnboardingForm({ next }: { next: string }) {
     setSaving(true);
     try {
       await api("/me", { method: "PATCH", json: { nickname: format.data } });
+      track(EVENTS.nicknameSaved);
       router.replace(next);
       router.refresh();
     } catch (cause) {
