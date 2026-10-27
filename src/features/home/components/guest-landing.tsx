@@ -46,7 +46,7 @@ function Hero() {
     >
       <h1
         id="landing-title"
-        className="max-w-4xl font-display text-[clamp(2.5rem,9vw,6rem)] uppercase leading-[0.95] tracking-tight"
+        className="max-w-4xl font-display text-[clamp(2.5rem,8vw,5rem)] uppercase leading-[0.95] tracking-tight"
       >
         {m.home.headline}
       </h1>
@@ -57,7 +57,7 @@ function Hero() {
         data-umami-event-where="hero"
         className={buttonClasses(
           "primary",
-          "min-h-14 gap-2 whitespace-nowrap px-5 text-base shadow-soft sm:gap-3 sm:px-8 sm:text-lg",
+          "min-h-14 gap-2 whitespace-nowrap px-5 text-base sm:gap-3 sm:px-8 sm:text-lg",
         )}
       >
         <TelegramIcon className="h-6 w-6" />
@@ -78,26 +78,26 @@ export async function UpcomingMatches() {
   const { tour, matches, tournament } = composePredictionsPage(pub, {}, undefined, new Date());
 
   return (
-    <div className="rounded-lg bg-surface p-4 shadow-soft sm:p-6">
+    <div className="rounded-lg border border-line bg-surface p-4 sm:p-6">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-2xl normal-case sm:text-h3">{t.upcomingTitle}</h2>
         <Link
           href={LOGIN_HREF}
           data-umami-event="cta-click"
           data-umami-event-where="matches-all"
-          className="inline-flex min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-bg px-4 text-sm font-semibold transition-colors hover:bg-line"
+          className="inline-flex min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-sm border border-line px-4 text-sm font-semibold transition-colors duration-200 hover:bg-surface-hover"
         >
           {t.allMatches}
           <ArrowRightIcon className="h-4 w-4" />
         </Link>
       </div>
       {!tournament || !tour || matches.length === 0 ? (
-        <div className="rounded-md bg-bg p-5">
+        <div className="rounded-lg border border-line bg-bg p-5">
           <p className="font-semibold">{m.home.soonTitle}</p>
           <p className="mt-1 text-muted">{m.home.soonText}</p>
         </div>
       ) : (
-        <ul className="flex flex-col divide-y divide-line rounded-md bg-bg px-3 sm:px-4">
+        <ul className="flex flex-col divide-y divide-line rounded-lg border border-line bg-bg px-3 sm:px-4">
           {matches.slice(0, 4).map((match) => (
             <li
               key={match.id}
@@ -158,9 +158,9 @@ function Community() {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex min-h-14 items-center gap-3 rounded-md bg-surface px-4 py-3 shadow-soft transition-shadow duration-200 hover:ring-2 hover:ring-accent"
+              className="flex min-h-14 items-center gap-3 rounded-lg border border-line bg-surface px-4 py-3 transition-colors duration-200 hover:border-muted hover:bg-surface-hover"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-bg text-ink">
                 {socialIcons[link.id]({ className: "h-5 w-5" })}
               </span>
               <span className="min-w-0 flex-1">
@@ -196,18 +196,18 @@ function Steps({ exact, outcome }: { exact: number; outcome: number }) {
         <li key={step.title} className="flex gap-4">
           <span
             aria-hidden="true"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black font-display text-lg text-white"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-accent font-display text-lg text-black"
           >
             {index + 1}
           </span>
           <div className="min-w-0">
             <h3 className="flex items-center gap-2 text-lg normal-case">
               {step.title}
-              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/70 text-black">
+              <span className="flex h-8 w-8 items-center justify-center rounded-sm border border-line bg-bg text-ink">
                 {step.icon}
               </span>
             </h3>
-            <p className="mt-1 text-black/70">{step.text}</p>
+            <p className="mt-1 text-muted">{step.text}</p>
           </div>
         </li>
       ))}
@@ -240,22 +240,22 @@ function RatingMock() {
     <figure className="flex flex-col items-center gap-3">
       <div
         aria-hidden="true"
-        className="w-64 rounded-[2.5rem] border-[10px] border-black bg-bg p-4 shadow-soft"
+        className="w-64 rounded-[2.5rem] border-[10px] border-black bg-bg p-4"
       >
         <div className="mx-auto mb-3 h-5 w-24 rounded-full bg-black" />
         <p className="font-display text-2xl uppercase">{m.rating.title}</p>
-        <div className="mt-2 grid grid-cols-2 rounded-full bg-surface p-1 text-center text-xs font-semibold">
-          <span className="rounded-full bg-bg py-1 shadow-soft">{t.mockSeason}</span>
+        <div className="mt-2 grid grid-cols-2 rounded-sm bg-surface p-1 text-center text-xs font-semibold">
+          <span className="rounded-sm bg-line py-1">{t.mockSeason}</span>
           <span className="py-1 text-muted">{t.mockTour}</span>
         </div>
         <ul className="mt-3 flex flex-col gap-2">
           {rows.map((row) => (
             <li
               key={row.place}
-              className={`flex items-center gap-2 rounded-md p-2 ${row.place === 1 ? "bg-accent/25" : "bg-surface"}`}
+              className={`flex items-center gap-2 rounded-md p-2 ${row.place === 1 ? "bg-accent/15" : "bg-surface"}`}
             >
               <span className="w-4 text-center text-sm font-semibold">{row.place}</span>
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-xs text-white">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-line text-xs text-ink">
                 {row.name[0]}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm font-semibold">{row.name}</span>
@@ -275,28 +275,28 @@ function RatingMock() {
 function Benefits() {
   const t = getMessages().landing;
   const items = [
-    { icon: <BarsIcon className="h-6 w-6" />, text: t.benefits.predict, tone: "bg-accent" },
-    { icon: <TrophyIcon className="h-6 w-6" />, text: t.benefits.points, tone: "bg-white" },
-    { icon: <CrownIcon className="h-6 w-6" />, text: t.benefits.lead, tone: "bg-accent" },
+    { icon: <BarsIcon className="h-6 w-6 text-accent" />, text: t.benefits.predict },
+    { icon: <TrophyIcon className="h-6 w-6 text-accent" />, text: t.benefits.points },
+    { icon: <CrownIcon className="h-6 w-6 text-accent" />, text: t.benefits.lead },
   ];
   return (
     <ul className="flex flex-col gap-3">
       {items.map((item) => (
         <li
           key={item.text}
-          className={`flex min-h-16 items-center gap-3 rounded-lg px-5 font-display text-2xl uppercase text-black ${item.tone}`}
+          className="flex min-h-16 items-center gap-3 rounded-lg border border-line bg-bg px-5 font-display text-2xl uppercase text-ink"
         >
           {item.icon}
           {item.text}
         </li>
       ))}
-      <li className="flex min-h-14 items-center justify-between rounded-full bg-white px-5 font-display text-xl uppercase text-black">
+      <li className="flex min-h-14 items-center justify-between rounded-lg border border-line bg-bg px-5 font-display text-xl uppercase text-ink">
         {t.benefits.free}
         <span
           aria-hidden="true"
           className="flex h-8 w-14 items-center justify-end rounded-full bg-accent p-1"
         >
-          <span className="h-6 w-6 rounded-full bg-white shadow-soft" />
+          <span className="h-6 w-6 rounded-full bg-black" />
         </span>
       </li>
     </ul>
@@ -313,7 +313,7 @@ function Panels() {
       </h2>
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4">
-          <div className="flex-1 rounded-lg bg-accent p-6 text-black shadow-soft">
+          <div className="flex-1 rounded-lg border border-line bg-surface p-6">
             <Suspense
               fallback={<Steps exact={DEFAULT_POINTS.exact} outcome={DEFAULT_POINTS.outcome} />}
             >
@@ -323,13 +323,13 @@ function Panels() {
           <p className="font-semibold">{t.captionOne}</p>
         </div>
         <div className="flex flex-col gap-4">
-          <div className="flex flex-1 items-center justify-center rounded-lg bg-surface p-6">
+          <div className="flex flex-1 items-center justify-center rounded-lg border border-line bg-surface p-6">
             <RatingMock />
           </div>
           <p className="font-semibold">{t.captionTwo}</p>
         </div>
         <div className="flex flex-col gap-4">
-          <div className="flex-1 rounded-lg bg-black p-6 text-white shadow-soft">
+          <div className="flex-1 rounded-lg border border-line bg-surface p-6">
             <Benefits />
           </div>
           <p className="font-semibold">{t.captionThree}</p>

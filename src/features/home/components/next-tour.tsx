@@ -18,7 +18,7 @@ export async function NextTour() {
 
   if (!tournament || !tour) {
     return (
-      <div className="rounded-lg bg-surface p-6 sm:p-8">
+      <div className="rounded-lg border border-line bg-surface p-6 sm:p-8">
         <p className="text-lg font-semibold">{t.home.soonTitle}</p>
         <p className="mt-2 text-muted">{t.home.soonText}</p>
       </div>
@@ -26,7 +26,7 @@ export async function NextTour() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg bg-surface p-6 shadow-soft sm:p-8">
+    <div className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-6 sm:p-8">
       <div>
         <p className="text-sm font-semibold uppercase tracking-widest text-muted">
           {tournament.name}
