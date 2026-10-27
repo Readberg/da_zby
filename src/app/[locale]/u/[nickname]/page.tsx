@@ -11,14 +11,18 @@ import { getProfileStatsCached } from "@/server/services/rating.cached";
 
 export const metadata: Metadata = { title: ru.publicProfile.title };
 
-async function ProfileContent({ params }: { params: PageProps<"/u/[nickname]">["params"] }) {
+async function ProfileContent({
+  params,
+}: {
+  params: PageProps<"/[locale]/u/[nickname]">["params"];
+}) {
   const { nickname } = await params;
   const profile = await getPublicProfile(await createClient(), decodeURIComponent(nickname));
   if (!profile) notFound();
   return <ProfileView profile={profile} stats={await getProfileStatsCached(profile.id)} />;
 }
 
-export default function PublicProfilePage(props: PageProps<"/u/[nickname]">) {
+export default function PublicProfilePage(props: PageProps<"/[locale]/u/[nickname]">) {
   return (
     <Container className="py-8 sm:py-12">
       <Suspense fallback={<Skeleton className="h-64 max-w-xl" />}>

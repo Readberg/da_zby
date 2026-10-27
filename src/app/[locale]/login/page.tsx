@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: ru.auth.loginTitle, robots: { index: 
 async function LoginContent({
   searchParams,
 }: {
-  searchParams: PageProps<"/login">["searchParams"];
+  searchParams: PageProps<"/[locale]/login">["searchParams"];
 }) {
   const params = await searchParams;
   const next = safeRedirectPath(typeof params.next === "string" ? params.next : null);
@@ -24,7 +24,7 @@ async function LoginContent({
   return <TelegramLogin next={next} error={params.error ? ru.auth.errors.telegram : null} />;
 }
 
-export default function LoginPage(props: PageProps<"/login">) {
+export default function LoginPage(props: PageProps<"/[locale]/login">) {
   return (
     <NarrowPage title={ru.auth.loginTitle} intro={ru.auth.loginIntro}>
       <Suspense fallback={<Skeleton className="h-24 w-full" />}>

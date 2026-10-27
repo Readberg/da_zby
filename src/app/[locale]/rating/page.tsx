@@ -19,7 +19,7 @@ export const metadata: Metadata = { title: ru.rating.title };
 async function RatingContent({
   searchParams,
 }: {
-  searchParams: PageProps<"/rating">["searchParams"];
+  searchParams: PageProps<"/[locale]/rating">["searchParams"];
 }) {
   const params = await searchParams;
   const tourNumber = Number(firstParam(params.tour));
@@ -117,7 +117,7 @@ async function RatingContent({
   );
 }
 
-export default function RatingPage(props: PageProps<"/rating">) {
+export default function RatingPage(props: PageProps<"/[locale]/rating">) {
   return (
     <Container className="flex flex-col gap-6 py-8 sm:py-12">
       <h1 className="text-h3 sm:text-h1">{ru.rating.title}</h1>

@@ -18,7 +18,7 @@ const PAGE_SIZE = 50;
 async function UsersContent({
   searchParams,
 }: {
-  searchParams: PageProps<"/admin/users">["searchParams"];
+  searchParams: PageProps<"/[locale]/admin/users">["searchParams"];
 }) {
   const params = await searchParams;
   const search = typeof params.q === "string" ? params.q.slice(0, 100) : "";
@@ -116,7 +116,7 @@ async function UsersContent({
   );
 }
 
-export default function AdminUsersPage(props: PageProps<"/admin/users">) {
+export default function AdminUsersPage(props: PageProps<"/[locale]/admin/users">) {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-h3 sm:text-h2">{ru.admin.nav.users}</h1>

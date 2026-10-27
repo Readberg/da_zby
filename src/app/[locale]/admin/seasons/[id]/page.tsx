@@ -19,7 +19,11 @@ import { getUtcOffsetMinutes } from "@/server/services/profiles";
 
 export const metadata: Metadata = { title: ru.admin.nav.seasons, robots: { index: false } };
 
-async function SeasonContent({ params }: { params: PageProps<"/admin/seasons/[id]">["params"] }) {
+async function SeasonContent({
+  params,
+}: {
+  params: PageProps<"/[locale]/admin/seasons/[id]">["params"];
+}) {
   const { id } = await params;
   const supabase = await createClient();
   const admin = await requireAdmin(`/admin/seasons/${id}`);
@@ -105,7 +109,7 @@ async function SeasonContent({ params }: { params: PageProps<"/admin/seasons/[id
   );
 }
 
-export default function AdminSeasonPage(props: PageProps<"/admin/seasons/[id]">) {
+export default function AdminSeasonPage(props: PageProps<"/[locale]/admin/seasons/[id]">) {
   return (
     <Suspense fallback={<Skeleton className="h-96" />}>
       <SeasonContent params={props.params} />
