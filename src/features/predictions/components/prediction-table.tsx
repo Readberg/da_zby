@@ -185,7 +185,7 @@ export function PredictionTable({
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       {!signedIn && open && (
-        <p className="rounded-md bg-surface p-4">
+        <p className="rounded-lg border border-line bg-surface p-4">
           {t.predictions.guestPrompt}{" "}
           <Link href={loginHref} className="font-semibold underline">
             {t.auth.login}
@@ -194,12 +194,15 @@ export function PredictionTable({
       )}
 
       {signedIn && hasResult && (
-        <div className="rounded-lg bg-surface p-5">
+        <div className="rounded-lg border border-line bg-surface p-5">
           <p className="text-sm font-semibold uppercase tracking-widest text-muted">
             {t.predictions.tourResult}
           </p>
           <p className="mt-1 text-lg font-semibold">
-            <CountUp value={earned.points} /> {pointsWord(earned.points, locale)}
+            <span className="text-accent">
+              <CountUp value={earned.points} />
+            </span>{" "}
+            {pointsWord(earned.points, locale)}
             {t.predictions.tourResultText
               .replace("{exact}", String(earned.exact))
               .replace("{outcome}", String(earned.outcome))}
@@ -218,7 +221,10 @@ export function PredictionTable({
           const editable = canEdit && match.editable;
           const finished = match.status === "finished";
           return (
-            <li key={match.id} className="flex flex-col gap-2 rounded-lg bg-surface p-4 sm:p-5">
+            <li
+              key={match.id}
+              className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-4 transition-colors duration-200 hover:bg-surface-hover sm:p-5"
+            >
               <p className="text-sm text-muted">
                 {formatDateTime(match.kickoffAt, offsetMinutes, locale)}
                 {match.status !== "scheduled" && !finished && (
@@ -238,7 +244,7 @@ export function PredictionTable({
                       value={entry.home}
                       invalid={Boolean(errors[match.id])}
                       onChange={(e) => change(match.id, "home", e.target.value)}
-                      className="col-start-2 row-start-1 w-14 px-1 text-center sm:col-start-2"
+                      className="col-start-2 row-start-1 w-14 px-1 text-center font-display text-lg sm:col-start-2"
                     />
                     <span
                       aria-hidden="true"
@@ -255,7 +261,7 @@ export function PredictionTable({
                       value={entry.away}
                       invalid={Boolean(errors[match.id])}
                       onChange={(e) => change(match.id, "away", e.target.value)}
-                      className="col-start-2 row-start-2 w-14 px-1 text-center sm:col-start-4 sm:row-start-1"
+                      className="col-start-2 row-start-2 w-14 px-1 text-center font-display text-lg sm:col-start-4 sm:row-start-1"
                     />
                   </>
                 ) : (
@@ -301,7 +307,8 @@ export function PredictionTable({
                     <>
                       <ResultBadge result={match.prediction.result} />
                       <span>
-                        {t.predictions.points}: <strong>{match.prediction.points ?? 0}</strong>
+                        {t.predictions.points}:{" "}
+                        <strong className="text-accent">{match.prediction.points ?? 0}</strong>
                       </span>
                     </>
                   ) : (
