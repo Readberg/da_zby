@@ -9,8 +9,6 @@ on:
   schedule:
     - cron: "17 2 * * *"
   workflow_dispatch:
-  push:
-    branches: [feat/DAZBY-102-db-backup]
 
 permissions:
   contents: read
@@ -41,18 +39,18 @@ jobs:
         run: |
           mkdir backup
           supabase db dump --linked -f backup/schema.sql
-          supabase db dump --linked --data-only --use-copy -f backup/data-public.sql
-          supabase db dump --linked --data-only --use-copy --schema auth -f backup/data-auth.sql
+          # One data file: public tables, the sign-in accounts (auth) and the storage index.
+          supabase db dump --linked --data-only --use-copy -f backup/data.sql
 
       - name: The dump is not empty and holds the key tables
         run: |
           set -e
           for table in profiles tournaments seasons clubs tours matches predictions; do
-            grep -q "COPY \"\?public\"\?\.\"\?${table}\"\? " backup/data-public.sql || {
-              echo "::error::Table ${table} is missing in backup/data-public.sql"; exit 1; }
+            grep -q "COPY \"\?public\"\?\.\"\?${table}\"\? " backup/data.sql || {
+              echo "::error::Table ${table} is missing in backup/data.sql"; exit 1; }
           done
-          grep -q "COPY \"\?auth\"\?\.\"\?users\"\? " backup/data-auth.sql || {
-            echo "::error::auth.users is missing in backup/data-auth.sql"; exit 1; }
+          grep -q "COPY \"\?auth\"\?\.\"\?users\"\? " backup/data.sql || {
+            echo "::error::auth.users is missing in backup/data.sql"; exit 1; }
           grep -q "CREATE TABLE" backup/schema.sql
           ls -l backup
           date -u +"%Y-%m-%dT%H:%M:%SZ" > backup/TAKEN_AT
