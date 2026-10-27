@@ -82,6 +82,12 @@ async function UsersContent({
                     <span>
                       {user.role === "admin" ? ru.admin.users.admin : ru.admin.users.user}
                     </span>
+                    <Link
+                      href={`/admin/users/${user.id}`}
+                      className="inline-flex min-h-11 items-center underline"
+                    >
+                      {ru.admin.users.edit}
+                    </Link>
                     <RoleButton
                       userId={user.id}
                       role={user.role}

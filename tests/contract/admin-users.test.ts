@@ -1,18 +1,27 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { adminUserRoleSchema, adminUsersSchema } from "@/server/api/v1/schemas/admin";
+import { invalidateRating } from "@/server/cache";
+import {
+  adminUserProfileSchema,
+  adminUserRoleSchema,
+  adminUsersSchema,
+} from "@/server/api/v1/schemas/admin";
 import { ApiError } from "@/server/api/v1/problem";
 import { apiRequest, expectApiHeaders, expectProblem } from "./helpers";
 
 const createClient = vi.fn();
 const listUsers = vi.fn();
 const setUserRole = vi.fn();
+const updateUserProfile = vi.fn();
+const adminClient = { marker: "secret-key-client" };
 
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
-vi.mock("@/server/services/admin-users", () => ({ listUsers, setUserRole }));
+vi.mock("@/server/services/admin-users", () => ({ listUsers, setUserRole, updateUserProfile }));
+vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => adminClient }));
 
 const users = await import("@/app/api/v1/admin/users/route");
 const role = await import("@/app/api/v1/admin/users/role/route");
+const profile = await import("@/app/api/v1/admin/users/profile/route");
 
 const USER_ID = "11111111-1111-4111-8111-111111111112";
 
@@ -123,5 +132,84 @@ describe("PATCH /api/v1/admin/users/role", () => {
       409,
       "admin.last_admin",
     );
+  });
+});
+
+describe("PATCH /api/v1/admin/users/profile", () => {
+  const body = { userId: USER_ID, patch: { city: "Брест" } };
+  const send = (payload: unknown) =>
+    apiRequest("/api/v1/admin/users/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  const updated = {
+    userId: USER_ID,
+    nickname: "Аня",
+    fullName: null,
+    contact: null,
+    about: null,
+    countryCode: null,
+    city: "Брест",
+    utcOffsetMinutes: 180,
+    avatarUrl: null,
+  };
+
+  beforeEach(() => {
+    updateUserProfile.mockReset().mockResolvedValue(updated);
+  });
+
+  it("is closed to guests (401) and ordinary users (403) and writes nothing for them", async () => {
+    client("guest");
+    await expectProblem(await profile.PATCH(send(body)), 401, "auth.required");
+    client("user");
+    await expectProblem(await profile.PATCH(send(body)), 403, "auth.forbidden");
+    expect(updateUserProfile).not.toHaveBeenCalled();
+  });
+
+  it("lets an admin change a profile with the secret-key client and names the actor", async () => {
+    client("admin");
+    const response = await profile.PATCH(send(body));
+    expect(response.status).toBe(200);
+    expectApiHeaders(response);
+    adminUserProfileSchema.parse((await response.json()).data);
+    expect(updateUserProfile).toHaveBeenCalledWith(adminClient, body, "u1");
+    expect(invalidateRating).toHaveBeenCalled();
+  });
+
+  it("rejects a body that is not a user id with a patch", async () => {
+    client("admin");
+    await expectProblem(
+      await profile.PATCH(send({ userId: "x", patch: { city: "a" } })),
+      422,
+      "api.validation_failed",
+    );
+    await expectProblem(
+      await profile.PATCH(send({ userId: USER_ID, patch: {} })),
+      422,
+      "api.validation_failed",
+    );
+    await expectProblem(
+      await profile.PATCH(send({ userId: USER_ID })),
+      422,
+      "api.validation_failed",
+    );
+    expect(updateUserProfile).not.toHaveBeenCalled();
+  });
+
+  it("passes a taken nickname (409) and an unknown user (404) through", async () => {
+    client("admin");
+    updateUserProfile.mockRejectedValueOnce(
+      new ApiError(409, "profile.nickname_taken", "Conflict", "taken", [
+        { field: "nickname", message: "x" },
+      ]),
+    );
+    await expectProblem(
+      await profile.PATCH(send({ userId: USER_ID, patch: { nickname: "Борис" } })),
+      409,
+      "profile.nickname_taken",
+    );
+    updateUserProfile.mockRejectedValueOnce(new ApiError(404, "profile.not_found", "Not Found"));
+    await expectProblem(await profile.PATCH(send(body)), 404, "profile.not_found");
   });
 });

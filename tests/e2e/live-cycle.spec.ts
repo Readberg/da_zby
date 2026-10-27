@@ -212,6 +212,25 @@ test.describe("live cycle (needs SUPABASE_SECRET_KEY)", () => {
     expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)]).toEqual([1200, 630]);
   });
 
+  test("an admin edits a participant's profile; the participant cannot use that door", async ({
+    page,
+  }) => {
+    await signInAs(page, admin, `/admin/users/${exactUser.id}`);
+    await page.getByLabel("Город").fill("Гродно");
+    await page.getByRole("button", { name: "Сохранить" }).click();
+    await expect(page.getByText("Сохранено")).toBeVisible();
+    await page.goto(`/u/${exactNick}`);
+    await expect(page.getByText(/Гродно/)).toBeVisible();
+
+    await signInAs(page, exactUser, "/profile");
+    const response = await page.request.patch("/api/v1/admin/users/profile", {
+      data: { userId: exactUser.id, patch: { city: "Хакер" } },
+    });
+    expect(response.status()).toBe(403);
+    await page.goto(`/u/${exactNick}`);
+    await expect(page.getByText(/Хакер/)).toHaveCount(0);
+  });
+
   test("the public profile statistics count the graded prediction", async ({ page }) => {
     await page.goto(`/u/${exactNick}`);
     await expect(page.getByText(`E2E турнир ${run}`)).toBeVisible();

@@ -90,6 +90,7 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 
 ### Админка: пользователи (DAZBY-60)
 - `GET /api/v1/admin/users?search=&page=&pageSize=` (admin): `{ items, total, page, pageSize }`, новые сверху; `search` — часть ника или имени.
+- `PATCH /api/v1/admin/users/profile` (admin): `{ userId, patch }` — правка чужого профиля теми же полями, что `PATCH /me` (фото — только `avatarPath: null`); занятый ник — 409 `profile.nickname_taken`, нет участника — 404. Запись выполняется ключом сервера; журнал `admin.profile_updated` (кто, кого, какие поля).
 - `PATCH /api/v1/admin/users/role` (admin): тело `{ userId, role: user | admin }`; последнего админа снять нельзя — 409 `admin.last_admin`. Права проверяются трижды: `withApi` (уровень admin → `is_admin()`), RLS и сама функция `set_user_role`.
 
 ### Админка: турниры и клубы (DAZBY-61, 62)
