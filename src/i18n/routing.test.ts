@@ -8,6 +8,11 @@ describe("routeRequest", () => {
     expect(routeRequest("/api", undefined)).toEqual({ kind: "pass" });
   });
 
+  it("leaves the generated link-preview images alone, with or without a language segment", () => {
+    expect(routeRequest("/ru/u/Аня/opengraph-image-1abc", "en")).toEqual({ kind: "pass" });
+    expect(routeRequest("/ru/rating/opengraph-image", undefined)).toEqual({ kind: "pass" });
+  });
+
   it("serves Russian without a cookie or with a wrong one", () => {
     expect(routeRequest("/rating", undefined)).toEqual({
       kind: "rewrite",

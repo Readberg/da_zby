@@ -201,6 +201,17 @@ test.describe("live cycle (needs SUPABASE_SECRET_KEY)", () => {
     await expect(page.getByRole("row").filter({ hasText: outcomeNick })).toContainText("1 : 0");
   });
 
+  test("a participant's link preview is a card with the nickname", async ({ page, request }) => {
+    await page.goto(`/u/${exactNick}`);
+    const url = await page.locator('meta[property="og:image"]').getAttribute("content");
+    expect(url).toContain(`/opengraph-image`);
+    const response = await request.get(new URL(url!).pathname + new URL(url!).search);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("image/png");
+    const bytes = await response.body();
+    expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)]).toEqual([1200, 630]);
+  });
+
   test("the public profile statistics count the graded prediction", async ({ page }) => {
     await page.goto(`/u/${exactNick}`);
     await expect(page.getByText(`E2E турнир ${run}`)).toBeVisible();
