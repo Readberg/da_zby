@@ -66,7 +66,7 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 | OpenAPI 3.1 из Zod (`z.toJSONSchema`), снимок `docs/api/openapi.v1.json`, `pnpm api:openapi`; contract-тест падает, если снимок устарел | `src/server/api/v1/openapi.ts` |
 | Неизвестная версия → `404 api.version_unsupported` (+ `supportedVersions`); неизвестный ресурс известной версии → `404 api.not_found` (все методы) | `src/app/api/[version]/[[...path]]/route.ts` |
 
-Служебные эндпоинты: `/health` — `data.status = "ok"`, пока приложение отвечает; `data.checks.database` = `ok`/`error` (проба `select id from tournaments limit 1`, таймаут 2 с; HTTP-статус остаётся 200). `/version` — `version` из `package.json`, `apiVersions`, `buildDate` (время сборки). `/openapi.json` — документ без конверта.
+Служебные эндпоинты: `/health` — `data.status = "ok"`, пока приложение отвечает; `data.checks.database` = `ok`/`error` (проба `select id from tournaments limit 1`, таймаут 2 с; HTTP-статус остаётся 200). `/version` — `version` из `package.json`, `apiVersions`, `buildDate` (время сборки), `commit` (коммит запущенной сборки; `null`, если хост не сообщает). `/openapi.json` — документ без конверта.
 
 Коды ошибок v1: `api.version_unsupported`, `api.not_found`, `api.validation_failed`, `api.internal_error`, `auth.required`, `auth.forbidden`, `videos.unavailable`.
 

@@ -266,12 +266,20 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "commit": {
+                          "description": "Git commit of the running build; null when the host does not tell.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
                         "version",
                         "apiVersions",
-                        "buildDate"
+                        "buildDate",
+                        "commit"
                       ],
                       "additionalProperties": false
                     },
