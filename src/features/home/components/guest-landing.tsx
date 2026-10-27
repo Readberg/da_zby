@@ -364,7 +364,7 @@ export function GuestLanding({ videos }: { videos: ReactNode }) {
   return (
     <Container className="flex flex-col gap-14 py-6 sm:gap-20 sm:py-10">
       <Hero />
-      <div className="grid gap-6 lg:grid-cols-[1fr_17rem] lg:items-start">
+      <div className="grid gap-6">
         <Suspense fallback={<Skeleton className="h-80 w-full rounded-lg" />}>
           <UpcomingMatches />
         </Suspense>

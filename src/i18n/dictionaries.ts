@@ -27,6 +27,7 @@ export const CLIENT_SECTIONS = [
   "profile",
   "rating",
   "home",
+  "chat",
 ] as const;
 
 export type ClientDictionary = Pick<Dictionary, (typeof CLIENT_SECTIONS)[number]>;

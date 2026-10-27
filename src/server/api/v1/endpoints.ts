@@ -56,6 +56,15 @@ import {
   telegramLoginStatusQuerySchema,
   telegramLoginStatusSchema,
 } from "./schemas/auth";
+import {
+  chatBanBodySchema,
+  chatBanSchema,
+  chatDeleteBodySchema,
+  chatDeletedSchema,
+  chatListSchema,
+  chatMessageSchema,
+  chatSendBodySchema,
+} from "./schemas/chat";
 import { listMetaSchema, videoListSchema, videosQuerySchema } from "./schemas/videos";
 import {
   fixturesAppliedSchema,
@@ -504,5 +513,56 @@ export const endpoints = {
     meta: listMetaSchema,
     cacheControl: "public, max-age=300",
     errors: [422, 503],
+  }),
+  chatList: defineEndpoint({
+    method: "get",
+    path: "/chat",
+    summary: "The common chat: messages of the last 24 hours",
+    description:
+      "Signed-in users only. Messages older than 24 hours are not returned and are deleted for good (D-098). Live updates come through Supabase Realtime; this endpoint is the first load and the fallback.",
+    tags: ["chat"],
+    auth: "user",
+    output: chatListSchema,
+    cacheControl: "private, no-store",
+    errors: [401],
+  }),
+  chatSend: defineEndpoint({
+    method: "post",
+    path: "/chat",
+    summary: "Write to the common chat",
+    description:
+      "1–500 characters. One message per 2 seconds per user (429 api.too_many_requests). A user an admin has shut out gets 403 chat.banned; a user without a nickname gets 409 chat.no_nickname.",
+    tags: ["chat"],
+    auth: "user",
+    body: chatSendBodySchema,
+    output: chatMessageSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 409, 422, 429],
+  }),
+  chatDelete: defineEndpoint({
+    method: "delete",
+    path: "/chat",
+    summary: "Delete a chat message",
+    description:
+      "The author deletes their own message; an admin deletes any. A message of someone else is 404.",
+    tags: ["chat"],
+    auth: "user",
+    body: chatDeleteBodySchema,
+    output: chatDeletedSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 404, 422],
+  }),
+  adminChatBan: defineEndpoint({
+    method: "put",
+    path: "/admin/chat/bans",
+    summary: "Shut a user out of the chat or let them back",
+    description:
+      "Idempotent. Messages the user already wrote stay until deleted or until 24 hours pass.",
+    tags: ["admin"],
+    auth: "admin",
+    body: chatBanBodySchema,
+    output: chatBanSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 404, 422],
   }),
 };
