@@ -1,5 +1,4 @@
-import Image from "next/image";
-import logo from "@/assets/logo.png";
+import { LOGO_COVER_DATA_URI } from "@/assets/logo-cover";
 import { BrandSpinner } from "@/components/ui/loader";
 import { getMessages } from "@/i18n/server";
 
@@ -26,7 +25,9 @@ export function SiteLoader() {
         aria-label={t.common.loading}
         className="site-loader fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-bg"
       >
-        <Image src={logo} alt="" width={96} height={96} priority className="h-24 w-24" />
+        {/* Inlined, so the cover paints with the document and no image request is on the way. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={LOGO_COVER_DATA_URI} alt="" width={96} height={96} className="h-24 w-24" />
         <BrandSpinner />
       </div>
       <script dangerouslySetInnerHTML={{ __html: READY_SCRIPT }} />

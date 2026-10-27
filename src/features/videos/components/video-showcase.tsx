@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cx } from "@/lib/cx";
 import { formatDate } from "@/lib/time";
 import type { Video } from "@/server/services/videos";
@@ -13,14 +13,34 @@ function embedUrl(id: string, autoplay: boolean) {
 
 /**
  * Standard YouTube player for the newest video plus a grid of the others. Picking another video
- * from the grid switches the player and starts it.
+ * from the grid switches the player and starts it. The embed (about 1 MB of third-party code) is
+ * only put on the page when it is about to be seen, so it does not compete with the first screen
+ * for the network and the main thread (DAZBY-112); until then there is the same black frame.
  */
 export function VideoShowcase({ videos }: { videos: Video[] }) {
   const locale = useLocale();
   const t = useMessages();
   const [selectedId, setSelectedId] = useState(videos[0]?.id);
   const [autoplay, setAutoplay] = useState(false);
+  const [near, setNear] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = playerRef.current;
+    if (near || !node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      const timer = setTimeout(() => setNear(true), 0);
+      return () => clearTimeout(timer);
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setNear(true);
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [near]);
 
   const selected = videos.find((video) => video.id === selectedId) ?? videos[0];
   if (!selected) return null;
@@ -29,6 +49,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
   function play(id: string) {
     setSelectedId(id);
     setAutoplay(true);
+    setNear(true);
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -42,15 +63,17 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
           ref={playerRef}
           className="relative aspect-video w-full scroll-mt-4 overflow-hidden rounded-md bg-black"
         >
-          <iframe
-            key={selected.id}
-            src={embedUrl(selected.id, autoplay)}
-            title={`${t.home.playerTitle}: ${selected.title}`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-            className="absolute inset-0 h-full w-full"
-          />
+          {near && (
+            <iframe
+              key={selected.id}
+              src={embedUrl(selected.id, autoplay)}
+              title={`${t.home.playerTitle}: ${selected.title}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+              className="absolute inset-0 h-full w-full"
+            />
+          )}
         </div>
         <h2
           id="current-video-title"

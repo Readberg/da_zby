@@ -89,11 +89,18 @@ test("home with videos has no horizontal scroll", async ({ page }) => {
   await page.goto("/");
   // Streaming keeps the static copy next to the final one until the swap.
   await expect(page.locator("h1")).toHaveCount(1);
-  await expect(
-    page
-      .locator('iframe[title^="Видеоплеер YouTube"]')
-      .or(page.getByRole("link", { name: /Перейти на канал/ })),
-  ).toBeVisible({ timeout: 15_000 });
+  // The embed is put on the page when it is about to be seen (DAZBY-112): scroll to the video like a visitor,
+  // again and again because the videos stream in after the first paint.
+  await expect(async () => {
+    await page.evaluate(() =>
+      document.querySelector("#current-video-title")?.scrollIntoView({ block: "center" }),
+    );
+    await expect(
+      page
+        .locator('iframe[title^="Видеоплеер YouTube"]')
+        .or(page.getByRole("link", { name: /Перейти на канал/ })),
+    ).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
