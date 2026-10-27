@@ -28,6 +28,19 @@ test("a deployed stand advertises its own address, not localhost", async ({ page
   expect(await (await request.get("/sitemap.xml")).text()).toContain(`<loc>${origin}`);
 });
 
+// The home address is the site origin (Next prints it without a trailing slash).
+const HOME_URL = /^https?:\/\/[^/]+\/?$/;
+
+test("only the home page names itself in og:url; other pages do not claim the home address", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", HOME_URL);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", HOME_URL);
+  await page.goto("/rating");
+  await expect(page.locator('meta[property="og:url"]')).toHaveCount(0);
+});
+
 test("sitemap.xml and robots.txt are served", async ({ request }) => {
   const sitemap = await request.get("/sitemap.xml");
   expect(sitemap.status()).toBe(200);

@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Suspense } from "react";
 import { siteConfig } from "@/config/site";
 import { publicEnv } from "@/lib/env";
+import { siteOpenGraph } from "@/lib/open-graph";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { CoverRelease } from "@/components/layout/cover-release";
 import { ErrorReporter } from "@/components/layout/error-reporter";
@@ -19,8 +20,6 @@ import { MessagesProvider } from "@/i18n/client";
 import { clientDictionary } from "@/i18n/dictionaries";
 import { getMessages, initLocale, setRequestLocale } from "@/i18n/server";
 
-const OPEN_GRAPH_LOCALE = { ru: "ru_RU", en: "en_US" } as const;
-
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
   const locale = await initLocale(params);
   const t = getMessages();
@@ -29,14 +28,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     title: { default: t.site.name, template: `%s — ${t.site.name}` },
     description: t.site.description,
     applicationName: t.site.name,
-    openGraph: {
-      type: "website",
-      locale: OPEN_GRAPH_LOCALE[locale],
-      siteName: t.site.name,
-      title: t.site.name,
-      description: t.site.description,
-      url: "/",
-    },
+    openGraph: siteOpenGraph(locale, t),
     twitter: {
       card: "summary_large_image",
       title: t.site.name,
