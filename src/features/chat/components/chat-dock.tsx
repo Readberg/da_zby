@@ -125,7 +125,7 @@ export function ChatDock({ userId, isAdmin }: { userId: string; isAdmin: boolean
           aria-label={t.dockLabel}
           ref={panelRef}
           tabIndex={-1}
-          className="fixed bottom-6 right-6 z-40 flex h-[min(34rem,calc(100vh-3rem))] outline-none w-88 flex-col overflow-hidden rounded-lg border border-line bg-surface shadow-soft"
+          className="fixed bottom-6 right-6 z-40 flex h-[min(34rem,calc(100vh-3rem))] outline-none w-88 flex-col overflow-hidden rounded-lg border border-line bg-surface"
         >
           <header className="flex items-center justify-between border-b border-line px-4 py-2">
             <h2 className="font-display text-lg uppercase">{t.title}</h2>
@@ -133,7 +133,7 @@ export function ChatDock({ userId, isAdmin }: { userId: string; isAdmin: boolean
               type="button"
               onClick={() => writeOpen(false)}
               aria-label={t.closeLabel}
-              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-line/60"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm text-ink transition-colors duration-200 hover:bg-surface-hover"
             >
               <CloseIcon className="h-5 w-5" />
             </button>
@@ -154,7 +154,7 @@ export function ChatDock({ userId, isAdmin }: { userId: string; isAdmin: boolean
           aria-expanded="false"
           aria-controls="chat-dock"
           aria-label={t.openLabel}
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-accent text-black shadow-soft ring-4 ring-accent/30 transition-transform duration-200 hover:scale-105 active:scale-95"
+          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-lg bg-accent text-black transition-colors duration-200 hover:bg-accent-hover active:scale-95"
         >
           <ChatIcon className="h-7 w-7" />
         </button>
