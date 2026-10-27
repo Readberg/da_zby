@@ -46,7 +46,9 @@ function NavList({ link: Link }: { link: typeof NavLink }) {
     <ul className="flex items-center justify-center gap-1">
       {siteConfig.nav.map((item) => (
         <li key={item.id}>
-          <Link href={item.href}>{t.nav[item.id]}</Link>
+          <Link href={item.href} prefetch={"prefetch" in item ? item.prefetch : undefined}>
+            {t.nav[item.id]}
+          </Link>
         </li>
       ))}
     </ul>
