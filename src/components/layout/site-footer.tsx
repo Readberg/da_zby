@@ -64,30 +64,32 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 border-t border-line pt-6 md:flex-row md:items-center md:justify-between">
           <p className="text-sm">
             {m.footer.rights} · {m.site.tagline}
           </p>
-          <LanguageSwitcher />
-          <nav aria-label={m.footer.socialLabel}>
-            <ul className="flex flex-wrap gap-3">
-              {social.map((link) => (
-                <li key={link.id}>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-11 w-11 items-center justify-center rounded-full bg-line/60 text-ink transition-colors hover:bg-accent hover:text-black"
-                  >
-                    {socialIcons[link.id]}
-                    <span className="sr-only">
-                      {m.footer.social[link.id]} {m.common.opensInNewTab}
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <div className="flex flex-wrap items-center gap-4">
+            <LanguageSwitcher />
+            <nav aria-label={m.footer.socialLabel}>
+              <ul className="flex flex-wrap gap-3">
+                {social.map((link) => (
+                  <li key={link.id}>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-11 w-11 items-center justify-center rounded-full bg-line/60 text-ink transition-colors hover:bg-accent hover:text-black"
+                    >
+                      {socialIcons[link.id]}
+                      <span className="sr-only">
+                        {m.footer.social[link.id]} {m.common.opensInNewTab}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
         </div>
       </Container>
     </footer>

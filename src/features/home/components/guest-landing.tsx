@@ -101,9 +101,9 @@ export async function UpcomingMatches() {
           {matches.slice(0, 4).map((match) => (
             <li
               key={match.id}
-              className="flex flex-col gap-3 py-4 sm:grid sm:grid-cols-[minmax(0,9rem)_1fr_auto] sm:items-center sm:gap-x-3 sm:py-3"
+              className="flex flex-col gap-3 py-4 sm:grid sm:grid-cols-[1fr_auto] sm:items-center sm:gap-x-4 sm:gap-y-2 sm:py-3"
             >
-              <p className="text-sm text-muted">
+              <p className="text-sm text-muted sm:col-span-2">
                 {tournament.name} · {m.home.nextTour.replace("{n}", String(tour.number))}
               </p>
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -151,7 +151,7 @@ function Community() {
       <h2 id="community-title" className="text-h3 normal-case">
         {t.communityTitle}
       </h2>
-      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {links.map((link) => (
           <li key={link.id}>
             <a
