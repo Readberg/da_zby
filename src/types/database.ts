@@ -23,6 +23,74 @@ export type Database = {
         };
         Relationships: [];
       };
+      chat_bans: {
+        Row: {
+          banned_at: string;
+          banned_by: string | null;
+          user_id: string;
+        };
+        Insert: {
+          banned_at?: string;
+          banned_by?: string | null;
+          user_id: string;
+        };
+        Update: {
+          banned_at?: string;
+          banned_by?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_bans_banned_by_fkey";
+            columns: ["banned_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chat_bans_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_messages: {
+        Row: {
+          author_avatar_path: string | null;
+          author_nickname: string;
+          body: string;
+          created_at: string;
+          id: string;
+          user_id: string;
+        };
+        Insert: {
+          author_avatar_path?: string | null;
+          author_nickname?: string;
+          body: string;
+          created_at?: string;
+          id?: string;
+          user_id: string;
+        };
+        Update: {
+          author_avatar_path?: string | null;
+          author_nickname?: string;
+          body?: string;
+          created_at?: string;
+          id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       clubs: {
         Row: {
           created_at: string;
@@ -56,6 +124,7 @@ export type Database = {
           expires_at: string;
           first_name: string | null;
           last_name: string | null;
+          locale: string;
           telegram_id: string | null;
           telegram_username: string | null;
           token_hash: string;
@@ -68,6 +137,7 @@ export type Database = {
           expires_at?: string;
           first_name?: string | null;
           last_name?: string | null;
+          locale?: string;
           telegram_id?: string | null;
           telegram_username?: string | null;
           token_hash: string;
@@ -80,6 +150,7 @@ export type Database = {
           expires_at?: string;
           first_name?: string | null;
           last_name?: string | null;
+          locale?: string;
           telegram_id?: string | null;
           telegram_username?: string | null;
           token_hash?: string;
@@ -525,8 +596,10 @@ export type Database = {
         Returns: undefined;
       };
       can_predict: { Args: { p_match_id: string }; Returns: boolean };
+      chat_is_banned: { Args: { p_user: string }; Returns: boolean };
       close_season: { Args: { p_season_id: string }; Returns: undefined };
       is_admin: { Args: never; Returns: boolean };
+      purge_chat_messages: { Args: never; Returns: undefined };
       recalculate_season: { Args: { p_season_id: string }; Returns: undefined };
       reopen_season: { Args: { p_season_id: string }; Returns: undefined };
       set_user_role: {

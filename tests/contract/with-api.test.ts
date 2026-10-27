@@ -65,6 +65,8 @@ describe("withApi", () => {
     );
     expect(response.status).toBe(200);
     expect(supabase.auth.getUser).toHaveBeenCalledWith("token-1");
+    // The queries of the handler are made as that user too, not as a guest (DAZBY-119).
+    expect(createClient).toHaveBeenCalledWith("token-1");
   });
 
   it("turns an output contract violation into a 500 problem", async () => {

@@ -6,6 +6,7 @@ export const headingFont = Oswald({
   weight: ["500", "700"],
   variable: "--font-heading",
   display: "swap",
+  preload: false,
 });
 
 /** Body text. */
@@ -13,4 +14,5 @@ export const bodyFont = Inter({
   subsets: ["latin", "cyrillic"],
   variable: "--font-body",
   display: "swap",
+  preload: false,
 });

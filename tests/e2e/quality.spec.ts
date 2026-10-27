@@ -72,13 +72,13 @@ test("keyboard focus is clearly visible", async ({ page }) => {
   expect(parseFloat(outline.width ?? "0")).toBeGreaterThanOrEqual(2);
 });
 
-test("content column is centred and stretches across the desktop", async ({ page }, testInfo) => {
+test("content column is narrow and centred on the desktop (D-099)", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "desktop layout only");
   await page.goto("/");
   const box = await page.locator("main > div > div").first().boundingBox();
   const viewportWidth = page.viewportSize()!.width;
-  expect(box?.width ?? 0).toBeGreaterThan(viewportWidth - 200);
-  expect(box?.width ?? 0).toBeLessThanOrEqual(1920);
+  expect(box?.width ?? 0).toBeLessThan(viewportWidth);
+  expect(box?.width ?? 0).toBeLessThanOrEqual(960);
   const viewport = page.viewportSize()!;
   const left = box!.x;
   const right = viewport.width - (box!.x + box!.width);
@@ -89,11 +89,13 @@ test("home with videos has no horizontal scroll", async ({ page }) => {
   await page.goto("/");
   // Streaming keeps the static copy next to the final one until the swap.
   await expect(page.locator("h1")).toHaveCount(1);
+  // The cover with a Play button stands in for the player until a click (DAZBY-115); the videos stream in after the first paint.
   await expect(
     page
-      .locator('iframe[title^="Видеоплеер YouTube"]')
+      .getByRole("button", { name: /Смотреть видео/ })
       .or(page.getByRole("link", { name: /Перейти на канал/ })),
   ).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator('iframe[title^="Видеоплеер YouTube"]')).toHaveCount(0);
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
