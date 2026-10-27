@@ -177,7 +177,7 @@ export function TelegramLogin({
         <div className="flex flex-wrap items-center gap-3">
           <a
             href={attempt.appUrl}
-            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-telegram px-7 text-base font-semibold text-white transition hover:brightness-95 active:scale-[0.97]"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-sm bg-telegram px-7 text-base font-semibold text-white transition hover:brightness-95 active:scale-[0.97]"
           >
             <PlaneIcon />
             {t.auth.openTelegram}

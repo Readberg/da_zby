@@ -78,7 +78,7 @@ export function SiteFooter() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-11 w-11 items-center justify-center rounded-full bg-line/60 text-ink transition-colors hover:bg-accent hover:text-black"
+                      className="flex h-11 w-11 items-center justify-center rounded-sm border border-line text-ink transition-colors duration-200 hover:border-accent hover:text-accent"
                     >
                       {socialIcons[link.id]}
                       <span className="sr-only">
