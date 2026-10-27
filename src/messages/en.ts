@@ -24,7 +24,7 @@ export const en: MessagesShape<typeof ru> = {
     socialLabel: "Follow us",
     rights: "© 2026 Da Zabey. All rights reserved.",
     contacts: "Contacts",
-    language: "English",
+    languageLabel: "Language",
     social: {
       youtube: "YouTube",
       telegram: "Telegram",

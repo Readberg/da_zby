@@ -2,26 +2,27 @@ import { buttonClasses } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/config/site";
-import { ru } from "@/messages/ru";
 import { VideosUnavailableError, type Video } from "@/server/services/videos";
 import { VideoShowcase } from "./video-showcase";
+import { getMessages } from "@/i18n/server";
 
 export const HOME_VIDEOS_COUNT = 6;
 
 const channelUrl = siteConfig.social.find((link) => link.id === "youtube")?.url ?? "";
 
 export function VideosUnavailable() {
+  const t = getMessages();
   return (
-    <Card variant="accent" title={ru.home.unavailableTitle}>
-      <p className="mb-4">{ru.home.unavailableText}</p>
+    <Card variant="accent" title={t.home.unavailableTitle}>
+      <p className="mb-4">{t.home.unavailableText}</p>
       <a
         href={channelUrl}
         target="_blank"
         rel="noopener noreferrer"
         className={buttonClasses("primary")}
       >
-        {ru.home.toChannel}
-        <span className="sr-only"> {ru.common.opensInNewTab}</span>
+        {t.home.toChannel}
+        <span className="sr-only"> {t.common.opensInNewTab}</span>
       </a>
     </Card>
   );

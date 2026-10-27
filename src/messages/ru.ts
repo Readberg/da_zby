@@ -21,7 +21,7 @@ export const ru = {
     socialLabel: "Мы в соцсетях",
     rights: "© 2026 «Да забей». Все права защищены.",
     contacts: "Контакты",
-    language: "Русский",
+    languageLabel: "Язык",
     social: {
       youtube: "YouTube",
       telegram: "Telegram",

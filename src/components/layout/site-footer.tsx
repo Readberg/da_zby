@@ -1,10 +1,9 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Container } from "@/components/ui/container";
 import {
-  ChevronDownIcon,
-  GlobeIcon,
   InstagramIcon,
   TelegramIcon,
   ThreadsIcon,
@@ -69,14 +68,7 @@ export function SiteFooter() {
           <p className="text-sm">
             {m.footer.rights} · {m.site.tagline}
           </p>
-          <span
-            aria-hidden="true"
-            className="inline-flex min-h-11 w-fit items-center gap-3 rounded-md border border-line bg-bg px-4 text-ink"
-          >
-            <GlobeIcon className="h-5 w-5" />
-            {m.footer.language}
-            <ChevronDownIcon className="h-4 w-4" />
-          </span>
+          <LanguageSwitcher />
           <nav aria-label={m.footer.socialLabel}>
             <ul className="flex flex-wrap gap-3">
               {social.map((link) => (
