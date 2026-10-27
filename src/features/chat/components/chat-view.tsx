@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { avatarUrl } from "@/lib/avatar";
+import { messageFromRow } from "@/lib/chat-row";
 import { createClient } from "@/lib/supabase/client";
 import { INTL_LOCALE } from "@/lib/time";
 import { useLocale, useMessages } from "@/i18n/client";
@@ -27,26 +28,6 @@ type Props = {
   isAdmin: boolean;
   utcOffsetMinutes: number;
 };
-
-type Row = {
-  id: string;
-  user_id: string;
-  author_nickname: string;
-  author_avatar_path: string | null;
-  body: string;
-  created_at: string;
-};
-
-function fromRow(row: Row): ChatMessage {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    nickname: row.author_nickname,
-    avatarPath: row.author_avatar_path,
-    body: row.body,
-    createdAt: new Date(row.created_at).toISOString(),
-  };
-}
 
 /** Keeps only what is younger than a day, oldest first, no duplicates. */
 function merge(current: ChatMessage[], incoming: ChatMessage[], now = Date.now()): ChatMessage[] {
@@ -95,7 +76,8 @@ export function ChatView({ initial, currentUserId, isAdmin, utcOffsetMinutes }: 
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "chat_messages" },
         (payload) => {
-          setMessages((current) => merge(current, [fromRow(payload.new as Row)]));
+          const message = messageFromRow(payload.new);
+          if (message) setMessages((current) => merge(current, [message]));
         },
       )
       .on(

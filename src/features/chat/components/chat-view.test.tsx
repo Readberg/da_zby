@@ -122,7 +122,7 @@ describe("ChatView", () => {
           author_nickname: "other",
           author_avatar_path: null,
           body: "live one",
-          created_at: new Date().toISOString(),
+          created_at: new Date().toISOString().replace("T", " ").replace("Z", "+00"),
         },
       });
     });
