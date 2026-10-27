@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { PlayIcon } from "@/components/ui/icons";
 import { cx } from "@/lib/cx";
 import { formatDate } from "@/lib/time";
 import type { Video } from "@/server/services/videos";
@@ -12,35 +13,18 @@ function embedUrl(id: string, autoplay: boolean) {
 }
 
 /**
- * Standard YouTube player for the newest video plus a grid of the others. Picking another video
- * from the grid switches the player and starts it. The embed (about 1 MB of third-party code) is
- * only put on the page when it is about to be seen, so it does not compete with the first screen
- * for the network and the main thread (DAZBY-112); until then there is the same black frame.
+ * Cover of the newest video plus a grid of the others. The cover is a picture with a Play button;
+ * the standard YouTube player (about 1 MB of third-party code) is put on the page only after the
+ * click, so it never competes with the first screen (DAZBY-112, DAZBY-115). Picking another video
+ * from the grid starts it at once.
  */
 export function VideoShowcase({ videos }: { videos: Video[] }) {
   const locale = useLocale();
   const t = useMessages();
   const [selectedId, setSelectedId] = useState(videos[0]?.id);
   const [autoplay, setAutoplay] = useState(false);
-  const [near, setNear] = useState(false);
+  const [started, setStarted] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const node = playerRef.current;
-    if (near || !node) return;
-    if (typeof IntersectionObserver === "undefined") {
-      const timer = setTimeout(() => setNear(true), 0);
-      return () => clearTimeout(timer);
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) setNear(true);
-      },
-      { rootMargin: "300px" },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [near]);
 
   const selected = videos.find((video) => video.id === selectedId) ?? videos[0];
   if (!selected) return null;
@@ -49,7 +33,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
   function play(id: string) {
     setSelectedId(id);
     setAutoplay(true);
-    setNear(true);
+    setStarted(true);
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -63,16 +47,37 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
           ref={playerRef}
           className="relative aspect-video w-full scroll-mt-4 overflow-hidden rounded-md bg-black"
         >
-          {near && (
+          {started ? (
             <iframe
               key={selected.id}
               src={embedUrl(selected.id, autoplay)}
               title={`${t.home.playerTitle}: ${selected.title}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              loading="lazy"
               className="absolute inset-0 h-full w-full"
             />
+          ) : (
+            <button
+              type="button"
+              onClick={() => play(selected.id)}
+              aria-label={`${t.home.playVideo}: ${selected.title}`}
+              className="group absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-accent/80"
+            >
+              <Image
+                src={selected.thumbnailUrl}
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/20"
+              />
+              <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-accent text-black shadow-soft ring-8 ring-accent/30 transition-transform duration-200 group-hover:scale-110 group-active:scale-95 sm:h-20 sm:w-20 sm:ring-[10px]">
+                <PlayIcon className="ml-1 h-8 w-8 sm:h-10 sm:w-10" />
+              </span>
+            </button>
           )}
         </div>
         <h2
