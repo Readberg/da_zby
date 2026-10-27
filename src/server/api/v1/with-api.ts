@@ -28,15 +28,19 @@ function issuesToFieldErrors(issues: z.core.$ZodIssue[]): FieldError[] {
   }));
 }
 
+/** The access token of an external client (`Authorization: Bearer <token>`), if one was sent. */
+function bearerToken(request: NextRequest): string | undefined {
+  return request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+}
+
 async function authenticate(
   level: EndpointDef["auth"],
-  request: NextRequest,
+  bearer: string | undefined,
   supabase: SupabaseClient<Database>,
 ): Promise<User | null> {
   if (level === "public") return null;
 
   // Browsers use the session cookie; external clients send `Authorization: Bearer <access token>`.
-  const bearer = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
   const { data, error } = bearer
     ? await supabase.auth.getUser(bearer)
     : await supabase.auth.getUser();
@@ -122,8 +126,9 @@ export function withApi<
         body = parsed.data;
       }
 
-      const supabase = await createClient();
-      const user = await authenticate(endpoint.auth, request, supabase);
+      const bearer = bearerToken(request);
+      const supabase = await createClient(bearer);
+      const user = await authenticate(endpoint.auth, bearer, supabase);
       const result = await handler({ request, requestId, query, body, supabase, user });
 
       // The handler must honour the published contract; a mismatch is a server bug, not a client error.
