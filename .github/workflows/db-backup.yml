@@ -1,0 +1,68 @@
+name: db-backup
+
+# Daily backup of the live database (D-089): the dev project is the production one (D-080) and the
+# free Supabase plan keeps no copies. The dump (schema, public data, sign-in accounts) is a private
+# artifact of this repository for 30 days; how to restore it is in docs/BACKUP.md.
+# A failed run makes GitHub send the usual "workflow failed" e-mail, which is the alert.
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+  push:
+    branches: [feat/DAZBY-102-db-backup]
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PROJECT_REF: ksykaqwkbfqtkvdxqedv
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - name: Check secrets
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
+            echo "::error::Set SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD in Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Dump
+        run: |
+          mkdir backup
+          supabase db dump --linked -f backup/schema.sql
+          supabase db dump --linked --data-only --use-copy -f backup/data-public.sql
+          supabase db dump --linked --data-only --use-copy --schema auth -f backup/data-auth.sql
+
+      - name: The dump is not empty and holds the key tables
+        run: |
+          set -e
+          for table in profiles tournaments seasons clubs tours matches predictions; do
+            grep -q "COPY \"\?public\"\?\.\"\?${table}\"\? " backup/data-public.sql || {
+              echo "::error::Table ${table} is missing in backup/data-public.sql"; exit 1; }
+          done
+          grep -q "COPY \"\?auth\"\?\.\"\?users\"\? " backup/data-auth.sql || {
+            echo "::error::auth.users is missing in backup/data-auth.sql"; exit 1; }
+          grep -q "CREATE TABLE" backup/schema.sql
+          ls -l backup
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > backup/TAKEN_AT
+
+      - name: Pack
+        run: tar -czf "dazby-backup-$(date -u +%Y-%m-%d).tar.gz" backup
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dazby-backup
+          path: dazby-backup-*.tar.gz
+          retention-days: 30
+          if-no-files-found: error
