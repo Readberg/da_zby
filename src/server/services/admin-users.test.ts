@@ -1,7 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/server/api/v1/problem";
-import { listUsers, setUserRole } from "./admin-users";
+import { getUserProfile, listUsers, setUserRole, updateUserProfile } from "./admin-users";
+import { fakeDb } from "./fake-db";
+
+vi.mock("@/lib/env", () => ({
+  publicEnv: { NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" },
+}));
 
 const row = (n: number, role = "user") => ({
   id: `00000000-0000-0000-0000-00000000000${n}`,
@@ -105,5 +110,101 @@ describe("setUserRole", () => {
 
     const broken = roleDb({ rpcError: { message: "boom", code: "XX000" } });
     await expect(setUserRole(broken.db, target)).rejects.toMatchObject({ message: "boom" });
+  });
+});
+
+describe("updateUserProfile / getUserProfile", () => {
+  const USER = "00000000-0000-0000-0000-000000000002";
+  const ACTOR = "00000000-0000-0000-0000-000000000001";
+  const profileRow = (over: Record<string, unknown> = {}) => ({
+    id: USER,
+    nickname: "Аня",
+    full_name: "Анна",
+    contact: null,
+    about: null,
+    country_code: "BY",
+    city: "Минск",
+    utc_offset_minutes: 180,
+    avatar_path: null,
+    ...over,
+  });
+
+  it("changes only the fields that were sent and returns the new profile", async () => {
+    const fake = fakeDb({
+      profiles: { data: [profileRow()], writeData: [profileRow({ city: "Брест" })] },
+    });
+    const result = await updateUserProfile(
+      fake.db,
+      { userId: USER, patch: { city: "Брест" } },
+      ACTOR,
+    );
+    expect(result).toMatchObject({ userId: USER, nickname: "Аня", city: "Брест" });
+    const update = fake.calls.profiles?.find((call) => call.method === "update");
+    expect(update?.args[0]).toEqual({ city: "Брест" });
+  });
+
+  it("maps the database fields (name, country, zone) and removes a photo", async () => {
+    const fake = fakeDb({ profiles: { data: [profileRow()], writeData: [profileRow()] } });
+    await updateUserProfile(
+      fake.db,
+      {
+        userId: USER,
+        patch: {
+          nickname: "Анна_2",
+          fullName: null,
+          countryCode: null,
+          utcOffsetMinutes: 120,
+          avatarPath: null,
+        },
+      },
+      ACTOR,
+    );
+    const update = fake.calls.profiles?.find((call) => call.method === "update");
+    expect(update?.args[0]).toEqual({
+      nickname: "Анна_2",
+      full_name: null,
+      country_code: null,
+      utc_offset_minutes: 120,
+      avatar_path: null,
+    });
+  });
+
+  it("refuses to point the photo at a file: an admin can only remove it", async () => {
+    const fake = fakeDb({ profiles: { data: [profileRow()] } });
+    await expect(
+      updateUserProfile(fake.db, { userId: USER, patch: { avatarPath: `${USER}/x.png` } }, ACTOR),
+    ).rejects.toMatchObject({ status: 422 });
+    expect(fake.calls.profiles).toBeUndefined();
+  });
+
+  it("says 409 for a nickname that is taken and 404 for a user who does not exist", async () => {
+    const taken = fakeDb({ profiles: { writeError: { code: "23505", message: "duplicate" } } });
+    await expect(
+      updateUserProfile(taken.db, { userId: USER, patch: { nickname: "Борис" } }, ACTOR),
+    ).rejects.toMatchObject({ status: 409, code: "profile.nickname_taken" });
+
+    const missing = fakeDb({ profiles: { data: [], writeData: [] } });
+    await expect(
+      updateUserProfile(missing.db, { userId: USER, patch: { city: "x" } }, ACTOR),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("logs who changed whom and which fields, never the values", async () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const fake = fakeDb({ profiles: { data: [profileRow()], writeData: [profileRow()] } });
+    await updateUserProfile(fake.db, { userId: USER, patch: { about: "секрет" } }, ACTOR);
+    const line = String(spy.mock.calls.at(-1)?.[0]);
+    expect(line).toContain("admin.profile_updated");
+    expect(line).toContain(ACTOR);
+    expect(line).toContain("about");
+    expect(line).not.toContain("секрет");
+    spy.mockRestore();
+  });
+
+  it("reads one profile or null", async () => {
+    expect(
+      await getUserProfile(fakeDb({ profiles: { data: [profileRow()] } }).db, USER),
+    ).toMatchObject({ userId: USER, nickname: "Аня" });
+    expect(await getUserProfile(fakeDb({ profiles: { data: [] } }).db, USER)).toBeNull();
   });
 });

@@ -44,6 +44,8 @@ import {
   tournamentUpdateBodySchema,
 } from "./schemas/admin-catalog";
 import {
+  adminUserProfileBodySchema,
+  adminUserProfileSchema,
   adminUserRoleBodySchema,
   adminUserRoleSchema,
   adminUsersQuerySchema,
@@ -173,6 +175,19 @@ export const endpoints = {
     auth: "admin",
     body: adminUserRoleBodySchema,
     output: adminUserRoleSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 404, 409, 422],
+  }),
+  adminUserProfile: defineEndpoint({
+    method: "patch",
+    path: "/admin/users/profile",
+    summary: "Edit a participant's profile as an admin",
+    description:
+      "Same fields and rules as PATCH /me (nickname uniqueness is 409 profile.nickname_taken). The photo can only be removed (avatarPath null). Only the changed field names are logged.",
+    tags: ["admin"],
+    auth: "admin",
+    body: adminUserProfileBodySchema,
+    output: adminUserProfileSchema,
     cacheControl: "private, no-store",
     errors: [400, 401, 403, 404, 409, 422],
   }),

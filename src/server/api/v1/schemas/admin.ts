@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { profilePatchSchema } from "@/lib/profile-schema";
 
 export const adminUserSchema = z.object({
   id: z.string().describe("User id (UUID)."),
@@ -39,3 +40,24 @@ export const adminUserRoleSchema = z.object({
   userId: z.string(),
   role: z.enum(["user", "admin"]),
 });
+
+export const adminUserProfileBodySchema = z.object({
+  userId: z.uuid(),
+  patch: profilePatchSchema.describe(
+    "The same fields as PATCH /me; `avatarPath` may only be null (remove the photo).",
+  ),
+});
+export type AdminUserProfileBody = z.infer<typeof adminUserProfileBodySchema>;
+
+export const adminUserProfileSchema = z.object({
+  userId: z.string(),
+  nickname: z.string().nullable(),
+  fullName: z.string().nullable(),
+  contact: z.string().nullable(),
+  about: z.string().nullable(),
+  countryCode: z.string().nullable(),
+  city: z.string().nullable(),
+  utcOffsetMinutes: z.number().int(),
+  avatarUrl: z.string().nullable(),
+});
+export type AdminUserProfile = z.infer<typeof adminUserProfileSchema>;

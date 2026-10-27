@@ -1,7 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { avatarUrl } from "@/lib/avatar";
+import { log } from "@/lib/log";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
-import type { AdminUserRoleBody, AdminUsers } from "@/server/api/v1/schemas/admin";
-import type { Database } from "@/types/database";
+import type {
+  AdminUserProfile,
+  AdminUserProfileBody,
+  AdminUserRoleBody,
+  AdminUsers,
+} from "@/server/api/v1/schemas/admin";
+import type { Database, Tables } from "@/types/database";
+import { CHECK_VIOLATION, UNIQUE_VIOLATION } from "./pg-errors";
 
 type Db = SupabaseClient<Database>;
 
@@ -77,4 +85,96 @@ export async function setUserRole(
     throw error;
   }
   return { userId, role };
+}
+
+function toUserProfile(row: Tables<"profiles">): AdminUserProfile {
+  return {
+    userId: row.id,
+    nickname: row.nickname,
+    fullName: row.full_name,
+    contact: row.contact,
+    about: row.about,
+    countryCode: row.country_code,
+    city: row.city,
+    utcOffsetMinutes: row.utc_offset_minutes,
+    avatarUrl: avatarUrl(row.avatar_path),
+  };
+}
+
+const notFound = () =>
+  new ApiError(404, ERROR_CODES.profileNotFound, "Not Found", "User does not exist.");
+
+/** One participant's profile for the admin edit form; null when there is no such user. */
+export async function getUserProfile(
+  supabase: Db,
+  userId: string,
+): Promise<AdminUserProfile | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? toUserProfile(data) : null;
+}
+
+/**
+ * An admin changes somebody's profile. Runs with the secret key (RLS lets only the owner write), so
+ * the caller must already be checked as an admin. Same fields as the owner's own edit; a photo can
+ * only be removed. The log names who changed whom and which fields, never the values.
+ */
+export async function updateUserProfile(
+  supabase: Db,
+  { userId, patch }: AdminUserProfileBody,
+  actorId: string,
+): Promise<AdminUserProfile> {
+  if (patch.avatarPath !== undefined && patch.avatarPath !== null) {
+    throw new ApiError(
+      422,
+      ERROR_CODES.validationFailed,
+      "Unprocessable Content",
+      "An admin can only remove the photo.",
+      [{ field: "avatarPath", message: "Админ может только убрать фото" }],
+    );
+  }
+
+  const update: Database["public"]["Tables"]["profiles"]["Update"] = {};
+  if (patch.nickname !== undefined) update.nickname = patch.nickname;
+  if (patch.fullName !== undefined) update.full_name = patch.fullName;
+  if (patch.contact !== undefined) update.contact = patch.contact;
+  if (patch.about !== undefined) update.about = patch.about;
+  if (patch.countryCode !== undefined) update.country_code = patch.countryCode;
+  if (patch.city !== undefined) update.city = patch.city;
+  if (patch.avatarPath !== undefined) update.avatar_path = patch.avatarPath;
+  if (patch.utcOffsetMinutes !== undefined) update.utc_offset_minutes = patch.utcOffsetMinutes;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update(update)
+    .eq("id", userId)
+    .select("*")
+    .maybeSingle();
+  if (error) {
+    if (error.code === UNIQUE_VIOLATION) {
+      throw new ApiError(
+        409,
+        ERROR_CODES.nicknameTaken,
+        "Conflict",
+        "This nickname is already taken.",
+        [{ field: "nickname", message: "Этот ник уже занят" }],
+      );
+    }
+    if (error.code === CHECK_VIOLATION) {
+      throw new ApiError(422, ERROR_CODES.validationFailed, "Unprocessable Content", error.message);
+    }
+    throw error;
+  }
+  if (!data) throw notFound();
+
+  log("info", "admin.profile_updated", {
+    actor: actorId,
+    target: userId,
+    fields: Object.keys(update),
+  });
+  return toUserProfile(data);
 }
