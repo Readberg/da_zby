@@ -115,6 +115,7 @@ export const ru = {
     videosTitle: "Свежие видео",
     playerTitle: "Видеоплеер YouTube",
     watchOnYoutube: "Смотреть на YouTube",
+    playVideo: "Смотреть видео",
     moreVideos: "Предыдущие выпуски",
     unavailableTitle: "Видео сейчас не загрузились",
     unavailableText: "YouTube не ответил. Свежие выпуски всегда есть на нашем канале.",
