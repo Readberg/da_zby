@@ -35,4 +35,14 @@ describe("server Supabase client", () => {
     expect(options.cookies.getAll()).toEqual([{ name: "sb-abc-auth-token", value: "v" }]);
     expect(() => options.cookies.setAll([{ name: "a", value: "b" }])).not.toThrow();
   });
+
+  it("acts as the bearer's user when an access token is given, and as the cookie session otherwise", async () => {
+    const withToken = (await createClient("tok")) as unknown as {
+      global?: { headers: Record<string, string> };
+    };
+    expect(withToken.global).toEqual({ headers: { Authorization: "Bearer tok" } });
+
+    const without = (await createClient()) as unknown as { global?: unknown };
+    expect(without.global).toBeUndefined();
+  });
 });
