@@ -10,9 +10,15 @@ export function hasAuthCookie(request: NextRequest): boolean {
     .some(({ name }) => name.startsWith("sb-") && name.includes("-auth-token"));
 }
 
-/** Refreshes the Supabase session cookie on every matched request (called from `src/proxy.ts`). */
-export async function updateSession(request: NextRequest): Promise<NextResponse> {
-  let response = NextResponse.next({ request });
+/**
+ * Refreshes the Supabase session cookie on every matched request (called from `src/proxy.ts`).
+ * With `rewriteTo` the page is served from that internal address (the language segment, D-088);
+ * the refreshed cookies travel with either kind of response.
+ */
+export async function updateSession(request: NextRequest, rewriteTo?: URL): Promise<NextResponse> {
+  const respond = () =>
+    rewriteTo ? NextResponse.rewrite(rewriteTo, { request }) : NextResponse.next({ request });
+  let response = respond();
 
   // Guests have no session to refresh: skip the network round-trip to Supabase Auth.
   if (!hasAuthCookie(request)) {
@@ -29,7 +35,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
         },
         setAll(cookiesToSet, headers) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
+          response = respond();
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );

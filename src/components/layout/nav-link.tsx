@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useAppPathname } from "@/i18n/use-app-pathname";
 import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
 
@@ -10,7 +10,7 @@ const base =
 
 /** Navigation link that marks the current page. Needs a <Suspense> boundary around it. */
 export function NavLink({ href, children }: { href: string; children: ReactNode }) {
-  const pathname = usePathname();
+  const pathname = useAppPathname();
   const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
   return (
     <Link

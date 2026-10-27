@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Suspense } from "react";
 import { siteConfig } from "@/config/site";
@@ -11,8 +12,9 @@ import { HydrationMark } from "@/features/home/components/home-fallback";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ru } from "@/messages/ru";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
-import { bodyFont, headingFont } from "./fonts";
-import "./globals.css";
+import { LOCALES, isLocale } from "@/i18n/config";
+import { bodyFont, headingFont } from "../fonts";
+import "../globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),
@@ -41,10 +43,17 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/** Both languages are known at build time, so the static shell is prerendered for each (D-088). */
+export function generateStaticParams() {
+  return LOCALES.map((locale) => ({ locale }));
+}
+
+export default async function RootLayout({ children, params }: LayoutProps<"/[locale]">) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
   return (
     <html
-      lang="ru"
+      lang={locale}
       suppressHydrationWarning
       className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased`}
     >

@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: ru.onboarding.title, robots: { index:
 async function OnboardingContent({
   searchParams,
 }: {
-  searchParams: PageProps<"/onboarding">["searchParams"];
+  searchParams: PageProps<"/[locale]/onboarding">["searchParams"];
 }) {
   const params = await searchParams;
   const next = safeRedirectPath(typeof params.next === "string" ? params.next : null);
@@ -25,7 +25,7 @@ async function OnboardingContent({
   return <OnboardingForm next={next} />;
 }
 
-export default function OnboardingPage(props: PageProps<"/onboarding">) {
+export default function OnboardingPage(props: PageProps<"/[locale]/onboarding">) {
   return (
     <NarrowPage title={ru.onboarding.title} intro={ru.onboarding.intro}>
       <Suspense fallback={<Skeleton className="h-40 w-full" />}>

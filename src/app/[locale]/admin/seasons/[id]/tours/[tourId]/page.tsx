@@ -19,7 +19,7 @@ export const metadata: Metadata = { title: ru.admin.tours.title, robots: { index
 async function TourContent({
   params,
 }: {
-  params: PageProps<"/admin/seasons/[id]/tours/[tourId]">["params"];
+  params: PageProps<"/[locale]/admin/seasons/[id]/tours/[tourId]">["params"];
 }) {
   const { id, tourId } = await params;
   const supabase = await createClient();
@@ -117,7 +117,9 @@ async function TourContent({
   );
 }
 
-export default function AdminTourPage(props: PageProps<"/admin/seasons/[id]/tours/[tourId]">) {
+export default function AdminTourPage(
+  props: PageProps<"/[locale]/admin/seasons/[id]/tours/[tourId]">,
+) {
   return (
     <Suspense fallback={<Skeleton className="h-96" />}>
       <TourContent params={props.params} />

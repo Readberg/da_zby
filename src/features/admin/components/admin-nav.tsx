@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useAppPathname } from "@/i18n/use-app-pathname";
 import { cx } from "@/lib/cx";
 import { ru } from "@/messages/ru";
 
@@ -14,7 +14,7 @@ const sections = [
 
 /** Tabs of the admin sections; the current one is marked. Needs a <Suspense> boundary around it. */
 export function AdminNav() {
-  const pathname = usePathname();
+  const pathname = useAppPathname();
   return (
     <nav aria-label={ru.admin.title} className="-mx-1 flex flex-wrap items-center gap-1">
       {sections.map((section) => {

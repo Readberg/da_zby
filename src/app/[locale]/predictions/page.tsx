@@ -22,7 +22,7 @@ export const metadata: Metadata = { title: ru.predictions.title };
 async function PredictionsContent({
   searchParams,
 }: {
-  searchParams: PageProps<"/predictions">["searchParams"];
+  searchParams: PageProps<"/[locale]/predictions">["searchParams"];
 }) {
   // Deadlines depend on the current time: render at request time, never in the static shell.
   await connection();
@@ -127,7 +127,7 @@ async function PredictionsContent({
   );
 }
 
-export default function PredictionsPage(props: PageProps<"/predictions">) {
+export default function PredictionsPage(props: PageProps<"/[locale]/predictions">) {
   return (
     <Container className="flex flex-col gap-6 py-8 sm:py-12">
       <h1 className="text-h3 sm:text-h1">{ru.predictions.title}</h1>
