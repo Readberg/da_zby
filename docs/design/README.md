@@ -31,7 +31,7 @@
 | `--font-body` (Inter) | `font-sans` | гротеск, кириллица | основной текст |
 | шкала шрифта | `text-sm` 14 · `text-base` 16 · `text-lg` 20 · `text-h3` 28 · `text-h2` 40 · `text-h1` 56 | px | на мобильных заголовки ≤ `text-h3` |
 | `--radius-sm/md/lg` | `rounded-sm/md/lg` | 4 / 8 / 16 px | скругления |
-| `--container-max` | `max-w-site` | 1200 px | ширина контейнера |
+| `--container-max` | `max-w-site` | 960 px | ширина контейнера (узкая колонка по центру, D-099) |
 
 Фокус: глобально `:focus-visible` — жёлтая обводка + чёрное кольцо. Шрифты грузятся через `next/font` (`src/app/fonts.ts`), без запросов к Google из браузера.
 
