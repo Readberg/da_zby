@@ -17,6 +17,8 @@ export const serverEnvSchema = z.object({
     .string()
     .regex(/^\d+(,\d+)*$/, "expected comma-separated Telegram ids")
     .optional(),
+  // Own key of TheSportsDB for the schedule import (D-090); without it the free test key is used.
+  THESPORTSDB_API_KEY: z.string().min(1).optional(),
   YOUTUBE_CHANNEL_ID: z.string().regex(/^UC[\w-]{22}$/, "expected a channel id like UC…"),
 });
 
