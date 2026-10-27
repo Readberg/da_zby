@@ -5,11 +5,16 @@ import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProfileView } from "@/features/profile/components/profile-view";
 import { createClient } from "@/lib/supabase/server";
-import { ru } from "@/messages/ru";
 import { getPublicProfile } from "@/server/services/public-profiles";
 import { getProfileStatsCached } from "@/server/services/rating.cached";
+import { initLocale, messagesFor } from "@/i18n/server";
 
-export const metadata: Metadata = { title: ru.publicProfile.title };
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/u/[nickname]">): Promise<Metadata> {
+  const t = await messagesFor(params);
+  return { title: t.publicProfile.title };
+}
 
 async function ProfileContent({
   params,
@@ -22,7 +27,8 @@ async function ProfileContent({
   return <ProfileView profile={profile} stats={await getProfileStatsCached(profile.id)} />;
 }
 
-export default function PublicProfilePage(props: PageProps<"/[locale]/u/[nickname]">) {
+export default async function PublicProfilePage(props: PageProps<"/[locale]/u/[nickname]">) {
+  await initLocale(props.params);
   return (
     <Container className="py-8 sm:py-12">
       <Suspense fallback={<Skeleton className="h-64 max-w-xl" />}>

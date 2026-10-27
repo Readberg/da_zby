@@ -7,15 +7,21 @@ import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProfileView } from "@/features/profile/components/profile-view";
 import { createClient } from "@/lib/supabase/server";
-import { ru } from "@/messages/ru";
 import { requireProfile } from "@/server/services/current-user";
 import { getPublicProfile } from "@/server/services/public-profiles";
 import { getProfileStatsCached } from "@/server/services/rating.cached";
+import { getMessages, initLocale, messagesFor } from "@/i18n/server";
 
-export const metadata: Metadata = { title: ru.profile.title, robots: { index: false } };
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/profile">): Promise<Metadata> {
+  const t = await messagesFor(params);
+  return { title: t.profile.title, robots: { index: false } };
+}
 
 /** Your own profile exactly as other people see it, with a way to edit it. */
 async function ProfileContent() {
+  const t = getMessages();
   const user = await requireProfile("/profile");
   const profile = await getPublicProfile(await createClient(), user.nickname);
   if (!profile) notFound();
@@ -26,14 +32,15 @@ async function ProfileContent() {
       stats={await getProfileStatsCached(profile.id)}
       actions={
         <Link href="/profile/edit" className={buttonClasses("secondary", "px-5")}>
-          {ru.profile.edit}
+          {t.profile.edit}
         </Link>
       }
     />
   );
 }
 
-export default function ProfilePage() {
+export default async function ProfilePage(props: PageProps<"/[locale]/profile">) {
+  await initLocale(props.params);
   return (
     <Container className="py-8 sm:py-12">
       <Suspense fallback={<Skeleton className="h-64 max-w-xl" />}>

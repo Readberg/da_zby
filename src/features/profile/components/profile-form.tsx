@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { SelectField, TextField, TextareaField } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { fieldErrorsFromIssues } from "@/lib/form-errors";
 import { profilePatchSchema, utcOffsetOptions } from "@/lib/profile-schema";
-import { ru } from "@/messages/ru";
+import { useLocale, useMessages } from "@/i18n/client";
+import { localizeMessage } from "@/i18n/validation";
 
 export type ProfileFormValues = {
   nickname: string;
@@ -23,7 +24,6 @@ type FieldErrors = Partial<Record<keyof ProfileFormValues, string>>;
 type Status = "idle" | "saving" | "saved" | "failed";
 
 const ABOUT_MAX = 1000;
-const offsets = utcOffsetOptions();
 
 export function ProfileForm({
   initial,
@@ -32,6 +32,9 @@ export function ProfileForm({
   initial: ProfileFormValues;
   countries: { code: string; name: string }[];
 }) {
+  const t = useMessages();
+  const locale = useLocale();
+  const offsets = useMemo(() => utcOffsetOptions(locale), [locale]);
   const router = useRouter();
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -58,7 +61,14 @@ export function ProfileForm({
 
     const parsed = profilePatchSchema.safeParse(payload);
     if (!parsed.success) {
-      setErrors(fieldErrorsFromIssues<keyof ProfileFormValues>(parsed.error.issues));
+      setErrors(
+        fieldErrorsFromIssues<keyof ProfileFormValues>(
+          parsed.error.issues.map((issue) => ({
+            ...issue,
+            message: localizeMessage(issue.message, locale),
+          })),
+        ),
+      );
       setStatus("failed");
       return;
     }
@@ -74,7 +84,7 @@ export function ProfileForm({
       if (cause instanceof ApiClientError) {
         for (const key of Object.keys(values) as (keyof ProfileFormValues)[]) {
           const message = cause.fieldError(key);
-          if (message) next[key] = message;
+          if (message) next[key] = localizeMessage(message, locale);
         }
       }
       setErrors(next);
@@ -86,8 +96,8 @@ export function ProfileForm({
     <form onSubmit={onSubmit} noValidate className="flex max-w-xl flex-col gap-4">
       <TextField
         id="profile-nickname"
-        label={ru.profile.nickname}
-        hint={ru.profile.nicknameHint}
+        label={t.profile.nickname}
+        hint={t.profile.nicknameHint}
         autoComplete="nickname"
         value={values.nickname}
         onChange={(e) => set("nickname", e.target.value)}
@@ -95,7 +105,7 @@ export function ProfileForm({
       />
       <TextField
         id="profile-fullName"
-        label={ru.profile.fullName}
+        label={t.profile.fullName}
         autoComplete="name"
         value={values.fullName}
         onChange={(e) => set("fullName", e.target.value)}
@@ -103,15 +113,15 @@ export function ProfileForm({
       />
       <TextField
         id="profile-contact"
-        label={ru.profile.contact}
-        hint={ru.profile.contactHint}
+        label={t.profile.contact}
+        hint={t.profile.contactHint}
         value={values.contact}
         onChange={(e) => set("contact", e.target.value)}
         error={errors.contact}
       />
       <TextareaField
         id="profile-about"
-        label={ru.profile.about}
+        label={t.profile.about}
         hint={`${values.about.length}/${ABOUT_MAX}`}
         value={values.about}
         onChange={(e) => set("about", e.target.value)}
@@ -119,12 +129,12 @@ export function ProfileForm({
       />
       <SelectField
         id="profile-country"
-        label={ru.profile.country}
+        label={t.profile.country}
         value={values.countryCode}
         onChange={(e) => set("countryCode", e.target.value)}
         error={errors.countryCode}
       >
-        <option value="">{ru.profile.countryEmpty}</option>
+        <option value="">{t.profile.countryEmpty}</option>
         {countries.map((country) => (
           <option key={country.code} value={country.code}>
             {country.name}
@@ -133,7 +143,7 @@ export function ProfileForm({
       </SelectField>
       <TextField
         id="profile-city"
-        label={ru.profile.city}
+        label={t.profile.city}
         autoComplete="address-level2"
         value={values.city}
         onChange={(e) => set("city", e.target.value)}
@@ -141,8 +151,8 @@ export function ProfileForm({
       />
       <SelectField
         id="profile-timezone"
-        label={ru.profile.timezone}
-        hint={ru.profile.timezoneHint}
+        label={t.profile.timezone}
+        hint={t.profile.timezoneHint}
         value={String(values.utcOffsetMinutes)}
         onChange={(e) => set("utcOffsetMinutes", Number(e.target.value))}
         error={errors.utcOffsetMinutes}
@@ -156,11 +166,11 @@ export function ProfileForm({
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" loading={status === "saving"}>
-          {status === "saving" ? ru.profile.saving : ru.profile.save}
+          {status === "saving" ? t.profile.saving : t.profile.save}
         </Button>
         <p role="status" aria-live="polite" className="text-sm">
-          {status === "saved" && <span className="text-ink">{ru.profile.saved}</span>}
-          {status === "failed" && <span className="text-danger">{ru.profile.error}</span>}
+          {status === "saved" && <span className="text-ink">{t.profile.saved}</span>}
+          {status === "failed" && <span className="text-danger">{t.profile.error}</span>}
         </p>
       </div>
     </form>

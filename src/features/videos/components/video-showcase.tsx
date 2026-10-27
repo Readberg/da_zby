@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { cx } from "@/lib/cx";
 import { formatDate } from "@/lib/time";
-import { ru } from "@/messages/ru";
 import type { Video } from "@/server/services/videos";
+import { useMessages, useLocale } from "@/i18n/client";
 
 function embedUrl(id: string, autoplay: boolean) {
   return `https://www.youtube-nocookie.com/embed/${id}?rel=0${autoplay ? "&autoplay=1" : ""}`;
@@ -16,6 +16,8 @@ function embedUrl(id: string, autoplay: boolean) {
  * from the grid switches the player and starts it.
  */
 export function VideoShowcase({ videos }: { videos: Video[] }) {
+  const locale = useLocale();
+  const t = useMessages();
   const [selectedId, setSelectedId] = useState(videos[0]?.id);
   const [autoplay, setAutoplay] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +42,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
           <iframe
             key={selected.id}
             src={embedUrl(selected.id, autoplay)}
-            title={`${ru.home.playerTitle}: ${selected.title}`}
+            title={`${t.home.playerTitle}: ${selected.title}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             loading="lazy"
@@ -51,15 +53,17 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
           {selected.title}
         </h2>
         <p className="flex flex-wrap items-center gap-x-4 text-sm text-muted">
-          <time dateTime={selected.publishedAt}>{formatDate(selected.publishedAt)}</time>
+          <time dateTime={selected.publishedAt}>
+            {formatDate(selected.publishedAt, undefined, locale)}
+          </time>
           <a
             href={selected.url}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-11 items-center text-ink underline underline-offset-4"
           >
-            {ru.home.watchOnYoutube}
-            <span className="sr-only"> {ru.common.opensInNewTab}</span>
+            {t.home.watchOnYoutube}
+            <span className="sr-only"> {t.common.opensInNewTab}</span>
           </a>
         </p>
       </article>
@@ -67,7 +71,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
       {others.length > 0 && (
         <section aria-labelledby="more-videos-title" className="flex flex-col gap-3">
           <h2 id="more-videos-title" className="text-lg sm:text-h3">
-            {ru.home.moreVideos}
+            {t.home.moreVideos}
           </h2>
           <ul className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-1">
             {others.map((video) => (
@@ -93,7 +97,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
                       {video.title}
                     </span>
                     <time dateTime={video.publishedAt} className="text-sm text-muted">
-                      {formatDate(video.publishedAt)}
+                      {formatDate(video.publishedAt, undefined, locale)}
                     </time>
                   </span>
                 </button>

@@ -5,10 +5,15 @@ import { NarrowPage } from "@/components/ui/narrow-page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OnboardingForm } from "@/features/profile/components/onboarding-form";
 import { safeRedirectPath } from "@/lib/safe-redirect";
-import { ru } from "@/messages/ru";
 import { requireUser } from "@/server/services/current-user";
+import { getMessages, initLocale, messagesFor } from "@/i18n/server";
 
-export const metadata: Metadata = { title: ru.onboarding.title, robots: { index: false } };
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/onboarding">): Promise<Metadata> {
+  const t = await messagesFor(params);
+  return { title: t.onboarding.title, robots: { index: false } };
+}
 
 async function OnboardingContent({
   searchParams,
@@ -25,9 +30,11 @@ async function OnboardingContent({
   return <OnboardingForm next={next} />;
 }
 
-export default function OnboardingPage(props: PageProps<"/[locale]/onboarding">) {
+export default async function OnboardingPage(props: PageProps<"/[locale]/onboarding">) {
+  await initLocale(props.params);
+  const t = getMessages();
   return (
-    <NarrowPage title={ru.onboarding.title} intro={ru.onboarding.intro}>
+    <NarrowPage title={t.onboarding.title} intro={t.onboarding.intro}>
       <Suspense fallback={<Skeleton className="h-40 w-full" />}>
         <OnboardingContent searchParams={props.searchParams} />
       </Suspense>

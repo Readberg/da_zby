@@ -2,10 +2,11 @@
 
 import { EVENTS, track } from "@/lib/analytics";
 import { effectiveTheme, otherTheme, THEME_STORAGE_KEY } from "@/lib/theme";
-import { ru } from "@/messages/ru";
+import { useMessages } from "@/i18n/client";
 
 /** Switches between the light and the dark theme and remembers the choice on this device. */
 export function ThemeToggle() {
+  const t = useMessages();
   function toggle() {
     const root = document.documentElement;
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -23,8 +24,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label={ru.theme.toggle}
-      title={ru.theme.toggle}
+      aria-label={t.theme.toggle}
+      title={t.theme.toggle}
       className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink transition-colors duration-200 hover:bg-surface"
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="theme-moon h-5 w-5 fill-current">

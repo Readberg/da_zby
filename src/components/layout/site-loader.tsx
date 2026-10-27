@@ -1,7 +1,7 @@
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 import { BrandSpinner } from "@/components/ui/loader";
-import { ru } from "@/messages/ru";
+import { getMessages } from "@/i18n/server";
 
 /**
  * Marks the document as ready once what is on the first screen has loaded: the HTML (so the whole
@@ -17,12 +17,13 @@ export const READY_SCRIPT = `(function(){var d=document.documentElement,done=fal
  * after a few seconds, and without scripts it never blocks (see globals.css).
  */
 export function SiteLoader() {
+  const t = getMessages();
   return (
     <>
       <div
         id="site-loader"
         role="status"
-        aria-label={ru.common.loading}
+        aria-label={t.common.loading}
         className="site-loader fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-bg"
       >
         <Image src={logo} alt="" width={96} height={96} priority className="h-24 w-24" />
