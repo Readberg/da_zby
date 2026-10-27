@@ -36,6 +36,19 @@ const socialIcons: Record<SocialId, (props: { className?: string }) => ReactNode
   threads: (p) => <ThreadsIcon {...p} />,
 };
 
+/** The headline with one phrase in the accent colour; the text itself stays whole for readers and search. */
+function Headline({ text, accent }: { text: string; accent: string }) {
+  const at = text.indexOf(accent);
+  if (at < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, at)}
+      <span className="text-accent">{accent}</span>
+      {text.slice(at + accent.length)}
+    </>
+  );
+}
+
 function Hero() {
   const m = getMessages();
   const t = m.landing;
@@ -48,7 +61,7 @@ function Hero() {
         id="landing-title"
         className="max-w-4xl font-display text-[clamp(2.5rem,8vw,5rem)] uppercase leading-[0.95] tracking-tight"
       >
-        {m.home.headline}
+        <Headline text={m.home.headline} accent={m.home.headlineAccent} />
       </h1>
       <p className="max-w-md text-lg text-muted">{t.lead}</p>
       <Link

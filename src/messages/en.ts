@@ -90,6 +90,7 @@ export const en: MessagesShape<typeof ru> = {
   home: {
     memberTitle: "Next round",
     headline: "Football is more fun when you are in the game",
+    headlineAccent: "when you are in the game",
     ctaUser: "Make a prediction",
     soonTitle: "Starting soon",
     soonText: "The next round will appear here as soon as we add the matches. Check back later.",

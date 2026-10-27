@@ -16,6 +16,8 @@ test.describe("landing (guest)", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "Футбол интереснее, когда ты в игре" }),
     ).toBeVisible();
+    // One phrase of the headline carries the accent colour (D-106), the heading text stays whole.
+    await expect(page.locator("#landing-title span.text-accent")).toHaveText("когда ты в игре");
     const action = page.getByRole("link", { name: "Войти через Telegram" });
     await expect(action).toBeVisible();
     await expect(action).toHaveAttribute("href", /\/login\?next=%2Fpredictions/);
