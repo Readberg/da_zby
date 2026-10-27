@@ -40,7 +40,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
   return (
     <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[2fr_1fr] lg:items-start">
       <article
-        className="flex flex-col gap-4 rounded-lg bg-surface p-3 shadow-soft sm:p-4"
+        className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-3 sm:p-4"
         aria-labelledby="current-video-title"
       >
         <div
@@ -74,7 +74,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
                 aria-hidden="true"
                 className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/20"
               />
-              <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-accent text-black shadow-soft ring-8 ring-accent/30 transition-transform duration-200 group-hover:scale-110 group-active:scale-95 sm:h-20 sm:w-20 sm:ring-[10px]">
+              <span className="relative flex h-16 w-16 items-center justify-center rounded-lg bg-accent text-black transition-colors duration-200 group-hover:bg-accent-hover group-active:scale-95 sm:h-20 sm:w-20">
                 <PlayIcon className="ml-1 h-8 w-8 sm:h-10 sm:w-10" />
               </span>
             </button>
@@ -114,7 +114,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
                   type="button"
                   onClick={() => play(video.id)}
                   className={cx(
-                    "group flex w-full cursor-pointer flex-col gap-3 rounded-lg bg-surface p-3 text-left shadow-soft ring-2 ring-transparent transition-shadow duration-200 hover:ring-accent focus-visible:ring-accent lg:flex-row lg:items-start",
+                    "group flex w-full cursor-pointer flex-col gap-3 rounded-lg border border-line bg-surface p-3 text-left transition-colors duration-200 hover:border-accent hover:bg-surface-hover focus-visible:border-accent lg:flex-row lg:items-start",
                   )}
                 >
                   <span className="relative aspect-video w-full shrink-0 overflow-hidden rounded-md bg-line lg:w-40">
