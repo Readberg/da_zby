@@ -92,9 +92,9 @@ describe("highlighting the visitor", () => {
   it("marks only the visitor's own row in the season table", () => {
     render(<SeasonRatingTable rows={rows} currentUserId="b" />);
     const [, anya, borya] = screen.getAllByRole("row");
-    expect(borya).toHaveClass("bg-accent/25!");
+    expect(borya).toHaveClass("bg-accent/15!");
     expect(borya).toHaveAttribute("aria-current", "true");
-    expect(anya).not.toHaveClass("bg-accent/25!");
+    expect(anya).not.toHaveClass("bg-accent/15!");
   });
 
   it("marks nobody for a guest", () => {

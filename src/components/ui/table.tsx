@@ -15,7 +15,7 @@ export function Table({
   ...props
 }: TableHTMLAttributes<HTMLTableElement> & { caption?: ReactNode }) {
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-line p-1 sm:p-3">
+    <div className="w-full overflow-x-auto rounded-lg border border-line bg-surface p-1 sm:p-3">
       <table className={cx("w-full border-collapse text-sm sm:text-base", className)} {...props}>
         {caption && <caption className="mb-2 text-left text-sm text-muted">{caption}</caption>}
         {children}
@@ -29,7 +29,7 @@ export function THead({ className, ...props }: HTMLAttributes<HTMLTableSectionEl
 }
 
 export function TBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className={cx("[&>tr:nth-child(even)]:bg-surface", className)} {...props} />;
+  return <tbody className={cx("[&>tr:nth-child(even)]:bg-surface-alt", className)} {...props} />;
 }
 
 export function TR({
@@ -39,7 +39,11 @@ export function TR({
 }: HTMLAttributes<HTMLTableRowElement> & { highlight?: boolean }) {
   return (
     <tr
-      className={cx("border-b border-line", highlight && "font-semibold bg-accent/25!", className)}
+      className={cx(
+        "border-b border-line transition-colors duration-150 hover:bg-surface-hover",
+        highlight && "bg-accent/15! font-semibold",
+        className,
+      )}
       {...props}
     />
   );
