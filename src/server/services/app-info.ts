@@ -5,6 +5,8 @@ export type AppInfo = {
   version: string;
   apiVersions: string[];
   buildDate: string | null;
+  /** Git commit of the running build (Railway sets it); null elsewhere. */
+  commit: string | null;
 };
 
 export function getAppInfo(): AppInfo {
@@ -13,5 +15,6 @@ export function getAppInfo(): AppInfo {
     apiVersions: [...SUPPORTED_API_VERSIONS],
     // Set once at build time in next.config.ts.
     buildDate: process.env.APP_BUILD_DATE ?? null,
+    commit: process.env.RAILWAY_GIT_COMMIT_SHA ?? null,
   };
 }

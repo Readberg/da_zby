@@ -56,3 +56,17 @@ export function bumpPackageJson(text: string, to: string): string {
 export function releaseDate(now: Date = new Date()): string {
   return new Date(now.getTime() + 3 * 3_600_000).toISOString().slice(0, 10);
 }
+
+export type DeployAction = "wait" | "redeploy" | "give-up";
+
+export const MAX_REDEPLOYS = 3;
+
+/**
+ * What to do about the stand's newest deployment while the release waits for it (D-092): a failed
+ * or crashed one is started again, a limited number of times; a running one is simply waited for.
+ */
+export function deployAction(status: string | null | undefined, redeploys: number): DeployAction {
+  const failed = status === "FAILED" || status === "CRASHED";
+  if (!failed) return "wait";
+  return redeploys < MAX_REDEPLOYS ? "redeploy" : "give-up";
+}

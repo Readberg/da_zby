@@ -5,9 +5,12 @@
 // It stops at the first red check or failed step and never merges what is not green.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { hasRailwayAccess, latestDeployment, redeploy } from "./railway";
 import {
   bumpPackageJson,
   bumpVersionMentions,
+  deployAction,
+  MAX_REDEPLOYS,
   nextVersion,
   releaseChangelog,
   releaseDate,
@@ -86,9 +89,31 @@ function waitForGreen(pr: string) {
   }
 }
 
+/** Looks at the newest Railway deployment; starts a failed one again (D-092). */
+async function watchDeployment(state: { redeploys: number }) {
+  if (!hasRailwayAccess()) return;
+  try {
+    const deployment = await latestDeployment();
+    const action = deployAction(deployment?.status, state.redeploys);
+    if (deployment && action === "redeploy") {
+      await redeploy(deployment.id);
+      state.redeploys += 1;
+      console.log(
+        `Railway deployment ${deployment.status}: started it again (${state.redeploys} of ${MAX_REDEPLOYS})`,
+      );
+    } else if (action === "give-up") {
+      console.warn("Railway keeps failing the deployment: look at its status page.");
+    }
+  } catch (error) {
+    console.warn(`Could not ask Railway: ${error instanceof Error ? error.message : error}`);
+  }
+}
+
 async function verifyStand(version: string) {
-  console.log(`… waiting for the stand to run ${version} (up to 12 minutes)`);
-  for (let attempt = 0; attempt < 24; attempt++) {
+  console.log(`… waiting for the stand to run ${version} (up to 20 minutes)`);
+  const state = { redeploys: 0 };
+  for (let attempt = 0; attempt < 40; attempt++) {
+    if (attempt > 0 && attempt % 8 === 0) await watchDeployment(state);
     try {
       const body = (await (await fetch(`${STAND}/api/v1/version`)).json()) as {
         data?: { version?: string };

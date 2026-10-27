@@ -300,6 +300,13 @@ export const en: MessagesShape<typeof ru> = {
     saving: "Saving…",
     generic: "Could not save. Please try again.",
   },
+  og: {
+    tagline: "Predictions tournament on Belarusian football",
+    place: "Place {place}",
+    noStats: "Predictions tournament participant",
+    season: "Season {season}",
+    notFound: "Profile not found",
+  },
   notFound: {
     title: "Page not found",
     text: "There is no such page. The link may be out of date or the address has a typo.",

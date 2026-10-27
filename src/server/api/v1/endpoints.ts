@@ -55,6 +55,12 @@ import {
   telegramLoginStatusSchema,
 } from "./schemas/auth";
 import { listMetaSchema, videoListSchema, videosQuerySchema } from "./schemas/videos";
+import {
+  fixturesAppliedSchema,
+  fixturesApplyBodySchema,
+  fixturesPreviewSchema,
+  fixturesQuerySchema,
+} from "./schemas/admin-fixtures";
 
 /** Registry of all API v1 endpoints: route handlers and the OpenAPI document both read it. */
 export const endpoints = {
@@ -382,6 +388,32 @@ export const endpoints = {
     query: tourQuerySchema,
     output: tourDetailSchema,
     errors: [401, 403, 404, 422],
+    cacheControl: "private, no-store",
+  }),
+  adminFixturesPreview: defineEndpoint({
+    method: "get",
+    path: "/admin/fixtures",
+    summary: "Preview the import of a tour's schedule and results from the league source",
+    tags: ["admin"],
+    auth: "admin",
+    description:
+      "Reads one round from TheSportsDB (D-090) and says, per match, what an import would do: create, update, same, or blocked with the reason. Nothing is written. A source failure is 502 fixtures.unavailable.",
+    query: fixturesQuerySchema,
+    output: fixturesPreviewSchema,
+    errors: [401, 403, 404, 422, 502],
+    cacheControl: "private, no-store",
+  }),
+  adminFixturesApply: defineEndpoint({
+    method: "post",
+    path: "/admin/fixtures",
+    summary: "Apply the confirmed rows of the import preview",
+    tags: ["admin"],
+    auth: "admin",
+    description:
+      "The source is read again and the named rows are recomputed; only create/update rows are applied, the rest are reported as skipped. Results are graded by the database as for a manual entry.",
+    body: fixturesApplyBodySchema,
+    output: fixturesAppliedSchema,
+    errors: [400, 401, 403, 404, 409, 422, 502],
     cacheControl: "private, no-store",
   }),
   adminMatchCreate: defineEndpoint({

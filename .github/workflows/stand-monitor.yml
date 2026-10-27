@@ -27,3 +27,28 @@ jobs:
           done
           echo "::error::$STAND_URL/api/v1/health/strict failed three times: the site, its database or the Telegram sign-in webhook is broken."
           exit 1
+
+      # The stand deploys the head of `dev` (D-092). If it still runs an older commit long after
+      # that head was made, the deploy failed or never started (a failed CI, a Railway incident).
+      - name: The stand runs the latest dev
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAX_LAG_SECONDS: "2700"
+        run: |
+          stand=$(curl -fsS --max-time 20 "$STAND_URL/api/v1/version" | jq -r '.data.commit // empty')
+          if [ -z "$stand" ]; then
+            echo "::warning::The stand does not report its commit yet; nothing to compare."
+            exit 0
+          fi
+          head=$(gh api "repos/${{ github.repository }}/commits/dev" --jq '.sha')
+          made=$(gh api "repos/${{ github.repository }}/commits/dev" --jq '.commit.committer.date')
+          age=$(( $(date +%s) - $(date -d "$made" +%s) ))
+          if [ "$stand" = "$head" ]; then
+            echo "The stand runs the head of dev ($head)."
+            exit 0
+          fi
+          if [ "$age" -gt "$MAX_LAG_SECONDS" ]; then
+            echo "::error::The stand runs ${stand:0:7}, but dev is at ${head:0:7} (made $((age / 60)) minutes ago): the deployment failed or did not start. Check Railway and the CI of dev."
+            exit 1
+          fi
+          echo "The stand is behind dev (${stand:0:7} vs ${head:0:7}) for $((age / 60)) min: still within the allowed time."
