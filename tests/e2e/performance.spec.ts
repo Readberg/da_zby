@@ -14,6 +14,12 @@ const budgets: Record<string, { ownJsKb: number }> = {
   "/login": { ownJsKb: 650 },
 };
 
+test("the heading font is preloaded through the Link header (DAZBY-123)", async ({ request }) => {
+  const link = (await request.get("/")).headers()["link"] ?? "";
+  expect(link).toMatch(/rel=preload; as="font"/);
+  expect(link).toContain(".woff2");
+});
+
 test.describe("performance budgets", () => {
   test.skip(({ isMobile }) => isMobile, "measured once, on the desktop project");
 
