@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/server/services/current-user";
 import { getMessages } from "@/i18n/server";
 
 const itemClass =
-  "inline-flex min-h-11 items-center rounded-full px-3 text-base sm:px-4 font-medium text-ink transition-colors duration-200 hover:bg-surface";
+  "inline-flex min-h-11 items-center rounded-sm px-3 text-base font-semibold text-ink transition-colors duration-200 hover:bg-surface-hover sm:px-4";
 
 /** Header slot: "Войти" for guests, nickname + sign-out for signed-in users. */
 export async function UserMenu() {

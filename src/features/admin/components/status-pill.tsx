@@ -6,8 +6,8 @@ export function StatusPill({ tone, children }: { tone: "ok" | "muted"; children:
   return (
     <span
       className={cx(
-        "inline-flex items-center rounded-full px-3 py-0.5 text-sm font-medium",
-        tone === "ok" ? "bg-accent text-black" : "bg-surface text-muted",
+        "inline-flex items-center rounded-sm px-3 py-0.5 text-sm font-semibold",
+        tone === "ok" ? "bg-accent text-black" : "border border-line text-muted",
       )}
     >
       {children}
