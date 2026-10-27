@@ -114,6 +114,19 @@ describe("GET /api/v1/version", () => {
     const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
     expect(versionSchema.parse(data)).toMatchObject({ version: pkg.version, apiVersions: ["v1"] });
   });
+
+  it("tells which commit runs when the host says so, and null otherwise (D-092)", async () => {
+    createClient.mockResolvedValue(fakeSupabase());
+    vi.stubEnv("RAILWAY_GIT_COMMIT_SHA", "abc1234def5678");
+    const withCommit = await (await version.GET(apiRequest("/api/v1/version"))).json();
+    expect(versionSchema.parse(withCommit.data).commit).toBe("abc1234def5678");
+
+    vi.stubEnv("RAILWAY_GIT_COMMIT_SHA", "");
+    vi.unstubAllEnvs();
+    delete process.env.RAILWAY_GIT_COMMIT_SHA;
+    const without = await (await version.GET(apiRequest("/api/v1/version"))).json();
+    expect(versionSchema.parse(without.data).commit).toBeNull();
+  });
 });
 
 describe("GET /api/v1/openapi.json", () => {

@@ -16,6 +16,10 @@ export const versionSchema = z.object({
   version: z.string().describe("Application version from package.json."),
   apiVersions: z.array(z.string()).describe('Major API versions served right now, e.g. ["v1"].'),
   buildDate: z.string().nullable().describe("ISO 8601 build time in UTC."),
+  commit: z
+    .string()
+    .nullable()
+    .describe("Git commit of the running build; null when the host does not tell."),
 });
 
 /** The OpenAPI document itself (not wrapped in the `{ data, meta }` envelope). */

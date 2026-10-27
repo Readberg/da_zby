@@ -87,3 +87,19 @@ describe("releaseDate", () => {
     expect(releaseDate(new Date("2026-10-26T12:00:00Z"))).toBe("2026-10-26");
   });
 });
+
+describe("deployAction", () => {
+  it("waits while the deployment is building, deploying or successful", async () => {
+    const { deployAction } = await import("../../scripts/release-lib");
+    for (const status of ["BUILDING", "DEPLOYING", "INITIALIZING", "SUCCESS", "QUEUED", null]) {
+      expect(deployAction(status, 0)).toBe("wait");
+    }
+  });
+
+  it("starts a failed or crashed deployment again, three times at most", async () => {
+    const { deployAction, MAX_REDEPLOYS } = await import("../../scripts/release-lib");
+    expect(deployAction("FAILED", 0)).toBe("redeploy");
+    expect(deployAction("CRASHED", MAX_REDEPLOYS - 1)).toBe("redeploy");
+    expect(deployAction("FAILED", MAX_REDEPLOYS)).toBe("give-up");
+  });
+});
