@@ -13,9 +13,15 @@ vi.mock("next/server", () => ({ connection: async () => {} }));
 
 const { default: Home } = await import("./page");
 
+// The page reads its language from the `[locale]` segment before it renders.
+const props = {
+  params: Promise.resolve({ locale: "ru" }),
+  searchParams: Promise.resolve({}),
+} as Parameters<typeof Home>[0];
+
 describe("Home page (landing)", () => {
-  it("states what the site is and offers one main action while data is loading", () => {
-    render(<Home />);
+  it("states what the site is and offers one main action while data is loading", async () => {
+    render(await Home(props));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Футбол интереснее, когда ты в игре",
     );
@@ -26,16 +32,16 @@ describe("Home page (landing)", () => {
     );
   });
 
-  it("explains how it works in three steps with the default points", () => {
-    render(<Home />);
+  it("explains how it works in three steps with the default points", async () => {
+    render(await Home(props));
     expect(screen.getByRole("heading", { level: 2, name: "Как это работает" })).toBeVisible();
     const steps = screen.getAllByRole("listitem").filter((li) => li.closest("ol"));
     expect(steps.length).toBeGreaterThanOrEqual(3);
     expect(screen.getByText(/Точный счёт — 3 очка, верный исход — 1 очко/)).toBeVisible();
   });
 
-  it("answers the common questions, the first one open", () => {
-    render(<Home />);
+  it("answers the common questions, the first one open", async () => {
+    render(await Home(props));
     expect(screen.getByRole("heading", { level: 2, name: "Вопросы? Ответы." })).toBeVisible();
     const questions = screen
       .getAllByRole("button", { expanded: false })
@@ -48,21 +54,21 @@ describe("Home page (landing)", () => {
   it("tells Umami which question was opened", async () => {
     const umami = { track: vi.fn() };
     (window as unknown as { umami: typeof umami }).umami = umami;
-    render(<Home />);
+    render(await Home(props));
     await userEvent.click(screen.getByRole("button", { name: "Это бесплатно?" }));
     expect(umami.track).toHaveBeenCalledWith("faq-open", { question: 6 });
     delete (window as unknown as { umami?: unknown }).umami;
   });
 
-  it("marks the calls to action so Umami counts their clicks by place", () => {
-    render(<Home />);
+  it("marks the calls to action so Umami counts their clicks by place", async () => {
+    render(await Home(props));
     const hero = screen.getByRole("link", { name: "Войти через Telegram" });
     expect(hero).toHaveAttribute("data-umami-event", "cta-click");
     expect(hero).toHaveAttribute("data-umami-event-where", "hero");
   });
 
-  it("links the community, labels the rating example as an example", () => {
-    render(<Home />);
+  it("links the community, labels the rating example as an example", async () => {
+    render(await Home(props));
     expect(screen.getByRole("link", { name: /YouTube/ })).toHaveAttribute(
       "href",
       "https://www.youtube.com/@da_zby",
@@ -70,8 +76,8 @@ describe("Home page (landing)", () => {
     expect(screen.getByText("Пример рейтинга")).toBeVisible();
   });
 
-  it("keeps the channel's videos below, under their own heading, with a loading state", () => {
-    render(<Home />);
+  it("keeps the channel's videos below, under their own heading, with a loading state", async () => {
+    render(await Home(props));
     expect(screen.getByRole("heading", { level: 2, name: "Свежие видео" })).toBeVisible();
     expect(screen.getAllByRole("status", { name: "Загрузка…" }).length).toBeGreaterThan(0);
   });

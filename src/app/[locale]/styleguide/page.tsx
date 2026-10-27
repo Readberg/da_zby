@@ -9,6 +9,7 @@ import { Container } from "@/components/ui/container";
 import { SelectField, TextField, TextareaField } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
+import { initLocale } from "@/i18n/server";
 
 // Internal design showcase (docs/design). Dev-only, so its sample texts live here, not in ru.ts.
 export const metadata: Metadata = { title: "Стайлгайд", robots: { index: false } };
@@ -33,7 +34,8 @@ function Section({ id, title, children }: { id: string; title: string; children:
   );
 }
 
-export default function StyleguidePage() {
+export default async function StyleguidePage(props: PageProps<"/[locale]/styleguide">) {
+  await initLocale(props.params);
   if (process.env.NODE_ENV === "production") notFound();
 
   return (

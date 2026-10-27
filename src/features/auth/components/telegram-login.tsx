@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { EVENTS, track } from "@/lib/analytics";
 import { ApiClientError, api } from "@/lib/api-client";
 import { LOGIN_NEXT_COOKIE, LOGIN_NEXT_MAX_AGE_SECONDS } from "@/lib/login-next";
-import { ru } from "@/messages/ru";
+import { useMessages } from "@/i18n/client";
 
 type Attempt = {
   token: string;
@@ -85,6 +85,7 @@ export function TelegramLogin({
   error?: string | null;
   navigate?: (url: string) => void;
 }) {
+  const t = useMessages();
   const stored = useSyncExternalStore(subscribe, readStored, () => null);
   const attempt = useMemo(() => parseAttempt(stored), [stored]);
   const [starting, setStarting] = useState(false);
@@ -97,6 +98,7 @@ export function TelegramLogin({
   }, []);
 
   const token = attempt?.token;
+  const expiredText = t.auth.errors.expired;
   useEffect(() => {
     if (!token) return;
     finished.current = false;
@@ -115,7 +117,7 @@ export function TelegramLogin({
         } else if (status === "expired") {
           finished.current = true;
           track(EVENTS.loginFailed, { reason: "expired" });
-          reset(ru.auth.errors.expired);
+          reset(expiredText);
         }
       } catch {
         // A short network hiccup: the next tick tries again.
@@ -130,7 +132,7 @@ export function TelegramLogin({
       clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [token, navigate, reset]);
+  }, [token, navigate, reset, expiredText]);
 
   async function start() {
     if (starting) return;
@@ -156,7 +158,7 @@ export function TelegramLogin({
     } catch (cause) {
       const unavailable = cause instanceof ApiClientError && cause.problem.status === 503;
       track(EVENTS.loginFailed, { reason: unavailable ? "unavailable" : "start" });
-      setMessage(unavailable ? ru.auth.unavailable : ru.auth.errors.start);
+      setMessage(unavailable ? t.auth.unavailable : t.auth.errors.start);
     } finally {
       setStarting(false);
     }
@@ -165,9 +167,9 @@ export function TelegramLogin({
   if (attempt) {
     return (
       <div className="flex w-full flex-col gap-4">
-        <p className="text-muted">{ru.auth.codeIntro}</p>
+        <p className="text-muted">{t.auth.codeIntro}</p>
         <p
-          aria-label={`${ru.auth.codeLabel}: ${attempt.code}`}
+          aria-label={`${t.auth.codeLabel}: ${attempt.code}`}
           className="font-display text-h1 leading-none tracking-wide"
         >
           {attempt.code}
@@ -178,16 +180,16 @@ export function TelegramLogin({
             className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-telegram px-7 text-base font-semibold text-white transition hover:brightness-95 active:scale-[0.97]"
           >
             <PlaneIcon />
-            {ru.auth.openTelegram}
+            {t.auth.openTelegram}
           </a>
           <Button variant="text" onClick={() => reset(null)}>
-            {ru.auth.cancel}
+            {t.auth.cancel}
           </Button>
         </div>
         <p className="text-sm text-muted">
-          {ru.auth.noApp}{" "}
+          {t.auth.noApp}{" "}
           <a href={attempt.webUrl} target="_blank" rel="noopener noreferrer" className="underline">
-            {ru.auth.openInBrowser}
+            {t.auth.openInBrowser}
           </a>
         </p>
         <p role="status" className="flex items-center gap-2 text-sm text-muted">
@@ -195,7 +197,7 @@ export function TelegramLogin({
             aria-hidden="true"
             className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"
           />
-          {ru.auth.waiting}
+          {t.auth.waiting}
         </p>
       </div>
     );
@@ -210,7 +212,7 @@ export function TelegramLogin({
         className="min-h-14 w-full bg-telegram px-7 text-lg text-white hover:brightness-95"
       >
         {!starting && <PlaneIcon />}
-        {ru.auth.telegram}
+        {t.auth.telegram}
       </Button>
       <p id="login-error" role="alert" className="min-h-5 text-sm text-danger">
         {message ?? error}

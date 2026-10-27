@@ -3,12 +3,14 @@ import { connection } from "next/server";
 import { buttonClasses } from "@/components/ui/button";
 import { ClubLogo } from "@/components/ui/club-logo";
 import { formatDateTime } from "@/lib/local-time";
-import { ru } from "@/messages/ru";
 import { getHomeCached } from "@/server/services/home.cached";
 import { composePredictionsPage } from "@/server/services/predictions";
+import { getMessages, getLocale } from "@/i18n/server";
 
 /** Next tour: the matches and the deadline, so a newcomer sees what to predict right away. */
 export async function NextTour() {
+  const locale = getLocale();
+  const t = getMessages();
   await connection();
   const { pub } = await getHomeCached();
   const page = composePredictionsPage(pub, {}, undefined, new Date());
@@ -17,8 +19,8 @@ export async function NextTour() {
   if (!tournament || !tour) {
     return (
       <div className="rounded-lg bg-surface p-6 sm:p-8">
-        <p className="text-lg font-semibold">{ru.home.soonTitle}</p>
-        <p className="mt-2 text-muted">{ru.home.soonText}</p>
+        <p className="text-lg font-semibold">{t.home.soonTitle}</p>
+        <p className="mt-2 text-muted">{t.home.soonText}</p>
       </div>
     );
   }
@@ -30,13 +32,13 @@ export async function NextTour() {
           {tournament.name}
         </p>
         <h2 className="mt-1 text-h3 normal-case sm:text-h3">
-          {ru.home.nextTour.replace("{n}", String(tour.number))}
+          {t.home.nextTour.replace("{n}", String(tour.number))}
           {tour.title ? ` · ${tour.title}` : ""}
         </h2>
         <p className="mt-1 text-sm text-muted">
           {tour.deadlineAt
-            ? `${tour.open ? ru.predictions.openUntil : ru.predictions.closedSince} ${formatDateTime(tour.deadlineAt)}`
-            : ru.predictions.noDeadline}
+            ? `${tour.open ? t.predictions.openUntil : t.predictions.closedSince} ${formatDateTime(tour.deadlineAt, undefined, locale)}`
+            : t.predictions.noDeadline}
         </p>
       </div>
       <ul className="flex flex-col divide-y divide-line">
@@ -49,7 +51,7 @@ export async function NextTour() {
             <span className="shrink-0 text-center text-sm text-muted">
               {match.status === "finished"
                 ? `${match.homeScore} : ${match.awayScore}`
-                : formatDateTime(match.kickoffAt)}
+                : formatDateTime(match.kickoffAt, undefined, locale)}
             </span>
             <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
               <span className="truncate text-right font-semibold">{match.away.name}</span>
@@ -60,7 +62,7 @@ export async function NextTour() {
       </ul>
       {matches.length > 3 && (
         <p className="text-sm text-muted">
-          {ru.home.moreMatches.replace("{n}", String(matches.length - 3))}
+          {t.home.moreMatches.replace("{n}", String(matches.length - 3))}
         </p>
       )}
     </div>
@@ -69,6 +71,7 @@ export async function NextTour() {
 
 /** The main action of a signed-in visitor on the home page. */
 export function MemberAction() {
+  const t = getMessages();
   return (
     <Link
       href="/predictions"
@@ -76,7 +79,7 @@ export function MemberAction() {
       data-umami-event-where="member"
       className={buttonClasses("primary", "min-h-12 px-8 text-lg")}
     >
-      {ru.home.ctaUser}
+      {t.home.ctaUser}
     </Link>
   );
 }

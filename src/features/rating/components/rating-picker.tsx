@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { SelectField } from "@/components/ui/field";
-import { ru } from "@/messages/ru";
 import type { RatingPageData } from "@/server/services/rating";
+import { useMessages } from "@/i18n/client";
 
 function address(params: { tournament?: string; season?: string; tour?: number }) {
   const query = new URLSearchParams();
@@ -22,6 +22,7 @@ export type RatingPickerData = Pick<
 >;
 
 export function RatingPicker({ data }: { data: RatingPickerData }) {
+  const m = useMessages();
   const router = useRouter();
   const { tournament, season, tour } = data;
   if (!tournament) return null;
@@ -30,7 +31,7 @@ export function RatingPicker({ data }: { data: RatingPickerData }) {
     <div className="grid gap-4 rounded-lg bg-surface p-4 sm:grid-cols-3 sm:p-5">
       <SelectField
         id="rating-tournament"
-        label={ru.rating.tournament}
+        label={m.rating.tournament}
         value={tournament.slug}
         onChange={(e) => router.push(address({ tournament: e.target.value }))}
       >
@@ -42,24 +43,24 @@ export function RatingPicker({ data }: { data: RatingPickerData }) {
       </SelectField>
       <SelectField
         id="rating-season"
-        label={ru.rating.season}
+        label={m.rating.season}
         value={season?.id ?? ""}
         disabled={data.seasons.length === 0}
         onChange={(e) =>
           router.push(address({ tournament: tournament.slug, season: e.target.value }))
         }
       >
-        {data.seasons.length === 0 && <option value="">{ru.rating.noSeasons}</option>}
+        {data.seasons.length === 0 && <option value="">{m.rating.noSeasons}</option>}
         {data.seasons.map((s) => (
           <option key={s.id} value={s.id}>
             {s.name}
-            {s.status === "closed" ? ` (${ru.rating.seasonClosedOption})` : ""}
+            {s.status === "closed" ? ` (${m.rating.seasonClosedOption})` : ""}
           </option>
         ))}
       </SelectField>
       <SelectField
         id="rating-tour"
-        label={ru.rating.tour}
+        label={m.rating.tour}
         value={tour ? String(tour.number) : ""}
         disabled={!season}
         onChange={(e) =>
@@ -72,10 +73,10 @@ export function RatingPicker({ data }: { data: RatingPickerData }) {
           )
         }
       >
-        <option value="">{ru.rating.wholeSeason}</option>
+        <option value="">{m.rating.wholeSeason}</option>
         {data.tours.map((t) => (
           <option key={t.number} value={t.number}>
-            {ru.admin.tours.tourN.replace("{n}", String(t.number))}
+            {m.predictions.tourN.replace("{n}", String(t.number))}
             {t.title ? ` · ${t.title}` : ""}
           </option>
         ))}

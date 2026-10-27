@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { buttonClasses } from "@/components/ui/button";
 import { UserIcon } from "@/components/ui/icons";
-import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
+import { getMessages } from "@/i18n/server";
 
 const itemClass =
   "inline-flex min-h-11 items-center rounded-full px-3 text-base sm:px-4 font-medium text-ink transition-colors duration-200 hover:bg-surface";
 
 /** Header slot: "Войти" for guests, nickname + sign-out for signed-in users. */
 export async function UserMenu() {
+  const t = getMessages();
   const user = await getCurrentUser();
 
   if (!user) {
@@ -20,25 +21,25 @@ export async function UserMenu() {
         className={buttonClasses("secondary", "gap-2 px-5")}
       >
         <UserIcon className="h-5 w-5" />
-        {ru.auth.login}
+        {t.auth.login}
       </Link>
     );
   }
 
   return (
-    <nav aria-label={ru.auth.userMenu} className="flex items-center gap-1">
+    <nav aria-label={t.auth.userMenu} className="flex items-center gap-1">
       {user.role === "admin" && (
         <Link href="/admin" className={itemClass}>
-          {ru.admin.title}
+          {t.auth.adminPanel}
         </Link>
       )}
       <Link href="/profile" className={buttonClasses("secondary", "gap-2 px-5")}>
         <UserIcon className="h-5 w-5" />
-        {ru.auth.profile}
+        {t.auth.profile}
       </Link>
       <form action="/auth/signout" method="post">
         <button type="submit" className={itemClass}>
-          {ru.auth.logout}
+          {t.auth.logout}
         </button>
       </form>
     </nav>

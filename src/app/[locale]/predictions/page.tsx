@@ -11,19 +11,26 @@ import { points } from "@/lib/plural";
 import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_UTC_OFFSET_MINUTES } from "@/lib/time";
 import { firstParam } from "@/lib/search-params";
-import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
 import { composePredictionsPage, getMyPredictions } from "@/server/services/predictions";
 import { getPredictionsPublicCached } from "@/server/services/predictions.cached";
 import { getUtcOffsetMinutes } from "@/server/services/profiles";
+import { getMessages, initLocale, messagesFor, getLocale } from "@/i18n/server";
 
-export const metadata: Metadata = { title: ru.predictions.title };
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/predictions">): Promise<Metadata> {
+  const t = await messagesFor(params);
+  return { title: t.predictions.title };
+}
 
 async function PredictionsContent({
   searchParams,
 }: {
   searchParams: PageProps<"/[locale]/predictions">["searchParams"];
 }) {
+  const locale = getLocale();
+  const t = getMessages();
   // Deadlines depend on the current time: render at request time, never in the static shell.
   await connection();
   const params = await searchParams;
@@ -45,7 +52,7 @@ async function PredictionsContent({
     Number.isInteger(tourNumber) && tourNumber > 0 ? tourNumber : undefined,
   );
 
-  if (!data.tournament) return <p className="text-muted">{ru.predictions.noTournaments}</p>;
+  if (!data.tournament) return <p className="text-muted">{t.predictions.noTournaments}</p>;
 
   const { tour, season } = data;
   const query = new URLSearchParams();
@@ -67,12 +74,12 @@ async function PredictionsContent({
       />
 
       {!season || !tour ? (
-        <p className="text-muted">{season ? ru.predictions.noTours : ru.predictions.noSeasons}</p>
+        <p className="text-muted">{season ? t.predictions.noTours : t.predictions.noSeasons}</p>
       ) : (
         <section aria-labelledby="tour-title" className="flex flex-col gap-4">
           <div>
             <h2 id="tour-title" className="text-lg normal-case sm:text-h3 sm:uppercase">
-              {ru.admin.tours.tourN.replace("{n}", String(tour.number))}
+              {t.predictions.tourN.replace("{n}", String(tour.number))}
               {tour.title ? ` · ${tour.title}` : ""}
             </h2>
             <p
@@ -83,12 +90,12 @@ async function PredictionsContent({
               }`}
             >
               {season.status === "closed"
-                ? ru.predictions.seasonIsClosed
+                ? t.predictions.seasonIsClosed
                 : tour.deadlineAt
                   ? tour.open
-                    ? `${ru.predictions.openUntil} ${formatDateTime(tour.deadlineAt, offset)}`
-                    : `${ru.predictions.closedSince} ${formatDateTime(tour.deadlineAt, offset)}`
-                  : ru.predictions.noDeadline}
+                    ? `${t.predictions.openUntil} ${formatDateTime(tour.deadlineAt, offset, locale)}`
+                    : `${t.predictions.closedSince} ${formatDateTime(tour.deadlineAt, offset, locale)}`
+                  : t.predictions.noDeadline}
             </p>
           </div>
           <p className="text-sm">
@@ -96,18 +103,16 @@ async function PredictionsContent({
               href={`/rating?${query}`}
               className="inline-flex min-h-10 items-center rounded-full bg-surface px-4 font-semibold transition-colors hover:bg-line"
             >
-              {ru.predictions.toRating}
+              {t.predictions.toRating}
             </Link>
           </p>
           {data.tournament && (
             <details className="group rounded-lg bg-surface px-5 py-4">
-              <summary className="cursor-pointer font-semibold">
-                {ru.predictions.rulesTitle}
-              </summary>
+              <summary className="cursor-pointer font-semibold">{t.predictions.rulesTitle}</summary>
               <p className="mt-2 text-muted">
-                {ru.predictions.rules
-                  .replace("{exact}", points(data.tournament.pointsExact))
-                  .replace("{outcome}", points(data.tournament.pointsOutcome))}
+                {t.predictions.rules
+                  .replace("{exact}", points(data.tournament.pointsExact, locale))
+                  .replace("{outcome}", points(data.tournament.pointsOutcome, locale))}
               </p>
             </details>
           )}
@@ -127,10 +132,12 @@ async function PredictionsContent({
   );
 }
 
-export default function PredictionsPage(props: PageProps<"/[locale]/predictions">) {
+export default async function PredictionsPage(props: PageProps<"/[locale]/predictions">) {
+  await initLocale(props.params);
+  const t = getMessages();
   return (
     <Container className="flex flex-col gap-6 py-8 sm:py-12">
-      <h1 className="text-h3 sm:text-h1">{ru.predictions.title}</h1>
+      <h1 className="text-h3 sm:text-h1">{t.predictions.title}</h1>
       <Suspense fallback={<Skeleton className="h-96" />}>
         <PredictionsContent searchParams={props.searchParams} />
       </Suspense>

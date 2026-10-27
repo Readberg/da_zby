@@ -20,14 +20,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig, type SocialId } from "@/config/site";
 import { formatDateTime } from "@/lib/local-time";
 import { points } from "@/lib/plural";
-import { ru } from "@/messages/ru";
 import { getHomeCached } from "@/server/services/home.cached";
 import { FaqList } from "./faq-list";
 import { composePredictionsPage } from "@/server/services/predictions";
+import { getMessages, getLocale } from "@/i18n/server";
 
 const LOGIN_HREF = "/login?next=%2Fpredictions";
 const DEFAULT_POINTS = { exact: 3, outcome: 1 };
-const t = ru.landing;
 
 const socialIcons: Record<SocialId, (props: { className?: string }) => ReactNode> = {
   youtube: (p) => <YoutubeIcon {...p} />,
@@ -38,6 +37,8 @@ const socialIcons: Record<SocialId, (props: { className?: string }) => ReactNode
 };
 
 function Hero() {
+  const m = getMessages();
+  const t = m.landing;
   return (
     <section
       aria-labelledby="landing-title"
@@ -47,7 +48,7 @@ function Hero() {
         id="landing-title"
         className="max-w-4xl font-display text-[clamp(2.5rem,9vw,6rem)] uppercase leading-[0.95] tracking-tight"
       >
-        {ru.home.headline}
+        {m.home.headline}
       </h1>
       <p className="max-w-md text-lg text-muted">{t.lead}</p>
       <Link
@@ -70,6 +71,9 @@ function Hero() {
 
 /** The next tour matches (real data); every row leads to sign-in and then to the tour. */
 export async function UpcomingMatches() {
+  const locale = getLocale();
+  const m = getMessages();
+  const t = m.landing;
   await connection();
   const { pub } = await getHomeCached();
   const { tour, matches, tournament } = composePredictionsPage(pub, {}, undefined, new Date());
@@ -90,8 +94,8 @@ export async function UpcomingMatches() {
       </div>
       {!tournament || !tour || matches.length === 0 ? (
         <div className="rounded-md bg-bg p-5">
-          <p className="font-semibold">{ru.home.soonTitle}</p>
-          <p className="mt-1 text-muted">{ru.home.soonText}</p>
+          <p className="font-semibold">{m.home.soonTitle}</p>
+          <p className="mt-1 text-muted">{m.home.soonText}</p>
         </div>
       ) : (
         <ul className="flex flex-col divide-y divide-line rounded-md bg-bg px-3 sm:px-4">
@@ -101,7 +105,7 @@ export async function UpcomingMatches() {
               className="flex flex-col gap-3 py-4 sm:grid sm:grid-cols-[minmax(0,9rem)_1fr_auto] sm:items-center sm:gap-x-3 sm:py-3"
             >
               <p className="text-sm text-muted">
-                {tournament.name} · {ru.home.nextTour.replace("{n}", String(tour.number))}
+                {tournament.name} · {m.home.nextTour.replace("{n}", String(tour.number))}
               </p>
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                 <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row-reverse sm:justify-start sm:gap-2 sm:text-right">
@@ -111,7 +115,7 @@ export async function UpcomingMatches() {
                   </span>
                 </span>
                 <span className="w-20 shrink-0 text-center text-xs text-muted sm:w-auto sm:px-1">
-                  {formatDateTime(match.kickoffAt)}
+                  {formatDateTime(match.kickoffAt, undefined, locale)}
                 </span>
                 <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row sm:gap-2 sm:text-left">
                   <ClubLogo src={match.away.logoUrl} name={match.away.name} size={40} />
@@ -140,6 +144,8 @@ export async function UpcomingMatches() {
 }
 
 function Community() {
+  const m = getMessages();
+  const t = m.landing;
   const links = siteConfig.social.filter((link) => link.url);
   return (
     <aside aria-labelledby="community-title" className="flex flex-col gap-3">
@@ -159,10 +165,10 @@ function Community() {
                 {socialIcons[link.id]({ className: "h-5 w-5" })}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-semibold">{ru.footer.social[link.id]}</span>
+                <span className="block truncate font-semibold">{m.footer.social[link.id]}</span>
                 <span className="block text-xs text-muted">{t.follow}</span>
               </span>
-              <span className="sr-only">{ru.common.opensInNewTab}</span>
+              <span className="sr-only">{m.common.opensInNewTab}</span>
             </a>
           </li>
         ))}
@@ -172,15 +178,17 @@ function Community() {
 }
 
 function Steps({ exact, outcome }: { exact: number; outcome: number }) {
+  const locale = getLocale();
+  const m = getMessages();
   const steps = [
-    { icon: <TelegramIcon className="h-5 w-5 text-telegram" />, ...ru.home.steps.one },
-    { icon: <PencilIcon className="h-5 w-5" />, ...ru.home.steps.two },
+    { icon: <TelegramIcon className="h-5 w-5 text-telegram" />, ...m.home.steps.one },
+    { icon: <PencilIcon className="h-5 w-5" />, ...m.home.steps.two },
     {
       icon: <TrophyIcon className="h-5 w-5" />,
-      ...ru.home.steps.three,
-      text: ru.home.steps.three.text
-        .replace("{exact}", points(exact))
-        .replace("{outcome}", points(outcome)),
+      ...m.home.steps.three,
+      text: m.home.steps.three.text
+        .replace("{exact}", points(exact, locale))
+        .replace("{outcome}", points(outcome, locale)),
     },
   ];
   return (
@@ -221,6 +229,8 @@ export async function StepsWithPoints() {
 
 /** Illustration only: the nicknames are invented, so it is labelled as an example. */
 function RatingMock() {
+  const m = getMessages();
+  const t = m.landing;
   const rows = [
     { place: 1, name: "GoalKing", points: 128, trend: "▲3", up: true },
     { place: 2, name: "MatchMind", points: 121, trend: "▲1", up: true },
@@ -234,7 +244,7 @@ function RatingMock() {
         className="w-64 rounded-[2.5rem] border-[10px] border-black bg-bg p-4 shadow-soft"
       >
         <div className="mx-auto mb-3 h-5 w-24 rounded-full bg-black" />
-        <p className="font-display text-2xl uppercase">{ru.rating.title}</p>
+        <p className="font-display text-2xl uppercase">{m.rating.title}</p>
         <div className="mt-2 grid grid-cols-2 rounded-full bg-surface p-1 text-center text-xs font-semibold">
           <span className="rounded-full bg-bg py-1 shadow-soft">{t.mockSeason}</span>
           <span className="py-1 text-muted">{t.mockTour}</span>
@@ -264,6 +274,7 @@ function RatingMock() {
 }
 
 function Benefits() {
+  const t = getMessages().landing;
   const items = [
     { icon: <BarsIcon className="h-6 w-6" />, text: t.benefits.predict, tone: "bg-accent" },
     { icon: <TrophyIcon className="h-6 w-6" />, text: t.benefits.points, tone: "bg-white" },
@@ -294,10 +305,12 @@ function Benefits() {
 }
 
 function Panels() {
+  const m = getMessages();
+  const t = m.landing;
   return (
     <section id="how" aria-labelledby="how-title" className="flex scroll-mt-20 flex-col gap-4">
       <h2 id="how-title" className="sr-only">
-        {ru.home.howTitle}
+        {m.home.howTitle}
       </h2>
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4">
@@ -328,6 +341,7 @@ function Panels() {
 }
 
 function Faq() {
+  const t = getMessages().landing;
   return (
     <section
       aria-labelledby="faq-title"

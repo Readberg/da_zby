@@ -10,17 +10,24 @@ import { formatDateTime } from "@/lib/local-time";
 import { hiddenUntil } from "@/lib/predictions";
 import { points } from "@/lib/plural";
 import { firstParam } from "@/lib/search-params";
-import { ru } from "@/messages/ru";
 import { getCurrentUser } from "@/server/services/current-user";
 import { getRatingPageCached } from "@/server/services/rating.cached";
+import { getMessages, initLocale, messagesFor, getLocale } from "@/i18n/server";
 
-export const metadata: Metadata = { title: ru.rating.title };
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/rating">): Promise<Metadata> {
+  const t = await messagesFor(params);
+  return { title: t.rating.title };
+}
 
 async function RatingContent({
   searchParams,
 }: {
   searchParams: PageProps<"/[locale]/rating">["searchParams"];
 }) {
+  const locale = getLocale();
+  const t = getMessages();
   const params = await searchParams;
   const tourNumber = Number(firstParam(params.tour));
   // The shared table comes from the cache; who is looking is worked out per request, in parallel.
@@ -36,7 +43,7 @@ async function RatingContent({
   const expanded = firstParam(params.around) === "1";
   const view = windowRows(data.rows, user?.id, expanded);
 
-  if (!data.tournament) return <p className="text-muted">{ru.rating.noTournaments}</p>;
+  if (!data.tournament) return <p className="text-muted">{t.rating.noTournaments}</p>;
 
   const { season, tour } = data;
   // Until the tour's deadline the others' predictions are hidden by the database (D-084).
@@ -61,22 +68,25 @@ async function RatingContent({
         }}
       />
       {!season ? (
-        <p className="text-muted">{ru.rating.noSeasons}</p>
+        <p className="text-muted">{t.rating.noSeasons}</p>
       ) : (
         <section className="flex flex-col gap-4">
           {season.status === "closed" && !tour && (
-            <p className="text-sm text-muted">{ru.rating.seasonClosed}</p>
+            <p className="text-sm text-muted">{t.rating.seasonClosed}</p>
           )}
           {mine && (
             <p className="rounded-lg bg-accent/25 px-5 py-4 font-semibold">
-              {ru.rating.yourPlace
+              {t.rating.yourPlace
                 .replace("{place}", String(mine.place ?? "—"))
-                .replace("{points}", points(mine.points))}
+                .replace("{points}", points(mine.points, locale))}
             </p>
           )}
           {hidden && (
             <p role="status" className="rounded-lg border border-line px-5 py-4 text-muted">
-              {ru.rating.predictionsHidden.replace("{date}", formatDateTime(hidden))}
+              {t.rating.predictionsHidden.replace(
+                "{date}",
+                formatDateTime(hidden, undefined, locale),
+              )}
             </p>
           )}
           {tour && hidden && data.rows.length === 0 ? null : tour ? (
@@ -102,14 +112,14 @@ async function RatingContent({
               scroll={false}
               className="w-fit text-sm font-semibold underline"
             >
-              {expanded ? ru.rating.hideNeighbours : ru.rating.showNeighbours}
+              {expanded ? t.rating.hideNeighbours : t.rating.showNeighbours}
             </Link>
           )}
           <p className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted">
             <Link href={`/predictions?${toPredictions}`} className="underline">
-              {ru.rating.toPredictions}
+              {t.rating.toPredictions}
             </Link>
-            <span>{ru.rating.cacheNote}</span>
+            <span>{t.rating.cacheNote}</span>
           </p>
         </section>
       )}
@@ -117,10 +127,12 @@ async function RatingContent({
   );
 }
 
-export default function RatingPage(props: PageProps<"/[locale]/rating">) {
+export default async function RatingPage(props: PageProps<"/[locale]/rating">) {
+  await initLocale(props.params);
+  const t = getMessages();
   return (
     <Container className="flex flex-col gap-6 py-8 sm:py-12">
-      <h1 className="text-h3 sm:text-h1">{ru.rating.title}</h1>
+      <h1 className="text-h3 sm:text-h1">{t.rating.title}</h1>
       <Suspense fallback={<Skeleton className="h-96" />}>
         <RatingContent searchParams={props.searchParams} />
       </Suspense>
