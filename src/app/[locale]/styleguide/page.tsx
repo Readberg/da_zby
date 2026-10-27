@@ -18,9 +18,13 @@ const palette = [
   ["bg", "bg-bg"],
   ["ink", "bg-ink"],
   ["accent", "bg-accent"],
+  ["accent-hover", "bg-accent-hover"],
   ["muted", "bg-muted"],
+  ["faint", "bg-faint"],
   ["line", "bg-line"],
+  ["surface-alt", "bg-surface-alt"],
   ["surface", "bg-surface"],
+  ["surface-hover", "bg-surface-hover"],
   ["success", "bg-success"],
   ["danger", "bg-danger"],
 ] as const;
