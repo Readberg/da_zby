@@ -6,7 +6,8 @@ export const headingFont = Oswald({
   weight: ["500", "700"],
   variable: "--font-heading",
   display: "swap",
-  preload: false,
+  // Preloaded (DAZBY-123): the first screen waits for it, and the largest element is a heading.
+  preload: true,
 });
 
 /** Body text. */
