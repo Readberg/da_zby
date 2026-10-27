@@ -12,7 +12,6 @@ import { SiteLoader } from "@/components/layout/site-loader";
 import { HydrationMark } from "@/features/home/components/home-fallback";
 import { ChatDockGate } from "@/features/chat/components/chat-dock-gate";
 import { SiteHeader } from "@/components/layout/site-header";
-import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { LOCALES, isLocale } from "@/i18n/config";
 import { bodyFont, headingFont } from "../fonts";
 import "../globals.css";
@@ -47,10 +46,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e0e10" },
-  ],
+  themeColor: "#090909",
 };
 
 /** Both languages are known at build time, so the static shell is prerendered for each (D-088). */
@@ -69,10 +65,6 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
       suppressHydrationWarning
       className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased`}
     >
-      <head>
-        {/* Applies the saved theme before the first paint, so the page never flashes. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
       <body className="flex min-h-full flex-col bg-bg text-ink">
         <MessagesProvider locale={locale} messages={clientDictionary(locale)}>
           <SiteLoader />

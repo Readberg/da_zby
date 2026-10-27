@@ -72,13 +72,13 @@ test("keyboard focus is clearly visible", async ({ page }) => {
   expect(parseFloat(outline.width ?? "0")).toBeGreaterThanOrEqual(2);
 });
 
-test("content column is narrow and centred on the desktop (D-099)", async ({ page }, testInfo) => {
+test("content column is centred and capped at 1440 px on the desktop (D-106)", async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "desktop layout only");
   await page.goto("/");
   const box = await page.locator("main > div > div").first().boundingBox();
-  const viewportWidth = page.viewportSize()!.width;
-  expect(box?.width ?? 0).toBeLessThan(viewportWidth);
-  expect(box?.width ?? 0).toBeLessThanOrEqual(960);
+  expect(box?.width ?? 0).toBeLessThanOrEqual(1440);
   const viewport = page.viewportSize()!;
   const left = box!.x;
   const right = viewport.width - (box!.x + box!.width);

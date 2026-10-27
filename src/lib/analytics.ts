@@ -20,8 +20,6 @@ export const EVENTS = {
   predictionFailed: "prediction-failed",
   /** A question on the landing was opened; `question` is its number. */
   faqOpen: "faq-open",
-  /** The theme was switched by hand; `theme` is the new one. */
-  themeChange: "theme-change",
   /** The interface language was switched by hand; `language` is the new one. */
   languageChange: "language-change",
   /** An error in the browser (see ErrorReporter); `message` is short and has no personal data. */

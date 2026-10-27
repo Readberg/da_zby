@@ -19,21 +19,27 @@
 
 | Токен (CSS) | Утилиты Tailwind | Значение | Назначение |
 |---|---|---|---|
-| `--color-bg` | `bg-bg`, `text-bg` | `#FFFFFF` | основной фон |
-| `--color-ink` | `bg-ink`, `text-ink`, `border-ink` | `#000000` | текст, рамки, тёмные блоки |
-| `--color-accent` | `bg-accent`, `border-accent` | `#FEDE06` | кнопки, акценты; **не для текста на белом** |
-| `--color-muted` | `text-muted` | `#6B6B6B` | вторичный текст |
-| `--color-line` | `border-line` | `#E6E6E6` | разделители, границы карточек |
-| `--color-surface` | `bg-surface` | `#F6F6F6` | фон карточек, зебра таблиц |
-| `--color-success` | `bg-success`, `text-success` | `#1FA84F` | точный счёт, лидеры |
-| `--color-danger` | `bg-danger`, `text-danger` | `#D6232A` | ошибки, «мимо» |
-| `--font-heading` (Oswald) | `font-display` | узкий гротеск, кириллица | заголовки, всегда заглавными |
+| `--color-bg` | `bg-bg` | `#090909` | основной фон |
+| `--color-surface-alt` | `bg-surface-alt` | `#111111` | вторичный фон (секции) |
+| `--color-surface` | `bg-surface` | `#161616` | карточки |
+| `--color-surface-hover` | `bg-surface-hover` | `#1D1D1D` | карточка и кнопка при наведении |
+| `--color-line` | `border-line` | `#292929` | границы 1 px |
+| `--color-ink` | `text-ink` | `#F5F5F5` | основной текст и важные данные |
+| `--color-muted` | `text-muted` | `#999999` | описания, вторичный текст |
+| `--color-faint` | `text-faint` | `#666666` | приглушённый текст (не для основного содержимого: контраст ниже AA) |
+| `--color-accent` | `bg-accent`, `text-accent` | `#FFD400` | главные действия, цифры, статусы, активная вкладка; текст на нём всегда `text-black` |
+| `--color-accent-hover` | `bg-accent-hover` | `#FFE033` | наведение на жёлтое |
+| `--color-success` / `--color-danger` | `text-success`, `text-danger` | `#3ECF70` / `#FF6B6B` | точный счёт, ошибки |
+| `--font-heading` (Oswald) | `font-display` | узкий гротеск, кириллица | заголовки, заглавными |
 | `--font-body` (Inter) | `font-sans` | гротеск, кириллица | основной текст |
-| шкала шрифта | `text-sm` 14 · `text-base` 16 · `text-lg` 20 · `text-h3` 28 · `text-h2` 40 · `text-h1` 56 | px | на мобильных заголовки ≤ `text-h3` |
-| `--radius-sm/md/lg` | `rounded-sm/md/lg` | 4 / 8 / 16 px | скругления |
-| `--container-max` | `max-w-site` | 960 px | ширина контейнера (узкая колонка по центру, D-099) |
+| шкала шрифта | `text-sm` 14 · `text-base` 16 · `text-lg` 20 · `text-h3` 28 · `text-h2` 40 · `text-h1` 64 | px | на мобильных заголовки ≤ `text-h3` |
+| `--radius-sm/md/lg` | `rounded-sm/md/lg` | 8 / 12 / 16 px | кнопки и поля / плитки / карточки |
+| `--shadow-soft` | `shadow-soft` | `none` | массивных теней нет: глубина — рамка 1 px |
+| `--container-max` | `max-w-site` | 1440 px | ширина контейнера (D-106) |
 
-Фокус: глобально `:focus-visible` — жёлтая обводка + чёрное кольцо. Шрифты грузятся через `next/font` (`src/app/fonts.ts`), без запросов к Google из браузера.
+Сайт только тёмный (D-106): переключателя темы нет, значения лежат прямо в `:root`. Правило цвета: ≈ 80 % чёрные и тёмно-серые, ≈ 15 % белая типографика, ≈ 5 % жёлтый.
+
+Фокус: глобально `:focus-visible` — обводка цвета основного текста. Шрифты грузятся через `next/font` (`src/app/fonts.ts`), без запросов к Google из браузера.
 
 ## Как пользоваться (для Claude)
 
