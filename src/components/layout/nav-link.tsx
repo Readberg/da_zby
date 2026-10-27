@@ -9,12 +9,15 @@ const base =
   "inline-flex min-h-11 items-center rounded-full px-3 text-base sm:px-4 font-medium transition-colors duration-200";
 
 /** Navigation link that marks the current page. Needs a <Suspense> boundary around it. */
-export function NavLink({ href, children }: { href: string; children: ReactNode }) {
+type NavLinkProps = { href: string; children: ReactNode; prefetch?: boolean };
+
+export function NavLink({ href, children, prefetch }: NavLinkProps) {
   const pathname = useAppPathname();
   const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
   return (
     <Link
       href={href}
+      prefetch={prefetch}
       aria-current={active ? "page" : undefined}
       className={cx(
         base,
@@ -27,9 +30,9 @@ export function NavLink({ href, children }: { href: string; children: ReactNode 
 }
 
 /** Same link without the current-page mark: the Suspense fallback while the path is unknown. */
-export function StaticNavLink({ href, children }: { href: string; children: ReactNode }) {
+export function StaticNavLink({ href, children, prefetch }: NavLinkProps) {
   return (
-    <Link href={href} className={cx(base, "text-ink hover:bg-surface")}>
+    <Link href={href} prefetch={prefetch} className={cx(base, "text-ink hover:bg-surface")}>
       {children}
     </Link>
   );
