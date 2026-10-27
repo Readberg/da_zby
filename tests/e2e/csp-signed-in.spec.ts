@@ -76,7 +76,8 @@ test.describe("content policy on signed-in pages (needs SUPABASE_SECRET_KEY)", (
       });
     }).toPass({ timeout: 20_000 });
     await page.goto("/profile");
-    await expect(page.locator("img[alt]").first()).toBeVisible();
+    // The photo on the page, not the logo of the first-visit cover.
+    await expect(page.locator("main img").first()).toBeVisible();
   });
 
   test("the admin pages and a club logo upload work", async ({ page }) => {
