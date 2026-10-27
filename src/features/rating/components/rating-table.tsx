@@ -52,13 +52,13 @@ function Place({ row }: { row: RatingRow }) {
   return (
     <span className="inline-flex items-center gap-1 whitespace-nowrap">
       <span
-        className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1 ${
+        className={`inline-flex h-7 min-w-7 items-center justify-center rounded-sm px-1 ${
           row.place === 1
             ? "bg-accent text-black"
             : row.place === 2
               ? "bg-line text-ink"
               : row.place === 3
-                ? "bg-accent/40 text-ink"
+                ? "border border-line text-ink"
                 : ""
         }`}
       >
@@ -151,7 +151,7 @@ export function SeasonRatingTable({
                 <TD className="text-right">{row.missCount}</TD>
                 <TD className="text-right">{row.outcomeCount}</TD>
                 <TD className="text-right">{row.exactCount}</TD>
-                <TD className="text-right font-semibold">{row.points}</TD>
+                <TD className="text-right font-semibold text-accent">{row.points}</TD>
               </TR>
             </Fragment>
           ))}
@@ -245,7 +245,7 @@ export function TourRatingTable({
                   />
                 </TD>
               ))}
-              <TD className="text-right font-semibold">{row.points}</TD>
+              <TD className="text-right font-semibold text-accent">{row.points}</TD>
             </TR>
           </Fragment>
         ))}

@@ -24,7 +24,7 @@ export async function LeadersList() {
           {t.home.fullRating}
         </Link>
       </div>
-      <ol className="flex flex-col divide-y divide-line rounded-lg bg-surface">
+      <ol className="flex flex-col divide-y divide-line rounded-lg border border-line bg-surface">
         {leaders.map((row) => (
           <li key={row.userId} className="flex items-center gap-3 px-5 py-3">
             <span className="w-6 font-display text-lg font-bold">{row.place ?? "—"}</span>
@@ -39,7 +39,7 @@ export async function LeadersList() {
             ) : (
               <span className="flex-1 text-muted">—</span>
             )}
-            <span className="font-semibold">
+            <span className="font-semibold text-accent">
               {row.points}{" "}
               <span className="text-sm font-normal text-muted">{t.home.pointsShort}</span>
             </span>

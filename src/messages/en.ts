@@ -18,9 +18,6 @@ export const en: MessagesShape<typeof ru> = {
     rating: "Standings",
     chat: "Chat",
   },
-  theme: {
-    toggle: "Switch theme: light / dark",
-  },
   footer: {
     socialLabel: "Follow us",
     rights: "© 2026 Da Zabey. All rights reserved.",

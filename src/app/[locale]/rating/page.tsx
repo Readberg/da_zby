@@ -78,14 +78,17 @@ async function RatingContent({
             <p className="text-sm text-muted">{t.rating.seasonClosed}</p>
           )}
           {mine && (
-            <p className="rounded-lg bg-accent/25 px-5 py-4 font-semibold">
+            <p className="rounded-lg border border-accent/50 bg-accent/10 px-5 py-4 font-semibold">
               {t.rating.yourPlace
                 .replace("{place}", String(mine.place ?? "—"))
                 .replace("{points}", points(mine.points, locale))}
             </p>
           )}
           {hidden && (
-            <p role="status" className="rounded-lg border border-line px-5 py-4 text-muted">
+            <p
+              role="status"
+              className="rounded-lg border border-line bg-surface px-5 py-4 text-muted"
+            >
               {t.rating.predictionsHidden.replace(
                 "{date}",
                 formatDateTime(hidden, undefined, locale),

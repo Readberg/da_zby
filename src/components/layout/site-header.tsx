@@ -5,7 +5,6 @@ import logo from "@/assets/logo.png";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
 import { NavLink, StaticNavLink } from "./nav-link";
-import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 import { getMessages } from "@/i18n/server";
 
@@ -13,7 +12,7 @@ export function SiteHeader() {
   const t = getMessages();
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/80 text-ink backdrop-blur-md">
-      <Container className="flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2 sm:flex-nowrap">
+      <Container className="flex min-h-18 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2 sm:flex-nowrap">
         <Link
           href="/"
           aria-label={t.site.homeLink}
@@ -29,7 +28,6 @@ export function SiteHeader() {
           </Suspense>
         </nav>
         <div className="flex items-center gap-1">
-          <ThemeToggle />
           {/* The user is request-time data: keep it out of the static shell. */}
           <Suspense fallback={<span className="inline-block h-11 w-20" aria-hidden="true" />}>
             <UserMenu />

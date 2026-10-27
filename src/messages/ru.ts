@@ -15,9 +15,6 @@ export const ru = {
     rating: "Рейтинг",
     chat: "Чат",
   },
-  theme: {
-    toggle: "Переключить тему: светлая / тёмная",
-  },
   footer: {
     socialLabel: "Мы в соцсетях",
     rights: "© 2026 «Да забей». Все права защищены.",

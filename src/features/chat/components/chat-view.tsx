@@ -220,7 +220,9 @@ export function ChatView({
               <Avatar src={avatarUrl(message.avatarPath)} name={message.nickname} size="sm" />
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-                  <span className="font-semibold text-ink">{message.nickname}</span>
+                  <span className={`font-semibold ${mine ? "text-accent" : "text-ink"}`}>
+                    {message.nickname}
+                  </span>
                   <time dateTime={message.createdAt} className="text-muted">
                     {time(message.createdAt)}
                   </time>

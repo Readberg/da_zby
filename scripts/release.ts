@@ -1,8 +1,10 @@
 // One command for the whole release (D-085):
-//   pnpm release <patch|minor|major> --title "short title" --task DAZBY-N [--dry-run]
+//   pnpm release <patch|minor|major> --title "short title" --task DAZBY-N [--dry-run] [--local-checks]
 // Steps: version + CHANGELOG on a branch → PR into `dev` → green CI → squash-merge → PR `dev` → `main`
 // → green CI → merge commit → tag → GitHub Release (text from CHANGELOG) → check of the stand.
 // It stops at the first red check or failed step and never merges what is not green.
+// --local-checks (D-108): while GitHub Actions cannot run, CI is not awaited; the caller must have run
+// the whole CI set (lint, typecheck, unit, build, e2e) on the same tree and says so with this flag.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { hasRailwayAccess, latestDeployment, redeploy } from "./railway";
@@ -47,7 +49,7 @@ function parse(argv: string[]) {
   };
   if (bump !== "patch" && bump !== "minor" && bump !== "major") {
     throw new Error(
-      'Usage: pnpm release <patch|minor|major> --title "…" --task DAZBY-N [--dry-run]',
+      'Usage: pnpm release <patch|minor|major> --title "…" --task DAZBY-N [--dry-run] [--local-checks]',
     );
   }
   const title = flag("--title");
@@ -55,7 +57,13 @@ function parse(argv: string[]) {
   if (!title || !task || !/^DAZBY-\d+$/.test(task)) {
     throw new Error("--title and --task DAZBY-N are required");
   }
-  return { bump: bump as Bump, title, task, dryRun: rest.includes("--dry-run") };
+  return {
+    bump: bump as Bump,
+    title,
+    task,
+    dryRun: rest.includes("--dry-run"),
+    localChecks: rest.includes("--local-checks"),
+  };
 }
 
 /** Waits until every check of the PR has finished; throws unless all of them passed. */
@@ -135,7 +143,11 @@ async function verifyStand(version: string) {
 }
 
 async function main() {
-  const { bump, title, task, dryRun } = parse(process.argv.slice(2));
+  const { bump, title, task, dryRun, localChecks } = parse(process.argv.slice(2));
+  const awaitChecks = (pr: string) => {
+    if (localChecks) console.log(`local checks (D-108): not waiting for CI of ${pr}`);
+    else waitForGreen(pr);
+  };
   const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
   const version = nextVersion(pkg.version, bump);
   const date = releaseDate();
@@ -185,7 +197,7 @@ async function main() {
       `Version ${version} and CHANGELOG.\n\n**Риск регресса:** меняются только версия и тексты.`,
     ),
   );
-  waitForGreen(bumpPr);
+  awaitChecks(bumpPr);
   gh("pr", "merge", bumpPr, "--squash", "--delete-branch");
   git("checkout", "dev");
   git("pull", "--ff-only");
@@ -204,7 +216,7 @@ async function main() {
       `Release ${version}: ${title}\n\n${notes}\n\n**Риск регресса:** см. PR, вошедшие в релиз; CI зелёный.`,
     ),
   );
-  waitForGreen(releasePr);
+  awaitChecks(releasePr);
   gh("pr", "merge", releasePr, "--merge");
 
   git("fetch", "origin", "--tags");

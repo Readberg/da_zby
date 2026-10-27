@@ -28,7 +28,7 @@ export function RatingPicker({ data }: { data: RatingPickerData }) {
   if (!tournament) return null;
 
   return (
-    <div className="grid gap-4 rounded-lg bg-surface p-4 sm:grid-cols-3 sm:p-5">
+    <div className="grid gap-4 rounded-lg border border-line bg-surface p-4 sm:grid-cols-3 sm:p-5">
       <SelectField
         id="rating-tournament"
         label={m.rating.tournament}
