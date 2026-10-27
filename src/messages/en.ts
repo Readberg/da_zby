@@ -287,12 +287,16 @@ export const en: MessagesShape<typeof ru> = {
     live: "Live",
     connecting: "Connecting…",
     offline: "Offline, reconnecting…",
+    dockLabel: "Chat window",
+    openLabel: "Open chat",
+    closeLabel: "Minimise chat",
     errors: {
       rateLimited: "Not so fast: one message per 2 seconds.",
       banned: "An admin has shut you out of the chat.",
       noNickname: "Choose a nickname in your profile first.",
       generic: "Could not send the message. Please try again.",
       deleteFailed: "Could not delete the message.",
+      loadFailed: "Could not load the chat. Close the window and open it again.",
     },
   },
   profile: {

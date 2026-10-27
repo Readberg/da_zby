@@ -22,7 +22,9 @@ import type { ChatList, ChatMessage } from "@/server/api/v1/schemas/chat";
 const MAX_LENGTH = 500;
 const DAY_MS = 24 * 3_600_000;
 
+/** `page` fills the /chat page; `dock` fills the floating window and scrolls inside it. */
 type Props = {
+  variant?: "page" | "dock";
   initial: ChatList;
   currentUserId: string;
   isAdmin: boolean;
@@ -40,7 +42,14 @@ function merge(current: ChatMessage[], incoming: ChatMessage[], now = Date.now()
 
 type Status = "connecting" | "live" | "offline";
 
-export function ChatView({ initial, currentUserId, isAdmin, utcOffsetMinutes }: Props) {
+export function ChatView({
+  variant = "page",
+  initial,
+  currentUserId,
+  isAdmin,
+  utcOffsetMinutes,
+}: Props) {
+  const dock = variant === "dock";
   const t = useMessages().chat;
   const locale = useLocale();
   const [messages, setMessages] = useState<ChatMessage[]>(() => merge([], initial.messages));
@@ -184,7 +193,7 @@ export function ChatView({ initial, currentUserId, isAdmin, utcOffsetMinutes }: 
     "min-h-6 cursor-pointer text-muted underline underline-offset-4 hover:text-ink";
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={dock ? "flex h-full min-h-0 flex-col gap-2" : "flex flex-col gap-4"}>
       <p className="text-sm text-muted" role="status">
         <span
           aria-hidden="true"
@@ -197,7 +206,11 @@ export function ChatView({ initial, currentUserId, isAdmin, utcOffsetMinutes }: 
         ref={listRef}
         onScroll={onScroll}
         aria-label={t.listLabel}
-        className="flex h-[60vh] min-h-72 flex-col gap-3 overflow-y-auto rounded-lg border border-line bg-surface p-3 sm:p-4"
+        className={
+          dock
+            ? "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-md border border-line bg-bg p-3"
+            : "flex h-[60vh] min-h-72 flex-col gap-3 overflow-y-auto rounded-lg border border-line bg-surface p-3 sm:p-4"
+        }
       >
         {messages.length === 0 && <li className="m-auto text-muted">{t.empty}</li>}
         {messages.map((message) => {
