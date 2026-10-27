@@ -83,10 +83,10 @@ async function PredictionsContent({
               {tour.title ? ` · ${tour.title}` : ""}
             </h2>
             <p
-              className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+              className={`mt-2 inline-flex rounded-sm border px-3 py-1 text-sm font-semibold ${
                 tour.open && season.status !== "closed"
-                  ? "bg-accent/30 text-ink"
-                  : "bg-surface text-muted"
+                  ? "border-accent/50 text-accent"
+                  : "border-line text-muted"
               }`}
             >
               {season.status === "closed"
@@ -101,13 +101,13 @@ async function PredictionsContent({
           <p className="text-sm">
             <Link
               href={`/rating?${query}`}
-              className="inline-flex min-h-10 items-center rounded-full bg-surface px-4 font-semibold transition-colors hover:bg-line"
+              className="inline-flex min-h-10 items-center rounded-sm border border-line px-4 font-semibold transition-colors duration-200 hover:bg-surface-hover"
             >
               {t.predictions.toRating}
             </Link>
           </p>
           {data.tournament && (
-            <details className="group rounded-lg bg-surface px-5 py-4">
+            <details className="group rounded-lg border border-line bg-surface px-5 py-4">
               <summary className="cursor-pointer font-semibold">{t.predictions.rulesTitle}</summary>
               <p className="mt-2 text-muted">
                 {t.predictions.rules
