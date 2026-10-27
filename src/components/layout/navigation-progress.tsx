@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useAppPathname } from "@/i18n/use-app-pathname";
 import { useEffect, useState } from "react";
 
 /**
@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
  * finishes when the new page has arrived, so slow server rendering never looks like a freeze.
  */
 export function NavigationProgress() {
-  const pathname = usePathname();
+  const pathname = useAppPathname();
   const [loadingFor, setLoadingFor] = useState<string | null>(null);
 
   useEffect(() => {

@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
 import { EVENTS, track } from "@/lib/analytics";
 import { ApiClientError, api } from "@/lib/api-client";
-import { ru } from "@/messages/ru";
 import { nicknameSchema } from "@/lib/profile-schema";
+import { useLocale, useMessages } from "@/i18n/client";
+import { localizeMessage } from "@/i18n/validation";
 
 type Availability = "idle" | "checking" | "free" | "taken";
 
 export function OnboardingForm({ next }: { next: string }) {
+  const t = useMessages();
+  const locale = useLocale();
   const router = useRouter();
   const [nickname, setNickname] = useState("");
   // Result of the last finished check; "checking" is derived, so no state is set synchronously.
@@ -55,7 +58,7 @@ export function OnboardingForm({ next }: { next: string }) {
     event.preventDefault();
     if (saving) return;
     if (!format.success) {
-      setError(format.error.issues[0]?.message ?? ru.onboarding.hint);
+      setError(localizeMessage(format.error.issues[0]?.message ?? t.onboarding.hint, locale));
       return;
     }
     setError(null);
@@ -69,26 +72,26 @@ export function OnboardingForm({ next }: { next: string }) {
       setSaving(false);
       setError(
         cause instanceof ApiClientError
-          ? (cause.fieldError("nickname") ?? ru.onboarding.generic)
-          : ru.onboarding.generic,
+          ? localizeMessage(cause.fieldError("nickname") ?? t.onboarding.generic, locale)
+          : t.onboarding.generic,
       );
     }
   }
 
   const hint =
     availability === "checking"
-      ? ru.onboarding.checking
+      ? t.onboarding.checking
       : availability === "free"
-        ? ru.onboarding.free
+        ? t.onboarding.free
         : availability === "taken"
-          ? ru.onboarding.taken
-          : ru.onboarding.hint;
+          ? t.onboarding.taken
+          : t.onboarding.hint;
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex w-full flex-col gap-4">
       <TextField
         id="onboarding-nickname"
-        label={ru.onboarding.nicknameLabel}
+        label={t.onboarding.nicknameLabel}
         autoComplete="nickname"
         autoCapitalize="none"
         maxLength={20}
@@ -98,10 +101,10 @@ export function OnboardingForm({ next }: { next: string }) {
           setError(null);
         }}
         hint={hint}
-        error={error ?? (availability === "taken" ? ru.onboarding.taken : undefined)}
+        error={error ?? (availability === "taken" ? t.onboarding.taken : undefined)}
       />
       <Button type="submit" disabled={saving || availability === "taken"}>
-        {saving ? ru.onboarding.saving : ru.onboarding.submit}
+        {saving ? t.onboarding.saving : t.onboarding.submit}
       </Button>
     </form>
   );

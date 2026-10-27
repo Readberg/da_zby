@@ -15,7 +15,7 @@ const sources = files("src", /\.(ts|tsx|css)$/).filter((f) => !/\.test\.tsx?$/.t
 
 describe("design tokens guard (DAZBY-17)", () => {
   // Raw colours live only in the token file; the browser theme colour must be a literal.
-  const allowed = [join("src", "app", "globals.css"), join("src", "app", "layout.tsx")];
+  const allowed = [join("src", "app", "globals.css"), join("src", "app", "[locale]", "layout.tsx")];
 
   it("has no hard-coded hex colours outside the token file", () => {
     const offenders = sources

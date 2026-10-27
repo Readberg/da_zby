@@ -4,9 +4,9 @@ import { Card } from "@/components/ui/card";
 import { ProfileStats } from "@/features/rating/components/profile-stats";
 import { countryName } from "@/lib/countries";
 import { formatDate } from "@/lib/time";
-import { ru } from "@/messages/ru";
 import type { PublicProfile } from "@/server/services/public-profiles";
 import type { StatsRow } from "@/server/services/rating";
+import { getMessages, getLocale } from "@/i18n/server";
 
 /** What everybody sees on a profile; the owner gets the same view plus an action slot. */
 export function ProfileView({
@@ -18,7 +18,12 @@ export function ProfileView({
   stats: StatsRow[];
   actions?: ReactNode;
 }) {
-  const place = [profile.countryCode ? countryName(profile.countryCode) : null, profile.city]
+  const locale = getLocale();
+  const t = getMessages();
+  const place = [
+    profile.countryCode ? countryName(profile.countryCode, locale) : null,
+    profile.city,
+  ]
     .filter(Boolean)
     .join(", ");
 
@@ -39,23 +44,23 @@ export function ProfileView({
       <dl className="grid max-w-md gap-1 text-sm">
         {profile.contact && (
           <div className="flex flex-wrap gap-x-2">
-            <dt className="text-muted">{ru.publicProfile.contact}:</dt>
+            <dt className="text-muted">{t.publicProfile.contact}:</dt>
             <dd>{profile.contact}</dd>
           </div>
         )}
         <div className="flex flex-wrap gap-x-2">
-          <dt className="text-muted">{ru.publicProfile.registered}:</dt>
-          <dd>{formatDate(profile.createdAt)}</dd>
+          <dt className="text-muted">{t.publicProfile.registered}:</dt>
+          <dd>{formatDate(profile.createdAt, undefined, locale)}</dd>
         </div>
         {profile.lastLoginAt && (
           <div className="flex flex-wrap gap-x-2">
-            <dt className="text-muted">{ru.publicProfile.lastLogin}:</dt>
-            <dd>{formatDate(profile.lastLoginAt)}</dd>
+            <dt className="text-muted">{t.publicProfile.lastLogin}:</dt>
+            <dd>{formatDate(profile.lastLoginAt, undefined, locale)}</dd>
           </div>
         )}
       </dl>
 
-      <Card title={ru.publicProfile.statsTitle}>
+      <Card title={t.publicProfile.statsTitle}>
         <ProfileStats rows={stats} />
       </Card>
     </div>

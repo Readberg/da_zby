@@ -1,5 +1,5 @@
 import { cx } from "@/lib/cx";
-import { ru } from "@/messages/ru";
+import { getMessages } from "@/i18n/server";
 
 export type PredictionResult = "exact" | "outcome" | "miss";
 
@@ -18,6 +18,7 @@ export function ResultBadge({
   result: PredictionResult;
   className?: string;
 }) {
+  const t = getMessages();
   return (
     <span
       className={cx(
@@ -26,7 +27,7 @@ export function ResultBadge({
         className,
       )}
     >
-      {ru.result[result]}
+      {t.result[result]}
     </span>
   );
 }

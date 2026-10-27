@@ -1,4 +1,5 @@
-import { DEFAULT_UTC_OFFSET_MINUTES } from "./time";
+import type { Locale } from "@/i18n/config";
+import { DEFAULT_UTC_OFFSET_MINUTES, INTL_LOCALE } from "./time";
 
 const LOCAL_INPUT = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
 
@@ -32,10 +33,14 @@ export function utcIsoToLocalInput(
   return new Date(time + offsetMinutes * 60_000).toISOString().slice(0, 16);
 }
 
-/** "25 октября в 18:30" in the given offset, for lists and match rows. */
-export function formatDateTime(iso: string, offsetMinutes = DEFAULT_UTC_OFFSET_MINUTES): string {
+/** "25 октября в 18:30" / "25 October at 18:30" in the given offset, for lists and match rows. */
+export function formatDateTime(
+  iso: string,
+  offsetMinutes = DEFAULT_UTC_OFFSET_MINUTES,
+  locale: Locale = "ru",
+): string {
   const shifted = new Date(new Date(iso).getTime() + offsetMinutes * 60_000);
-  return new Intl.DateTimeFormat("ru-RU", {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
     day: "numeric",
     month: "long",
     hour: "2-digit",

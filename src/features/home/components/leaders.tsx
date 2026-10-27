@@ -2,10 +2,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ru } from "@/messages/ru";
 import { getHomeCached } from "@/server/services/home.cached";
+import { getMessages } from "@/i18n/server";
 
 export async function LeadersList() {
+  const t = getMessages();
   const { pub, leaders } = await getHomeCached();
   if (leaders.length === 0) return null;
 
@@ -17,10 +18,10 @@ export async function LeadersList() {
     <section aria-labelledby="leaders-title" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="leaders-title" className="text-h3 sm:text-h2">
-          {ru.home.leadersTitle}
+          {t.home.leadersTitle}
         </h2>
         <Link href={`/rating?${query}`} className="underline underline-offset-4">
-          {ru.home.fullRating}
+          {t.home.fullRating}
         </Link>
       </div>
       <ol className="flex flex-col divide-y divide-line rounded-lg bg-surface">
@@ -40,7 +41,7 @@ export async function LeadersList() {
             )}
             <span className="font-semibold">
               {row.points}{" "}
-              <span className="text-sm font-normal text-muted">{ru.home.pointsShort}</span>
+              <span className="text-sm font-normal text-muted">{t.home.pointsShort}</span>
             </span>
           </li>
         ))}

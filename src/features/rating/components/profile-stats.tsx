@@ -1,12 +1,13 @@
 import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { CountUp } from "@/components/ui/count-up";
-import { ru } from "@/messages/ru";
 import type { StatsRow } from "@/server/services/rating";
+import { getMessages } from "@/i18n/server";
 
 /** Statistics of one participant: a row per tournament and season with predictions. */
 export function ProfileStats({ rows }: { rows: StatsRow[] }) {
-  const t = ru.publicProfile.stats;
-  if (rows.length === 0) return <p className="text-muted">{ru.publicProfile.statsEmpty}</p>;
+  const m = getMessages();
+  const t = m.publicProfile.stats;
+  if (rows.length === 0) return <p className="text-muted">{m.publicProfile.statsEmpty}</p>;
 
   return (
     <div className="flex flex-col gap-2">

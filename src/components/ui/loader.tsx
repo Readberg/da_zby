@@ -1,5 +1,7 @@
+"use client";
+
+import { useMessages } from "@/i18n/client";
 import { cx } from "@/lib/cx";
-import { ru } from "@/messages/ru";
 
 /** The site's loading mark: a yellow ring with a black arc that turns; decorative on its own. */
 export function BrandSpinner({ className }: { className?: string }) {
@@ -17,13 +19,15 @@ export function BrandSpinner({ className }: { className?: string }) {
 /** Loading block: the brand spinner centred in a soft surface; size it with classes. */
 export function Loader({
   className,
-  label = ru.common.loading,
+  label,
   showLabel = false,
 }: {
   className?: string;
   label?: string;
   showLabel?: boolean;
 }) {
+  const t = useMessages();
+  label ??= t.common.loading;
   return (
     <div
       role="status"

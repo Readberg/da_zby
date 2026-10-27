@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n/config";
 import { z } from "./zod";
 import { AVATAR_PATH_PATTERN } from "./avatar-file";
 import { isCountryCode } from "./countries";
@@ -38,7 +39,7 @@ export const profilePatchSchema = z
 export type ProfilePatch = z.infer<typeof profilePatchSchema>;
 
 /** Well-known places for each offset, shown next to it so nobody has to guess their zone. */
-const UTC_REGIONS: Record<number, string> = {
+const UTC_REGIONS_RU: Record<number, string> = {
   [-720]: "Бейкер",
   [-660]: "Паго-Паго",
   [-600]: "Гавайи",
@@ -79,14 +80,60 @@ const UTC_REGIONS: Record<number, string> = {
   840: "Киритимати",
 };
 
+const UTC_REGIONS_EN: Record<number, string> = {
+  [-720]: "Baker Island",
+  [-660]: "Pago Pago",
+  [-600]: "Hawaii",
+  [-540]: "Alaska",
+  [-480]: "Los Angeles, Vancouver",
+  [-420]: "Denver, Phoenix",
+  [-360]: "Chicago, Mexico City",
+  [-300]: "New York, Toronto, Bogotá",
+  [-240]: "Halifax, Caracas",
+  [-210]: "Newfoundland",
+  [-180]: "Buenos Aires, São Paulo",
+  [-120]: "South Georgia",
+  [-60]: "Azores",
+  0: "London, Lisbon, Reykjavik",
+  60: "Berlin, Paris, Warsaw, Rome",
+  120: "Kyiv, Riga, Vilnius, Athens, Cairo",
+  180: "Minsk, Moscow, Istanbul",
+  210: "Tehran",
+  240: "Yerevan, Baku, Tbilisi, Dubai",
+  270: "Kabul",
+  300: "Astana, Tashkent, Karachi",
+  330: "Delhi, Mumbai",
+  345: "Kathmandu",
+  360: "Bishkek, Dhaka, Omsk",
+  390: "Yangon",
+  420: "Bangkok, Jakarta",
+  480: "Beijing, Singapore, Perth",
+  525: "Eucla",
+  540: "Tokyo, Seoul",
+  570: "Adelaide, Darwin",
+  600: "Sydney, Vladivostok",
+  630: "Lord Howe",
+  660: "Nouméa, Magadan",
+  690: "Norfolk",
+  720: "Auckland, Fiji",
+  765: "Chatham",
+  780: "Apia",
+  840: "Kiritimati",
+};
+
+const UTC_REGIONS: Record<Locale, Record<number, string>> = {
+  ru: UTC_REGIONS_RU,
+  en: UTC_REGIONS_EN,
+};
+
 /** UTC offsets offered in the profile: every 30 minutes plus the three 45-minute zones. */
-export function utcOffsetOptions(): { minutes: number; label: string }[] {
+export function utcOffsetOptions(locale: Locale = "ru"): { minutes: number; label: string }[] {
   const minutes = new Set<number>([345, 525, 765]);
   for (let m = -720; m <= 840; m += 30) minutes.add(m);
   return [...minutes]
     .sort((a, b) => a - b)
     .map((m) => {
-      const region = UTC_REGIONS[m];
+      const region = UTC_REGIONS[locale][m];
       return {
         minutes: m,
         label: region ? `${formatUtcOffset(m)} — ${region}` : formatUtcOffset(m),

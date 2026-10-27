@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
 import { AVATAR_ACCEPT, buildAvatarPath, validateAvatarFile } from "@/lib/avatar-file";
 import { createClient } from "@/lib/supabase/client";
-import { ru } from "@/messages/ru";
+import { useMessages } from "@/i18n/client";
 
 type Props = {
   userId: string;
@@ -19,6 +19,7 @@ type Props = {
 };
 
 export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Props) {
+  const t = useMessages();
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -37,7 +38,7 @@ export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Pr
 
     const problem = validateAvatarFile(file);
     if (problem) {
-      setError(ru.avatar.errors[problem]);
+      setError(t.avatar.errors[problem]);
       return;
     }
 
@@ -54,7 +55,7 @@ export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Pr
       await removeOldFile(currentPath);
       router.refresh();
     } catch {
-      setError(ru.avatar.errors.upload);
+      setError(t.avatar.errors.upload);
     } finally {
       setBusy(false);
     }
@@ -68,7 +69,7 @@ export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Pr
       await removeOldFile(currentPath);
       router.refresh();
     } catch {
-      setError(ru.avatar.errors.upload);
+      setError(t.avatar.errors.upload);
     } finally {
       setBusy(false);
     }
@@ -77,7 +78,7 @@ export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Pr
   return (
     <section aria-labelledby="avatar-title" className="flex max-w-xl flex-col gap-3">
       <h2 id="avatar-title" className="text-lg">
-        {ru.avatar.title}
+        {t.avatar.title}
       </h2>
       <div className="flex flex-wrap items-center gap-4">
         <Avatar src={currentUrl} name={nickname} size="lg" />
@@ -88,18 +89,18 @@ export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Pr
             accept={AVATAR_ACCEPT}
             onChange={onChoose}
             className="sr-only"
-            aria-label={ru.avatar.choose}
+            aria-label={t.avatar.choose}
             tabIndex={-1}
           />
           <Button variant="secondary" loading={busy} onClick={() => input.current?.click()}>
-            {busy ? ru.avatar.uploading : currentUrl ? ru.avatar.replace : ru.avatar.choose}
+            {busy ? t.avatar.uploading : currentUrl ? t.avatar.replace : t.avatar.choose}
           </Button>
           {currentUrl && (
             <Button variant="text" disabled={busy} onClick={onRemove}>
-              {ru.avatar.remove}
+              {t.avatar.remove}
             </Button>
           )}
-          <p className="text-sm text-muted">{ru.avatar.hint}</p>
+          <p className="text-sm text-muted">{t.avatar.hint}</p>
         </div>
       </div>
       <p role="alert" className="min-h-5 text-sm text-danger">

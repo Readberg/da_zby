@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { SelectField } from "@/components/ui/field";
-import { ru } from "@/messages/ru";
 import type { PredictionsPageData } from "@/server/services/predictions";
+import { useMessages } from "@/i18n/client";
 
 function address(params: { tournament?: string; season?: string; tour?: number }) {
   const query = new URLSearchParams();
@@ -22,6 +22,7 @@ export type PredictionPickerData = Pick<
 >;
 
 export function PredictionPicker({ data }: { data: PredictionPickerData }) {
+  const m = useMessages();
   const router = useRouter();
   const { tournament, season, tour } = data;
   if (!tournament) return null;
@@ -30,7 +31,7 @@ export function PredictionPicker({ data }: { data: PredictionPickerData }) {
     <div className="grid gap-4 rounded-lg bg-surface p-4 sm:grid-cols-3 sm:p-5">
       <SelectField
         id="pick-tournament"
-        label={ru.predictions.tournament}
+        label={m.predictions.tournament}
         value={tournament.slug}
         onChange={(e) => router.push(address({ tournament: e.target.value }))}
       >
@@ -42,24 +43,24 @@ export function PredictionPicker({ data }: { data: PredictionPickerData }) {
       </SelectField>
       <SelectField
         id="pick-season"
-        label={ru.predictions.season}
+        label={m.predictions.season}
         value={season?.id ?? ""}
         disabled={data.seasons.length === 0}
         onChange={(e) =>
           router.push(address({ tournament: tournament.slug, season: e.target.value }))
         }
       >
-        {data.seasons.length === 0 && <option value="">{ru.predictions.noSeasons}</option>}
+        {data.seasons.length === 0 && <option value="">{m.predictions.noSeasons}</option>}
         {data.seasons.map((s) => (
           <option key={s.id} value={s.id}>
             {s.name}
-            {s.status === "closed" ? ` (${ru.predictions.seasonClosed})` : ""}
+            {s.status === "closed" ? ` (${m.predictions.seasonClosed})` : ""}
           </option>
         ))}
       </SelectField>
       <SelectField
         id="pick-tour"
-        label={ru.predictions.tour}
+        label={m.predictions.tour}
         value={tour ? String(tour.number) : ""}
         disabled={data.tours.length === 0}
         onChange={(e) =>
@@ -72,10 +73,10 @@ export function PredictionPicker({ data }: { data: PredictionPickerData }) {
           )
         }
       >
-        {data.tours.length === 0 && <option value="">{ru.predictions.noTours}</option>}
+        {data.tours.length === 0 && <option value="">{m.predictions.noTours}</option>}
         {data.tours.map((t) => (
           <option key={t.number} value={t.number}>
-            {ru.admin.tours.tourN.replace("{n}", String(t.number))}
+            {m.predictions.tourN.replace("{n}", String(t.number))}
             {t.title ? ` · ${t.title}` : ""}
           </option>
         ))}

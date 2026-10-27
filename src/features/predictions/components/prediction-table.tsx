@@ -11,9 +11,9 @@ import { EVENTS, track } from "@/lib/analytics";
 import { ApiClientError, api } from "@/lib/api-client";
 import { formatDateTime } from "@/lib/local-time";
 import { CountUp } from "@/components/ui/count-up";
-import { pluralRu } from "@/lib/plural";
-import { ru } from "@/messages/ru";
+import { pointsWord } from "@/lib/plural";
 import type { MatchView, PageClub } from "@/server/services/predictions";
+import { useMessages, useLocale } from "@/i18n/client";
 
 type Entry = { home: string; away: string };
 
@@ -64,6 +64,8 @@ export function PredictionTable({
   /** Where the table of this tour lives (shown with the tour result). */
   ratingHref?: string;
 }) {
+  const locale = useLocale();
+  const t = useMessages();
   const router = useRouter();
   const saved = (match: MatchView): Entry => ({
     home: match.prediction ? String(match.prediction.homeScore) : "",
@@ -100,9 +102,9 @@ export function PredictionTable({
       const home = parseScore(entry.home);
       const away = parseScore(entry.away);
       if (home === "invalid" || away === "invalid") {
-        problems[match.id] = ru.predictions.scoreError;
+        problems[match.id] = t.predictions.scoreError;
       } else if ((home === null) !== (away === null)) {
-        problems[match.id] = ru.predictions.bothNumbers;
+        problems[match.id] = t.predictions.bothNumbers;
       } else if (home !== null && away !== null) {
         const before = match.prediction;
         if (!before || before.homeScore !== home || before.awayScore !== away) {
@@ -152,7 +154,7 @@ export function PredictionTable({
     const { items, problems } = pending();
     setErrors(problems);
     if (Object.keys(problems).length > 0) {
-      setMessage({ text: ru.predictions.checkScores, failed: true });
+      setMessage({ text: t.predictions.checkScores, failed: true });
       return;
     }
     if (items.length === 0) return;
@@ -162,14 +164,14 @@ export function PredictionTable({
     try {
       await api("/predictions", { method: "PUT", json: { tourId, items } });
       track(EVENTS.predictionSaved, { count: items.length });
-      setMessage({ text: ru.predictions.saved, failed: false });
+      setMessage({ text: t.predictions.saved, failed: false });
       router.refresh();
     } catch (cause) {
       const isClosed =
         cause instanceof ApiClientError && cause.problem.code === "predictions.closed";
       track(EVENTS.predictionFailed, { reason: isClosed ? "closed" : "error" });
       setMessage({
-        text: isClosed ? ru.predictions.closedNow : ru.predictions.saveFailed,
+        text: isClosed ? t.predictions.closedNow : t.predictions.saveFailed,
         failed: true,
       });
       if (isClosed) router.refresh();
@@ -178,15 +180,15 @@ export function PredictionTable({
     }
   }
 
-  if (matches.length === 0) return <p className="text-muted">{ru.predictions.noMatches}</p>;
+  if (matches.length === 0) return <p className="text-muted">{t.predictions.noMatches}</p>;
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       {!signedIn && open && (
         <p className="rounded-md bg-surface p-4">
-          {ru.predictions.guestPrompt}{" "}
+          {t.predictions.guestPrompt}{" "}
           <Link href={loginHref} className="font-semibold underline">
-            {ru.auth.login}
+            {t.auth.login}
           </Link>
         </p>
       )}
@@ -194,17 +196,17 @@ export function PredictionTable({
       {signedIn && hasResult && (
         <div className="rounded-lg bg-surface p-5">
           <p className="text-sm font-semibold uppercase tracking-widest text-muted">
-            {ru.predictions.tourResult}
+            {t.predictions.tourResult}
           </p>
           <p className="mt-1 text-lg font-semibold">
-            <CountUp value={earned.points} /> {pluralRu(earned.points, ["очко", "очка", "очков"])}
-            {ru.predictions.tourResultText
+            <CountUp value={earned.points} /> {pointsWord(earned.points, locale)}
+            {t.predictions.tourResultText
               .replace("{exact}", String(earned.exact))
               .replace("{outcome}", String(earned.outcome))}
           </p>
           {ratingHref && (
             <Link href={ratingHref} className="mt-2 inline-block text-sm underline">
-              {ru.predictions.tourTable}
+              {t.predictions.tourTable}
             </Link>
           )}
         </div>
@@ -218,9 +220,9 @@ export function PredictionTable({
           return (
             <li key={match.id} className="flex flex-col gap-2 rounded-lg bg-surface p-4 sm:p-5">
               <p className="text-sm text-muted">
-                {formatDateTime(match.kickoffAt, offsetMinutes)}
+                {formatDateTime(match.kickoffAt, offsetMinutes, locale)}
                 {match.status !== "scheduled" && !finished && (
-                  <span className="ml-2">· {ru.admin.matches.statuses[match.status]}</span>
+                  <span className="ml-2">· {t.predictions.matchStatuses[match.status]}</span>
                 )}
               </p>
               <div className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[1fr_auto_auto_auto_1fr] sm:gap-x-3">
@@ -228,7 +230,7 @@ export function PredictionTable({
                 {editable ? (
                   <>
                     <Input
-                      aria-label={`${ru.predictions.goalsOf} ${match.home.name}`}
+                      aria-label={`${t.predictions.goalsOf} ${match.home.name}`}
                       type="number"
                       inputMode="numeric"
                       min={0}
@@ -245,7 +247,7 @@ export function PredictionTable({
                       :
                     </span>
                     <Input
-                      aria-label={`${ru.predictions.goalsOf} ${match.away.name}`}
+                      aria-label={`${t.predictions.goalsOf} ${match.away.name}`}
                       type="number"
                       inputMode="numeric"
                       min={0}
@@ -259,7 +261,7 @@ export function PredictionTable({
                 ) : (
                   <span
                     className="col-start-2 row-span-2 row-start-1 min-w-16 text-center font-display text-lg sm:col-span-3 sm:row-span-1 sm:min-w-24"
-                    aria-label={ru.predictions.yourPrediction}
+                    aria-label={t.predictions.yourPrediction}
                   >
                     {match.prediction
                       ? `${match.prediction.homeScore} : ${match.prediction.awayScore}`
@@ -277,7 +279,7 @@ export function PredictionTable({
                 <p
                   className={`text-center text-sm ${chip(match) === "saved" ? "text-success-ink" : "text-muted"}`}
                 >
-                  {chip(match) === "saved" ? ru.predictions.savedChip : ru.predictions.notSaved}
+                  {chip(match) === "saved" ? t.predictions.savedChip : t.predictions.notSaved}
                 </p>
               )}
 
@@ -290,7 +292,7 @@ export function PredictionTable({
               {finished && (
                 <p className="flex flex-wrap items-center justify-center gap-3 text-sm">
                   <span>
-                    {ru.predictions.final}:{" "}
+                    {t.predictions.final}:{" "}
                     <strong>
                       {match.homeScore} : {match.awayScore}
                     </strong>
@@ -299,12 +301,12 @@ export function PredictionTable({
                     <>
                       <ResultBadge result={match.prediction.result} />
                       <span>
-                        {ru.predictions.points}: <strong>{match.prediction.points ?? 0}</strong>
+                        {t.predictions.points}: <strong>{match.prediction.points ?? 0}</strong>
                       </span>
                     </>
                   ) : (
                     !match.prediction && (
-                      <span className="text-muted">{ru.predictions.noneMade}</span>
+                      <span className="text-muted">{t.predictions.noneMade}</span>
                     )
                   )}
                 </p>
@@ -317,7 +319,7 @@ export function PredictionTable({
       {canEdit && editableMatches.length > 0 && (
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" loading={busy} disabled={!dirty}>
-            {ru.predictions.save}
+            {t.predictions.save}
           </Button>
           {message && (
             <p
