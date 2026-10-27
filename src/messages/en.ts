@@ -119,6 +119,7 @@ export const en: MessagesShape<typeof ru> = {
     videosTitle: "Latest videos",
     playerTitle: "YouTube video player",
     watchOnYoutube: "Watch on YouTube",
+    playVideo: "Play video",
     moreVideos: "Previous episodes",
     unavailableTitle: "The videos did not load",
     unavailableText: "YouTube did not answer. The latest episodes are always on our channel.",
