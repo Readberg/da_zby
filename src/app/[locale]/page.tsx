@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
@@ -9,8 +10,15 @@ import { MemberAction, NextTour } from "@/features/home/components/next-tour";
 import { Leaders } from "@/features/home/components/leaders";
 import { LatestVideos, LatestVideosSkeleton } from "@/features/videos/components/latest-videos";
 import { getCurrentUser } from "@/server/services/current-user";
+import { siteOpenGraph } from "@/lib/open-graph";
 import { videosService } from "@/server/services/videos.server";
 import { getMessages, initLocale } from "@/i18n/server";
+
+/** The home page is the one address that is the site itself: it names itself as canonical. */
+export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
+  const locale = await initLocale(params);
+  return { alternates: { canonical: "/" }, openGraph: siteOpenGraph(locale, getMessages(), "/") };
+}
 
 async function loadVideos(limit: number) {
   // Videos are request-time data (the service checks its cache age with the clock):

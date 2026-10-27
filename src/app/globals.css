@@ -28,9 +28,6 @@
   --radius-md: 12px;
   --radius-lg: 16px;
 
-  /* No heavy shadows: depth comes from the 1 px border. */
-  --shadow-soft: none;
-
   --container-max: 1440px;
 }
 
@@ -55,7 +52,6 @@
   --color-success-ink: var(--color-success-ink);
   --color-danger: var(--color-danger);
   --color-telegram: var(--color-telegram);
-  --shadow-soft: var(--shadow-soft);
 
   --font-sans: var(--font-body), system-ui, sans-serif;
   --font-display: var(--font-heading), "Arial Narrow", sans-serif;

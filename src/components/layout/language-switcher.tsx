@@ -91,7 +91,7 @@ export function LanguageSwitcher({
           role="menu"
           aria-label={t.footer.languageLabel}
           onKeyDown={onMenuKey}
-          className="absolute bottom-full left-0 z-20 mb-2 min-w-full origin-bottom animate-page-in rounded-md border border-line bg-bg p-1 shadow-soft"
+          className="absolute bottom-full left-0 z-20 mb-2 min-w-full origin-bottom animate-page-in rounded-md border border-line bg-bg p-1"
         >
           {LOCALES.map((code, index) => (
             <button
