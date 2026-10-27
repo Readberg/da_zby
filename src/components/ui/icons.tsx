@@ -166,6 +166,14 @@ export function ChevronDownIcon(props: IconProps) {
   );
 }
 
+export function PlayIcon(props: IconProps) {
+  return (
+    <svg {...base} fill="currentColor" {...props}>
+      <path d="M8 5.6v12.8a1 1 0 0 0 1.5.9l10.6-6.4a1 1 0 0 0 0-1.8L9.5 4.7A1 1 0 0 0 8 5.6Z" />
+    </svg>
+  );
+}
+
 export function CheckIcon(props: IconProps) {
   return (
     <svg
