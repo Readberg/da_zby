@@ -44,7 +44,9 @@ jobs:
         run: supabase migration list
 
       - name: Apply migrations
-        run: supabase db push
+        # --include-all: parallel branches can land a migration that sorts before one already applied
+        # (DAZBY-117). It only adds migrations that are not applied yet; applied ones are never rerun.
+        run: supabase db push --include-all
 
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
