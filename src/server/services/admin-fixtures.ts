@@ -99,7 +99,17 @@ export async function previewFixtures(
     source: FIXTURES_SOURCE.name,
     season,
     round,
-    rows: plan.rows.map(({ homeClubId: _h, awayClubId: _a, ...row }) => row),
+    rows: plan.rows.map((row) => ({
+      key: row.key,
+      fixture: row.fixture,
+      homeName: row.homeName,
+      awayName: row.awayName,
+      action: row.action,
+      current: row.current,
+      next: row.next,
+      matchId: row.matchId,
+      notes: row.notes,
+    })),
     extra: plan.extra,
   };
 }

@@ -36,7 +36,6 @@ export const en: MessagesShape<typeof ru> = {
   landing: {
     lead: "Sign up in 2 clicks and join the football predictions tournament.",
     cta: "Sign in with Telegram",
-    ctaNote: "No passwords, no email. Fast, safe, free.",
     upcomingTitle: "Upcoming matches",
     allMatches: "All matches",
     predict: "Make a prediction",
@@ -54,7 +53,7 @@ export const en: MessagesShape<typeof ru> = {
       lead: "Top the standings",
       free: "Free",
     },
-    faqTitle: "Questions? Answers.",
+    faqTitle: "Questions?\nAnswers.",
     faq: [
       {
         q: "What is Da Zabey?",
