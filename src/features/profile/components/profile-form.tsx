@@ -93,7 +93,7 @@ export function ProfileForm({
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex max-w-xl flex-col gap-4">
+    <form onSubmit={onSubmit} noValidate className="flex w-full flex-col gap-4">
       <TextField
         id="profile-nickname"
         label={t.profile.nickname}

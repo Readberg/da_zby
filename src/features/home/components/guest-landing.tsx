@@ -64,7 +64,6 @@ function Hero() {
         {t.cta}
         <ArrowRightIcon className="h-5 w-5" />
       </Link>
-      <p className="text-sm text-muted">{t.ctaNote}</p>
     </section>
   );
 }
@@ -348,7 +347,12 @@ function Faq() {
       className="grid gap-8 py-4 lg:grid-cols-[1fr_1.4fr] lg:gap-16"
     >
       <h2 id="faq-title" className="font-display text-5xl uppercase leading-none sm:text-6xl">
-        {t.faqTitle}
+        {/* Two lines: the question and the answer. */}
+        {t.faqTitle.split("\n").map((line) => (
+          <span key={line} className="block">
+            {line}{" "}
+          </span>
+        ))}
       </h2>
       <FaqList items={t.faq} />
     </section>

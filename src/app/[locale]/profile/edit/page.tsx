@@ -51,17 +51,19 @@ export default async function EditProfilePage(props: PageProps<"/[locale]/profil
   await initLocale(props.params);
   const t = getMessages();
   return (
-    <Container className="flex flex-col gap-4 py-8 sm:py-12">
-      <Link
-        href="/profile"
-        className="inline-flex min-h-11 w-fit items-center text-muted underline-offset-4 hover:text-ink hover:underline"
-      >
-        ← {t.profile.back}
-      </Link>
-      <h1 className="text-h3 sm:text-h1">{t.profile.editTitle}</h1>
-      <Suspense fallback={<Skeleton className="h-96 max-w-xl" />}>
-        <EditContent />
-      </Suspense>
+    <Container className="flex flex-col items-center py-8 sm:py-12">
+      <div className="flex w-full max-w-xl flex-col gap-4">
+        <Link
+          href="/profile"
+          className="inline-flex min-h-11 w-fit items-center text-muted underline-offset-4 hover:text-ink hover:underline"
+        >
+          ← {t.profile.back}
+        </Link>
+        <h1 className="text-h3 sm:text-h1">{t.profile.editTitle}</h1>
+        <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+          <EditContent />
+        </Suspense>
+      </div>
     </Container>
   );
 }

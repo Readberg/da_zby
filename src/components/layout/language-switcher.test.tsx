@@ -21,36 +21,77 @@ function setup(locale: "ru" | "en") {
   return reload;
 }
 
+const trigger = () => screen.getByRole("button", { name: /Язык|Language/ });
+
 describe("LanguageSwitcher", () => {
   beforeEach(() => {
     document.cookie = "lang=; path=/; max-age=0";
     track.mockClear();
   });
 
-  it("shows the current language and names both in their own language", () => {
+  it("shows the current language on a closed button", () => {
     setup("ru");
-    const select = screen.getByRole("combobox", { name: "Язык" });
-    expect(select).toHaveValue("ru");
-    expect(screen.getByRole("option", { name: "Русский" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "English" })).toBeInTheDocument();
+    expect(trigger()).toHaveTextContent("Русский");
+    expect(trigger()).toHaveAccessibleName("Язык: Русский");
+    expect(trigger()).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("opens a menu with both languages named in their own language and marks the current one", async () => {
+    setup("ru");
+    await userEvent.click(trigger());
+    expect(trigger()).toHaveAttribute("aria-expanded", "true");
+    const items = screen.getAllByRole("menuitemradio");
+    expect(items.map((item) => item.textContent)).toEqual(["Русский", "English"]);
+    expect(items[0]).toBeChecked();
+    expect(items[1]).not.toBeChecked();
+    expect(items[0]).toHaveFocus();
   });
 
   it("saves the choice in a cookie, reports it and reloads the page", async () => {
     const reload = setup("ru");
-    await userEvent.selectOptions(screen.getByRole("combobox"), "en");
+    await userEvent.click(trigger());
+    await userEvent.click(screen.getByRole("menuitemradio", { name: "English" }));
     expect(document.cookie).toContain("lang=en");
     expect(track).toHaveBeenCalledWith("language-change", { language: "en" });
     expect(reload).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("works with the keyboard: arrows move, Enter picks, Escape closes and returns focus", async () => {
+    const reload = setup("ru");
+    trigger().focus();
+    await userEvent.keyboard("{Enter}");
+    await userEvent.keyboard("{ArrowDown}");
+    expect(screen.getByRole("menuitemradio", { name: "English" })).toHaveFocus();
+    await userEvent.keyboard("{ArrowDown}");
+    expect(screen.getByRole("menuitemradio", { name: "Русский" })).toHaveFocus();
+
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    expect(trigger()).toHaveFocus();
+    expect(reload).not.toHaveBeenCalled();
+
+    await userEvent.keyboard("{Enter}{ArrowDown}{Enter}");
+    expect(reload).toHaveBeenCalledOnce();
+  });
+
+  it("closes on a click outside", async () => {
+    setup("ru");
+    await userEvent.click(trigger());
+    await userEvent.click(document.body);
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 
   it("labels itself in the page's language", () => {
     setup("en");
-    expect(screen.getByRole("combobox", { name: "Language" })).toHaveValue("en");
+    expect(trigger()).toHaveAccessibleName("Language: English");
   });
 
   it("does nothing when the current language is picked again", async () => {
     const reload = setup("en");
-    await userEvent.selectOptions(screen.getByRole("combobox"), "en");
+    await userEvent.click(trigger());
+    await userEvent.click(screen.getByRole("menuitemradio", { name: "English" }));
     expect(reload).not.toHaveBeenCalled();
     expect(document.cookie).not.toContain("lang=");
   });
