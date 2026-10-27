@@ -13,7 +13,7 @@ export const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://i.ytimg.com https://*.supabase.co",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://cloud.umami.is https://gateway.umami.is",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cloud.umami.is https://gateway.umami.is",
   "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
   "media-src 'self'",
   "object-src 'none'",

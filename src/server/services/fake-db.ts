@@ -32,9 +32,11 @@ export function fakeDb(
     for (const method of [
       "select",
       "insert",
+      "upsert",
       "update",
       "delete",
       "eq",
+      "gt",
       "in",
       "or",
       "order",
@@ -42,7 +44,7 @@ export function fakeDb(
     ]) {
       chain[method] = (...args: unknown[]) => {
         log(method, args);
-        if (method === "insert" || method === "update" || method === "delete") write = true;
+        if (["insert", "upsert", "update", "delete"].includes(method)) write = true;
         return chain;
       };
     }

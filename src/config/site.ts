@@ -24,6 +24,7 @@ export const siteConfig = {
     { id: "home", href: "/" },
     { id: "predictions", href: "/predictions" },
     { id: "rating", href: "/rating" },
+    { id: "chat", href: "/chat" },
   ],
 } as const;
 
