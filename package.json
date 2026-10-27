@@ -1,6 +1,6 @@
 {
   "name": "da-zby",
-  "version": "0.25.0",
+  "version": "0.26.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,7 +19,8 @@
     "db:check": "tsx --env-file=.env.local scripts/check-schema.ts",
     "db:copy-catalog": "tsx scripts/copy-catalog.ts",
     "perf:scale": "tsx scripts/scale-check.ts",
-    "release": "tsx scripts/release.ts"
+    "release": "tsx scripts/release.ts",
+    "seed:rating-users": "tsx scripts/seed-rating-users.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

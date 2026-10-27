@@ -42,7 +42,7 @@ describe("Home page (landing)", () => {
 
   it("answers the common questions, the first one open", async () => {
     render(await Home(props));
-    expect(screen.getByRole("heading", { level: 2, name: "Вопросы? Ответы." })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 2, name: /Вопросы[?] ?Ответы[.]/ })).toBeVisible();
     const questions = screen
       .getAllByRole("button", { expanded: false })
       .concat(screen.getAllByRole("button", { expanded: true }));

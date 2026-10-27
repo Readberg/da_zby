@@ -65,9 +65,10 @@ test.describe("English interface (D-088)", () => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
 
-    await page.getByRole("combobox", { name: "Язык" }).selectOption("en");
+    await page.getByRole("button", { name: "Язык: Русский" }).click();
+    await page.getByRole("menuitemradio", { name: "English" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByRole("combobox", { name: "Language" })).toHaveValue("en");
+    await expect(page.getByRole("button", { name: "Language: English" })).toBeVisible();
     expect(new URL(page.url()).pathname).toBe("/");
 
     // The choice survives a navigation and a reload.
@@ -76,7 +77,8 @@ test.describe("English interface (D-088)", () => {
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
-    await page.getByRole("combobox", { name: "Language" }).selectOption("ru");
+    await page.getByRole("button", { name: "Language: English" }).click();
+    await page.getByRole("menuitemradio", { name: "Русский" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Рейтинг");
   });

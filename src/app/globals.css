@@ -222,6 +222,22 @@ html[data-ready] .site-loader {
   }
 }
 
+/*
+ * While the cover is up the page behind it is not drawn at all: a streamed page grows as its parts
+ * arrive, and every such move counts as a layout shift even though nobody sees it (D-095). Hidden
+ * elements are not measured; they appear together with the lifted cover, already in place. The same
+ * timer as the cover's makes them visible if the script never marks the page ready.
+ */
+html:not([data-ready]) body > :not(.site-loader):not(script):not(noscript) {
+  visibility: hidden;
+  animation: site-content-failsafe 0.01s 6s forwards;
+}
+@keyframes site-content-failsafe {
+  to {
+    visibility: visible;
+  }
+}
+
 /* No grey flash on tap, no double-tap delay. */
 a,
 button,

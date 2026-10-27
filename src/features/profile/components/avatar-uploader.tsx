@@ -76,7 +76,7 @@ export function AvatarUploader({ userId, nickname, currentUrl, currentPath }: Pr
   }
 
   return (
-    <section aria-labelledby="avatar-title" className="flex max-w-xl flex-col gap-3">
+    <section aria-labelledby="avatar-title" className="flex w-full flex-col gap-3">
       <h2 id="avatar-title" className="text-lg">
         {t.avatar.title}
       </h2>

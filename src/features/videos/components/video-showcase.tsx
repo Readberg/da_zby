@@ -34,10 +34,13 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
 
   return (
     <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[2fr_1fr] lg:items-start">
-      <article className="flex flex-col gap-3" aria-labelledby="current-video-title">
+      <article
+        className="flex flex-col gap-4 rounded-lg bg-surface p-3 shadow-soft sm:p-4"
+        aria-labelledby="current-video-title"
+      >
         <div
           ref={playerRef}
-          className="relative aspect-video w-full scroll-mt-4 overflow-hidden rounded-lg bg-black shadow-soft"
+          className="relative aspect-video w-full scroll-mt-4 overflow-hidden rounded-md bg-black"
         >
           <iframe
             key={selected.id}
@@ -49,10 +52,13 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
             className="absolute inset-0 h-full w-full"
           />
         </div>
-        <h2 id="current-video-title" className="text-lg normal-case sm:text-h3 sm:uppercase">
+        <h2
+          id="current-video-title"
+          className="px-1 text-lg normal-case sm:px-2 sm:text-h3 sm:uppercase"
+        >
           {selected.title}
         </h2>
-        <p className="flex flex-wrap items-center gap-x-4 text-sm text-muted">
+        <p className="flex flex-wrap items-center gap-x-4 px-1 text-sm text-muted sm:px-2">
           <time dateTime={selected.publishedAt}>
             {formatDate(selected.publishedAt, undefined, locale)}
           </time>
@@ -80,7 +86,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
                   type="button"
                   onClick={() => play(video.id)}
                   className={cx(
-                    "group flex w-full flex-col gap-2 text-left lg:flex-row lg:items-start",
+                    "group flex w-full cursor-pointer flex-col gap-3 rounded-lg bg-surface p-3 text-left shadow-soft ring-2 ring-transparent transition-shadow duration-200 hover:ring-accent focus-visible:ring-accent lg:flex-row lg:items-start",
                   )}
                 >
                   <span className="relative aspect-video w-full shrink-0 overflow-hidden rounded-md bg-line lg:w-40">
@@ -92,7 +98,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
                       className="object-cover transition-transform group-hover:scale-105"
                     />
                   </span>
-                  <span className="flex flex-col gap-1">
+                  <span className="flex min-w-0 flex-col gap-1 px-1 pb-1 lg:px-0 lg:pb-0">
                     <span className="line-clamp-3 font-semibold group-hover:underline">
                       {video.title}
                     </span>

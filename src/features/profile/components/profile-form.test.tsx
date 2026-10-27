@@ -68,6 +68,22 @@ describe("ProfileForm", () => {
     expect(refresh).toHaveBeenCalled();
   });
 
+  it("saves through the admin endpoint when an admin edits somebody else", async () => {
+    render(<ProfileForm initial={initial} countries={countries} adminTarget="user-42" />);
+    await userEvent.type(screen.getByLabelText("Город"), "Брест");
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+
+    expect(api).toHaveBeenCalledOnce();
+    expect(api).toHaveBeenCalledWith("/admin/users/profile", {
+      method: "PATCH",
+      json: {
+        userId: "user-42",
+        patch: expect.objectContaining({ nickname: "Readberg", city: "Брест" }),
+      },
+    });
+    expect(api).not.toHaveBeenCalledWith("/me", expect.anything());
+  });
+
   it("changes the nickname and rejects an invalid one before calling the API", async () => {
     render(<ProfileForm initial={initial} countries={countries} />);
     const field = screen.getByLabelText("Ник");

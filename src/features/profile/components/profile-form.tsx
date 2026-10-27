@@ -28,9 +28,12 @@ const ABOUT_MAX = 1000;
 export function ProfileForm({
   initial,
   countries,
+  adminTarget,
 }: {
   initial: ProfileFormValues;
   countries: { code: string; name: string }[];
+  /** Set when an admin edits somebody else: the id of that participant (D-094). */
+  adminTarget?: string;
 }) {
   const t = useMessages();
   const locale = useLocale();
@@ -76,7 +79,14 @@ export function ProfileForm({
     setErrors({});
     setStatus("saving");
     try {
-      await api("/me", { method: "PATCH", json: payload });
+      if (adminTarget) {
+        await api("/admin/users/profile", {
+          method: "PATCH",
+          json: { userId: adminTarget, patch: payload },
+        });
+      } else {
+        await api("/me", { method: "PATCH", json: payload });
+      }
       setStatus("saved");
       router.refresh();
     } catch (cause) {
@@ -93,7 +103,7 @@ export function ProfileForm({
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex max-w-xl flex-col gap-4">
+    <form onSubmit={onSubmit} noValidate className="flex w-full flex-col gap-4">
       <TextField
         id="profile-nickname"
         label={t.profile.nickname}

@@ -34,7 +34,7 @@ export function LatestVideosSkeleton() {
       <Skeleton className="aspect-video w-full" />
       <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-1">
         {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="aspect-video w-full lg:h-24 lg:aspect-auto" />
+          <Skeleton key={i} className="aspect-video w-full lg:aspect-auto lg:h-28" />
         ))}
       </div>
     </div>
