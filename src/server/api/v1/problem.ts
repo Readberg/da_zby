@@ -21,6 +21,8 @@ export const ERROR_CODES = {
   seasonClosed: "admin.season_closed",
   seasonState: "admin.season_state",
   predictionsClosed: "predictions.closed",
+  chatBanned: "chat.banned",
+  chatNoNickname: "chat.no_nickname",
   degraded: "system.degraded",
   fixturesUnavailable: "fixtures.unavailable",
 } as const;
