@@ -16,6 +16,8 @@ test("header and footer are present and fit the screen", async ({ page }) => {
 test("unknown pages show the 404 page with a link home", async ({ page }) => {
   const response = await page.goto("/no-such-page");
   expect(response?.status()).toBe(404);
+  // The 404 shell is drawn by the browser (inline scripts do not run there): the cover must still lift soon.
+  await expect(page.locator("html")).toHaveAttribute("data-ready", "", { timeout: 3000 });
   await expect(page.getByRole("heading", { name: "Страница не найдена" })).toBeVisible();
   await page.getByRole("link", { name: "На главную", exact: true }).click();
   await expect(page).toHaveURL("/");

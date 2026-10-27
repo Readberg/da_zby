@@ -31,7 +31,7 @@ export function SiteLoader() {
       </div>
       <script dangerouslySetInnerHTML={{ __html: READY_SCRIPT }} />
       <noscript>
-        <style>{".site-loader{display:none!important}"}</style>
+        <style>{".site-loader{display:none!important}body>*{visibility:visible!important}"}</style>
       </noscript>
     </>
   );

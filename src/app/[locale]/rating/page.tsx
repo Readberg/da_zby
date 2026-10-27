@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,6 +29,8 @@ async function RatingContent({
 }) {
   const locale = getLocale();
   const t = getMessages();
+  // The page compares the deadline with the clock: request time, not part of the prerendered shell.
+  await connection();
   const params = await searchParams;
   const tourNumber = Number(firstParam(params.tour));
   // The shared table comes from the cache; who is looking is worked out per request, in parallel.

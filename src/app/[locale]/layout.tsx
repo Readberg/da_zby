@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { siteConfig } from "@/config/site";
 import { publicEnv } from "@/lib/env";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
+import { CoverRelease } from "@/components/layout/cover-release";
 import { ErrorReporter } from "@/components/layout/error-reporter";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteLoader } from "@/components/layout/site-loader";
@@ -74,6 +75,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
       <body className="flex min-h-full flex-col bg-bg text-ink">
         <MessagesProvider locale={locale} messages={clientDictionary(locale)}>
           <SiteLoader />
+          <CoverRelease />
           <HydrationMark />
           <ErrorReporter />
           {/* First stop of the keyboard: jumps over the header to the page. */}
