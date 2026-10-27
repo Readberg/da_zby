@@ -87,6 +87,8 @@ export const ru = {
   home: {
     memberTitle: "Ближайший тур",
     headline: "Футбол интереснее, когда ты в игре",
+    /** The part of the headline set in the accent colour (one phrase, as in the brief). */
+    headlineAccent: "когда ты в игре",
     ctaUser: "Сделать прогноз",
     soonTitle: "Скоро начнём",
     soonText: "Ближайший тур появится здесь, как только мы заведём матчи. Заходите позже.",
