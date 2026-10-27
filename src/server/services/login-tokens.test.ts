@@ -147,7 +147,7 @@ describe("the bot conversation", () => {
     expect(bot.sendMessage).toHaveBeenCalledOnce();
     const [chatId, text, buttons] = bot.sendMessage.mock.calls[0]!;
     expect(chatId).toBe(7);
-    expect(text).toBe(botTexts.choose);
+    expect(text).toBe(botTexts.ru.choose);
     expect(buttons).toHaveLength(3);
     const list = buttons as { text: string; data: string }[];
     expect(new Set(list.map((b) => b.text)).size).toBe(3);
@@ -179,8 +179,8 @@ describe("the bot conversation", () => {
       telegram_username: "roma",
       first_name: "Roma",
     });
-    expect(bot.answerCallback).toHaveBeenCalledWith("cb1", botTexts.doneToast);
-    expect(bot.editMessage).toHaveBeenCalledWith(7, 5, botTexts.done);
+    expect(bot.answerCallback).toHaveBeenCalledWith("cb1", botTexts.ru.doneToast);
+    expect(bot.editMessage).toHaveBeenCalledWith(7, 5, botTexts.ru.done);
     expect(await loginStatus(admin, token, NOW)).toBe("confirmed");
   });
 
@@ -204,7 +204,7 @@ describe("the bot conversation", () => {
     );
 
     expect(rows[0]!.telegram_id).toBeNull();
-    expect(bot.editMessage).toHaveBeenCalledWith(7, 5, botTexts.wrong);
+    expect(bot.editMessage).toHaveBeenCalledWith(7, 5, botTexts.ru.wrong);
     expect(await loginStatus(admin, token, later(1))).toBe("expired");
   });
 
@@ -217,13 +217,13 @@ describe("the bot conversation", () => {
       { message: { chat: { id: 7 }, text: `/start ${"z".repeat(43)}` } },
       NOW,
     );
-    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.expired);
+    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.ru.expired);
 
     await handleBotUpdate(admin, bot, { message: { chat: { id: 7 }, text: "привет" } }, NOW);
-    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.help);
+    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.ru.help);
 
     await handleBotUpdate(admin, bot, { message: { chat: { id: 7 }, text: "/start" } }, NOW);
-    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.help);
+    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.ru.help);
   });
 
   it("does not let a confirmed attempt be confirmed again by somebody else", async () => {
@@ -238,7 +238,7 @@ describe("the bot conversation", () => {
     await handleBotUpdate(admin, bot, callback(2, "b"), NOW);
 
     expect(rows[0]!.telegram_id).toBe("1");
-    expect(bot.answerCallback).toHaveBeenLastCalledWith("b", botTexts.staleToast);
+    expect(bot.answerCallback).toHaveBeenLastCalledWith("b", botTexts.ru.staleToast);
   });
 
   it("ignores malformed callback data", async () => {
@@ -295,5 +295,79 @@ describe("loginStatus and consumeLogin", () => {
 
     const late = await confirmed();
     expect(await consumeLogin(late.admin, late.token, later(601))).toBeNull();
+  });
+});
+
+describe("the bot speaks the language of the site (DAZBY-116)", () => {
+  async function english() {
+    const fake = fakeAdmin();
+    const attempt = await startLogin(fake.admin, NOW, "en");
+    return { ...fake, ...attempt };
+  }
+
+  it("remembers the site language of the attempt, Russian by default", async () => {
+    expect((await english()).rows[0]!.locale).toBe("en");
+    expect((await startedAttempt()).rows[0]!.locale).toBe("ru");
+  });
+
+  it("asks in English for an English attempt, whatever Telegram is set to", async () => {
+    const { admin, token } = await english();
+    const bot = fakeBot();
+    await handleBotUpdate(
+      admin,
+      bot,
+      {
+        message: {
+          chat: { id: 7 },
+          from: { id: 7, language_code: "ru" },
+          text: `/start ${token}`,
+        },
+      },
+      NOW,
+    );
+    expect(bot.sendMessage.mock.calls[0]![1]).toBe(botTexts.en.choose);
+  });
+
+  it("confirms and cancels in English", async () => {
+    const { admin, token, code } = await english();
+    const bot = fakeBot();
+    const prefix = hashToken(token).slice(0, 24);
+    const callback = (data: string) => ({
+      callback_query: {
+        id: "cb",
+        from: { id: 1 },
+        data,
+        message: { message_id: 5, chat: { id: 7 } },
+      },
+    });
+
+    const wrong = code === "10" ? "11" : "10";
+    await handleBotUpdate(admin, bot, callback(`c:${prefix}:${wrong}`), NOW);
+    expect(bot.editMessage).toHaveBeenLastCalledWith(7, 5, botTexts.en.wrong);
+
+    const second = await english();
+    const secondPrefix = hashToken(second.token).slice(0, 24);
+    await handleBotUpdate(second.admin, bot, callback(`c:${secondPrefix}:${second.code}`), NOW);
+    expect(bot.answerCallback).toHaveBeenLastCalledWith("cb", botTexts.en.doneToast);
+    expect(bot.editMessage).toHaveBeenLastCalledWith(7, 5, botTexts.en.done);
+  });
+
+  it("without a live attempt it follows Telegram's own language", async () => {
+    const { admin } = fakeAdmin();
+    const bot = fakeBot();
+    const say = (language_code?: string) =>
+      handleBotUpdate(
+        admin,
+        bot,
+        { message: { chat: { id: 7 }, from: { id: 7, language_code }, text: "hi" } },
+        NOW,
+      );
+
+    await say("en-GB");
+    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.en.help);
+    await say("be");
+    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.ru.help);
+    await say(undefined);
+    expect(bot.sendMessage).toHaveBeenLastCalledWith(7, botTexts.ru.help);
   });
 });

@@ -56,6 +56,7 @@ export type Database = {
           expires_at: string;
           first_name: string | null;
           last_name: string | null;
+          locale: string;
           telegram_id: string | null;
           telegram_username: string | null;
           token_hash: string;
@@ -68,6 +69,7 @@ export type Database = {
           expires_at?: string;
           first_name?: string | null;
           last_name?: string | null;
+          locale?: string;
           telegram_id?: string | null;
           telegram_username?: string | null;
           token_hash: string;
@@ -80,6 +82,7 @@ export type Database = {
           expires_at?: string;
           first_name?: string | null;
           last_name?: string | null;
+          locale?: string;
           telegram_id?: string | null;
           telegram_username?: string | null;
           token_hash?: string;
