@@ -12,7 +12,7 @@ import {
 
 /**
  * Accessibility (WCAG 2.1 A and AA, axe-core) of the pages that need a session, with real data on
- * them: the member's home, profile, predictions and rating; the whole admin. Both themes.
+ * them: the member's home, profile, predictions and rating; the whole admin. One (dark) theme, D-106.
  * Test data is named `E2E …` / `e2e-…` and removed afterwards (D-078).
  */
 test.describe("accessibility of signed-in pages (needs SUPABASE_SECRET_KEY)", () => {
@@ -76,11 +76,8 @@ test.describe("accessibility of signed-in pages (needs SUPABASE_SECRET_KEY)", ()
     for (const user of [member, boss]) if (user) await deleteTestUser(user);
   });
 
-  for (const scheme of ["light", "dark"] as const) {
-    test(`the member's pages have no violations (${scheme} theme)`, async ({ page }, testInfo) => {
-      // Contrast depends on the theme, not on the width: on a phone the dark theme is enough.
-      test.skip(testInfo.project.name === "mobile" && scheme === "light", "covered on the desktop");
-      await page.emulateMedia({ colorScheme: scheme });
+  {
+    test(`the member's pages have no violations`, async ({ page }) => {
       await signInAs(page, member, "/");
       for (const path of [
         "/",
@@ -93,12 +90,11 @@ test.describe("accessibility of signed-in pages (needs SUPABASE_SECRET_KEY)", ()
       }
     });
 
-    test(`the admin pages have no violations (${scheme} theme)`, async ({ page }, testInfo) => {
+    test(`the admin pages have no violations`, async ({ page }, testInfo) => {
       test.skip(
         testInfo.project.name !== "desktop",
         "the admin is a desktop tool; one run is enough",
       );
-      await page.emulateMedia({ colorScheme: scheme });
       await signInAs(page, boss, "/admin");
       for (const path of [
         "/admin/tournaments",

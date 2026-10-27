@@ -23,8 +23,8 @@ export function Card({
   return (
     <Tag
       className={cx(
-        "rounded-lg p-5 shadow-soft sm:p-8",
-        accent ? "bg-black text-white" : "bg-surface text-ink",
+        "rounded-lg border p-5 sm:p-8",
+        accent ? "border-accent/40 bg-black text-white" : "border-line bg-surface text-ink",
         interactive &&
           "ring-2 ring-transparent transition-shadow duration-200 hover:ring-accent group-hover:ring-accent",
         className,

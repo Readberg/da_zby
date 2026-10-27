@@ -16,7 +16,6 @@ export const dictionaries: Record<Locale, Dictionary> = { ru, en };
  */
 export const CLIENT_SECTIONS = [
   "common",
-  "theme",
   "footer",
   "notFound",
   "error",
