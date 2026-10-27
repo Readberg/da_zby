@@ -5,8 +5,8 @@ export type Routing =
   | { kind: "redirect"; path: string }
   | { kind: "rewrite"; path: string; locale: Locale };
 
-/** Paths that are not pages: route handlers keep their addresses. */
-const NOT_PAGES = /^\/(api|auth)(\/|$)/;
+/** Paths that are not pages: route handlers and generated preview images keep their addresses. */
+const NOT_PAGES = /^\/(api|auth)(\/|$)|\/opengraph-image/;
 /** The admin section is Russian only (D-088): the cookie does not apply there. */
 const RUSSIAN_ONLY = /^\/admin(\/|$)/;
 
