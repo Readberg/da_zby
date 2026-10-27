@@ -30,14 +30,14 @@ function iso(value: string | null): string | null {
   return value ? new Date(value).toISOString() : null;
 }
 
-async function loadTour(db: Db, tourId: string): Promise<Tables<"tours">> {
+export async function loadTour(db: Db, tourId: string): Promise<Tables<"tours">> {
   const { data, error } = await db.from("tours").select("*").eq("id", tourId).maybeSingle();
   if (error) throw error;
   if (!data) throw notFound("Tour");
   return data;
 }
 
-async function rosterIds(db: Db, seasonId: string): Promise<string[]> {
+export async function rosterIds(db: Db, seasonId: string): Promise<string[]> {
   const { data, error } = await db.from("season_clubs").select("club_id").eq("season_id", seasonId);
   if (error) throw error;
   return (data ?? []).map((row) => row.club_id);

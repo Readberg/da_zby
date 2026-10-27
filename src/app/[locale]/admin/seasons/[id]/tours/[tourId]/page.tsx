@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FixtureImport } from "@/features/admin/components/fixture-import";
 import { MatchForm } from "@/features/admin/components/match-form";
 import { TourForm } from "@/features/admin/components/tour-forms";
 import { formatDateTime } from "@/lib/local-time";
@@ -70,6 +71,12 @@ async function TourContent({
           disabled={closed}
         />
       </Card>
+
+      {!closed && (
+        <Card title={ru.admin.fixtures.title}>
+          <FixtureImport tourId={tour.id} tourNumber={tour.number} offsetMinutes={offset} />
+        </Card>
+      )}
 
       {!closed && (
         <Card title={ru.admin.matches.newTitle}>

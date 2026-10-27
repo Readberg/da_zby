@@ -114,6 +114,7 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 - `POST /admin/seasons/close|reopen|recalculate`: закрыть (фиксирует итоговые места), откатить закрытие, пересчитать очки. Неверное состояние — 409 `admin.season_state`.
 - Закрытый сезон только для чтения: любые правки составa, туров и матчей — 409 `admin.season_closed`.
 - `POST|PATCH|DELETE /admin/tours`, `GET /admin/tour?tourId=`: туры (номер по умолчанию — следующий, ручной дедлайн `deadlineOverride`). Тур с матчами не удаляется (409 `admin.in_use`).
+- `GET|POST /admin/fixtures` (admin): импорт расписания и результатов тура из TheSportsDB (D-090). `GET ?tourId=&round=` — предпросмотр (по каждому матчу: `create` / `update` / `same` / `blocked` с причиной; ничего не пишется); `POST { tourId, round?, keys }` — применить подтверждённые строки (источник читается заново, клиент передаёт только ключи). Сбой источника — 502 `fixtures.unavailable`.
 - `POST|PATCH|DELETE /admin/matches`: матч (клубы только из состава сезона, `kickoffAt` — момент времени в UTC). Результат: `status: finished` + `homeScore`/`awayScore` (итог с доп. временем, без пенальти); другой статус обнуляет счёт. Очки считает триггер БД. Матч с прогнозами не удаляется — ставьте «отменён».
 
 ### Вход через Telegram (D-056)
