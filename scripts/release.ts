@@ -58,6 +58,17 @@ function parse(argv: string[]) {
 /** Waits until every check of the PR has finished; throws unless all of them passed. */
 function waitForGreen(pr: string) {
   console.log(`… waiting for checks of ${pr}`);
+  // Right after the PR is created GitHub has not registered its checks yet: wait until they appear.
+  for (let attempt = 0; attempt < 30; attempt++) {
+    let started = false;
+    try {
+      started = (JSON.parse(gh("pr", "checks", pr, "--json", "name")) as unknown[]).length > 0;
+    } catch {
+      // "no checks reported" exits non-zero: not there yet.
+    }
+    if (started) break;
+    execFileSync(process.execPath, ["-e", "setTimeout(() => {}, 10000)"]);
+  }
   try {
     gh("pr", "checks", pr, "--watch", "--interval", "20");
   } catch {
