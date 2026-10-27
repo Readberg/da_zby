@@ -10,6 +10,7 @@ import { ErrorReporter } from "@/components/layout/error-reporter";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteLoader } from "@/components/layout/site-loader";
 import { HydrationMark } from "@/features/home/components/home-fallback";
+import { ChatDockGate } from "@/features/chat/components/chat-dock-gate";
 import { SiteHeader } from "@/components/layout/site-header";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { LOCALES, isLocale } from "@/i18n/config";
@@ -93,6 +94,9 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
             {children}
           </main>
           <SiteFooter />
+          <Suspense fallback={null}>
+            <ChatDockGate />
+          </Suspense>
           {siteConfig.analytics.websiteId && (
             <Script
               defer
