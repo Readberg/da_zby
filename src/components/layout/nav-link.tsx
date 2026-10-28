@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
 
 const base =
-  "inline-flex min-h-11 items-center rounded-sm px-3 text-base font-semibold transition-colors duration-200 sm:px-4";
+  "inline-flex min-h-11 items-center rounded-sm px-3 text-base font-semibold transition-colors duration-200 lg:px-4";
 
 /** Navigation link that marks the current page. Needs a <Suspense> boundary around it. */
 type NavLinkProps = { href: string; children: ReactNode; prefetch?: boolean };
