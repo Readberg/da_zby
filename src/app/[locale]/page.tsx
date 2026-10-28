@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/container";
 import { Loader } from "@/components/ui/loader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GuestLanding } from "@/features/home/components/guest-landing";
-import { HomeFallback } from "@/features/home/components/home-fallback";
+import { GuestSlot, SessionKnown } from "@/features/home/components/home-fallback";
 import { MemberAction, NextTour } from "@/features/home/components/next-tour";
 import { Leaders } from "@/features/home/components/leaders";
 import { LatestVideos, LatestVideosSkeleton } from "@/features/videos/components/latest-videos";
@@ -63,27 +63,33 @@ function MemberHome() {
   );
 }
 
-async function HomeBody() {
+/** Reports the session to the landing and, for a signed-in visitor, adds the member home. */
+async function MemberSwitch() {
   const user = await getCurrentUser();
-  return user ? <MemberHome /> : <GuestLanding videos={<Videos />} />;
+  if (!user) return <SessionKnown member={false} />;
+  return (
+    <>
+      <SessionKnown member />
+      <MemberHome />
+    </>
+  );
 }
 
 /**
- * Guests get the landing (it is also the static shell, so search engines and link previews see it);
- * signed-in visitors get the member home once the session is known.
+ * Guests get the landing (it is the static shell, sent once, so search engines and link previews
+ * see it); signed-in visitors get the member home once the session is known (DAZBY-125).
  */
 export default async function Home(props: PageProps<"/[locale]">) {
   await initLocale(props.params);
   return (
-    <Suspense
-      fallback={
-        <HomeFallback
-          guest={<GuestLanding videos={<Videos />} />}
-          loader={<Loader className="m-8 min-h-96 flex-1" showLabel />}
-        />
-      }
-    >
-      <HomeBody />
-    </Suspense>
+    <>
+      <GuestSlot
+        guest={<GuestLanding videos={<Videos />} />}
+        loader={<Loader className="m-8 min-h-96 flex-1" showLabel />}
+      />
+      <Suspense fallback={null}>
+        <MemberSwitch />
+      </Suspense>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/services/videos.server", () => ({
   videosService: { getLatestVideos: vi.fn(() => new Promise(() => {})) },
@@ -20,6 +20,18 @@ const props = {
 } as Parameters<typeof Home>[0];
 
 describe("Home page (landing)", () => {
+  // On the first load the server-rendered landing is already in the document: that is how the page
+  // tells the first load from a navigation inside the app (which shows a loader instead).
+  beforeEach(() => {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<div id="ssr-landing" data-home-guest hidden></div>',
+    );
+  });
+  afterEach(() => {
+    document.getElementById("ssr-landing")?.remove();
+  });
+
   it("states what the site is and offers one main action while data is loading", async () => {
     render(await Home(props));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
