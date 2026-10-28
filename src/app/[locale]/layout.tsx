@@ -10,7 +10,6 @@ import { CoverRelease } from "@/components/layout/cover-release";
 import { ErrorReporter } from "@/components/layout/error-reporter";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteLoader } from "@/components/layout/site-loader";
-import { HydrationMark } from "@/features/home/components/home-fallback";
 import { ChatDockGate } from "@/features/chat/components/chat-dock-gate";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LOCALES, isLocale } from "@/i18n/config";
@@ -61,7 +60,6 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
         <MessagesProvider locale={locale} messages={clientDictionary(locale)}>
           <SiteLoader />
           <CoverRelease />
-          <HydrationMark />
           <ErrorReporter />
           {/* First stop of the keyboard: jumps over the header to the page. */}
           <a
