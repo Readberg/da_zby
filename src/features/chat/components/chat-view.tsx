@@ -79,34 +79,47 @@ export function ChatView({
 
   useEffect(() => {
     const supabase = createClient();
-    const channel = supabase
-      .channel("common-chat")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages" },
-        (payload) => {
-          const message = messageFromRow(payload.new);
-          if (message) setMessages((current) => merge(current, [message]));
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "chat_messages" },
-        (payload) => {
-          const id = (payload.old as { id?: string }).id;
-          if (id) setMessages((current) => current.filter((m) => m.id !== id));
-        },
-      )
-      .subscribe((state) => {
-        if (state === "SUBSCRIBED") {
-          setStatus("live");
-          void reload();
-        } else if (state === "CLOSED" || state === "CHANNEL_ERROR" || state === "TIMED_OUT") {
-          setStatus("offline");
-        }
-      });
+    let channel: ReturnType<typeof supabase.channel> | undefined;
+    let cancelled = false;
+
+    void (async () => {
+      // Realtime checks the row policy with the token of the channel. A client that subscribes
+      // before it has read the session joins with the anonymous key and every event answers 401.
+      const { data } = await supabase.auth.getSession();
+      if (data.session) await supabase.realtime.setAuth(data.session.access_token);
+      if (cancelled) return;
+
+      channel = supabase
+        .channel("common-chat")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "chat_messages" },
+          (payload) => {
+            const message = messageFromRow(payload.new);
+            if (message) setMessages((current) => merge(current, [message]));
+          },
+        )
+        .on(
+          "postgres_changes",
+          { event: "DELETE", schema: "public", table: "chat_messages" },
+          (payload) => {
+            const id = (payload.old as { id?: string }).id;
+            if (id) setMessages((current) => current.filter((m) => m.id !== id));
+          },
+        )
+        .subscribe((state) => {
+          if (state === "SUBSCRIBED") {
+            setStatus("live");
+            void reload();
+          } else if (state === "CLOSED" || state === "CHANNEL_ERROR" || state === "TIMED_OUT") {
+            setStatus("offline");
+          }
+        });
+    })();
+
     return () => {
-      void supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) void supabase.removeChannel(channel);
     };
   }, [reload]);
 
