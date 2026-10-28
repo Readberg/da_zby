@@ -90,7 +90,9 @@ export function ChatView({
       if (cancelled) return;
 
       channel = supabase
-        .channel("common-chat")
+        // The server says when the database stream is ready: a message written between "subscribed"
+        // and "ready" is in neither, so the list is read again at that moment (DAZBY-130).
+        .channel("common-chat", { config: { broadcast: { replication_ready: true } } })
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "chat_messages" },
@@ -107,6 +109,9 @@ export function ChatView({
             if (id) setMessages((current) => current.filter((m) => m.id !== id));
           },
         )
+        .on("system", {}, (payload: { extension?: string; status?: string }) => {
+          if (payload.extension === "system" && payload.status === "ok") void reload();
+        })
         .subscribe((state) => {
           if (state === "SUBSCRIBED") {
             setStatus("live");

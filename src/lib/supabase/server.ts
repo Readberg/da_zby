@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { publicEnv } from "@/lib/env";
 import type { Database } from "@/types/database";
 
@@ -12,6 +13,9 @@ import type { Database } from "@/types/database";
  * user instead of the cookie session, so RLS sees the same person that `getUser(token)` verified.
  */
 export async function createClient(accessToken?: string) {
+  // A session check reads the clock (token expiry). That is request-time work: say so, otherwise
+  // Next.js reports an unstable value while prerendering for every signed-in page (DAZBY-129).
+  await connection();
   const cookieStore = await cookies();
 
   return createServerClient<Database>(

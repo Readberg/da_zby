@@ -8,7 +8,10 @@ const store = {
 };
 const createServerClient = vi.fn((_url: string, _key: string, options: unknown) => options);
 
+const connection = vi.fn(async () => {});
+
 vi.mock("next/headers", () => ({ cookies: async () => store }));
+vi.mock("next/server", () => ({ connection }));
 vi.mock("@supabase/ssr", () => ({ createServerClient }));
 vi.mock("@/lib/env", () => ({
   publicEnv: {
@@ -24,6 +27,12 @@ type Options = {
 };
 
 describe("server Supabase client", () => {
+  it("makes the render request-time work before it reads the session (DAZBY-129)", async () => {
+    connection.mockClear();
+    await createClient();
+    expect(connection).toHaveBeenCalledTimes(1);
+  });
+
   it("reads request cookies and tolerates read-only cookie stores", async () => {
     const options = (await createClient()) as unknown as Options;
 
