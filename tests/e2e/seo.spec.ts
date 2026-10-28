@@ -50,3 +50,13 @@ test("sitemap.xml and robots.txt are served", async ({ request }) => {
   expect(robots.status()).toBe(200);
   expect(await robots.text()).toContain("Disallow: /api/");
 });
+
+test("the landing is in the static HTML exactly once, without scripts (DAZBY-125)", async ({
+  request,
+}) => {
+  const html = await (await request.get("/")).text();
+  // One copy for search engines and previews: the session check must not send a second one.
+  expect(html.match(/id="landing-title"/g)).toHaveLength(1);
+  expect(html.match(/id="how"/g)).toHaveLength(1);
+  expect(html).toContain("когда ты в игре");
+});
