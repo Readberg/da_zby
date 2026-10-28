@@ -2,7 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { buttonClasses } from "@/components/ui/button";
 import { ClubLogo } from "@/components/ui/club-logo";
-import { formatDateTime } from "@/lib/local-time";
+import { formatDateTime, formatDayMonth, formatTimeOfDay } from "@/lib/local-time";
 import { getHomeCached } from "@/server/services/home.cached";
 import { composePredictionsPage } from "@/server/services/predictions";
 import { getMessages, getLocale } from "@/i18n/server";
@@ -32,7 +32,7 @@ export async function NextTour() {
           {tournament.name}
         </p>
         <h2 className="mt-1 text-h3 normal-case sm:text-h3">
-          {t.home.nextTour.replace("{n}", String(tour.number))}
+          {t.predictions.tourN.replace("{n}", String(tour.number))}
           {tour.title ? ` · ${tour.title}` : ""}
         </h2>
         <p className="mt-1 text-sm text-muted">
@@ -43,20 +43,31 @@ export async function NextTour() {
       </div>
       <ul className="flex flex-col divide-y divide-line">
         {matches.slice(0, 3).map((match) => (
-          <li key={match.id} className="flex items-center justify-between gap-3 py-3">
-            <span className="flex min-w-0 flex-1 items-center gap-2">
-              <ClubLogo src={match.home.logoUrl} name={match.home.name} size={28} />
-              <span className="truncate font-semibold">{match.home.name}</span>
-            </span>
-            <span className="shrink-0 text-center text-sm text-muted">
-              {match.status === "finished"
-                ? `${match.homeScore} : ${match.awayScore}`
-                : formatDateTime(match.kickoffAt, undefined, locale)}
-            </span>
-            <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
-              <span className="truncate text-right font-semibold">{match.away.name}</span>
-              <ClubLogo src={match.away.logoUrl} name={match.away.name} size={28} />
-            </span>
+          <li key={match.id} className="py-4">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
+              <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row-reverse sm:justify-start sm:gap-3 sm:text-right">
+                <ClubLogo src={match.home.logoUrl} name={match.home.name} size={40} />
+                <span className="min-w-0 break-words text-sm font-semibold leading-tight sm:text-base">
+                  {match.home.name}
+                </span>
+              </span>
+              <span className="flex flex-col items-center gap-1 text-center">
+                <span className="font-display text-2xl leading-none text-accent sm:text-3xl">
+                  {match.status === "finished"
+                    ? `${match.homeScore} : ${match.awayScore}`
+                    : formatTimeOfDay(match.kickoffAt, undefined, locale)}
+                </span>
+                <span className="text-xs text-muted">
+                  {formatDayMonth(match.kickoffAt, undefined, locale)}
+                </span>
+              </span>
+              <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row sm:gap-3 sm:text-left">
+                <ClubLogo src={match.away.logoUrl} name={match.away.name} size={40} />
+                <span className="min-w-0 break-words text-sm font-semibold leading-tight sm:text-base">
+                  {match.away.name}
+                </span>
+              </span>
+            </div>
           </li>
         ))}
       </ul>

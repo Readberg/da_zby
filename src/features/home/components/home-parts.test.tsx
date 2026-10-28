@@ -50,7 +50,8 @@ describe("MemberAction", () => {
 describe("NextTour", () => {
   it("shows the next tour with its deadline and the first three matches", async () => {
     render(await NextTour());
-    expect(screen.getByRole("heading", { name: /Ближайший тур · 7/ })).toBeVisible();
+    // The page title says "next tour"; the card only says which one.
+    expect(screen.getByRole("heading", { name: "Тур 7" })).toBeVisible();
     expect(screen.getByText("Высшая лига")).toBeVisible();
     expect(screen.getByText(/Приём прогнозов до/)).toBeVisible();
     expect(screen.getByText("Дом0")).toBeVisible();

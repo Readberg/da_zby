@@ -1,5 +1,5 @@
 import { type Page } from "@playwright/test";
-import { expect, test } from "./helpers/fixtures";
+import { expect, openMenu, test } from "./helpers/fixtures";
 
 /**
  * The home page streams: until the session is known the static copy (the guest landing) is in the
@@ -102,6 +102,7 @@ test.describe("landing (guest)", () => {
     const hero = page.getByRole("link", { name: "Войти через Telegram" });
     await expect(hero).toHaveAttribute("data-umami-event", "cta-click");
     await expect(hero).toHaveAttribute("data-umami-event-where", "hero");
+    await openMenu(page);
     const header = page.getByRole("banner").getByRole("link", { name: "Войти" });
     await expect(header).toHaveAttribute("data-umami-event-where", "header");
   });

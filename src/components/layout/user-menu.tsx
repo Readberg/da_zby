@@ -21,10 +21,9 @@ export async function UserMenu() {
         href="/login"
         data-umami-event="cta-click"
         data-umami-event-where="header"
-        aria-label={t.auth.login}
-        className={iconClass}
+        className={itemClass}
       >
-        <UserIcon className="h-6 w-6" />
+        {t.auth.login}
       </Link>
     );
   }

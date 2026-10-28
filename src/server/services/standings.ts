@@ -20,6 +20,8 @@ export type StandingsPageData = {
   /** Matches that are in the table / matches of the season that are still to be played or entered. */
   counted: number;
   total: number;
+  /** When the latest counted result was entered or changed (ISO); null while nothing is counted. */
+  updatedAt: string | null;
 };
 
 /**
@@ -64,6 +66,7 @@ export async function getStandingsPage(
     rows: [],
     counted: 0,
     total: 0,
+    updatedAt: null,
   };
   if (!season) return empty;
 
@@ -82,7 +85,7 @@ export async function getStandingsPage(
   if (tourIds.length === 0) return { ...empty, rows: computeStandings(clubs, []) };
   const matchesResult = await db
     .from("matches")
-    .select("home_club_id, away_club_id, home_score, away_score, status, kickoff_at")
+    .select("home_club_id, away_club_id, home_score, away_score, status, kickoff_at, updated_at")
     .in("tour_id", tourIds);
   if (matchesResult.error) throw matchesResult.error;
 
@@ -94,10 +97,25 @@ export async function getStandingsPage(
     status: m.status as StandingsMatch["status"],
     kickoffAt: m.kickoff_at,
   }));
+  const countedRows = (matchesResult.data ?? []).filter((m) =>
+    isCounted({
+      homeId: m.home_club_id,
+      awayId: m.away_club_id,
+      homeScore: m.home_score,
+      awayScore: m.away_score,
+      status: m.status as StandingsMatch["status"],
+      kickoffAt: m.kickoff_at,
+    }),
+  );
+  const updatedAt = countedRows.reduce<string | null>(
+    (latest, m) => (latest === null || m.updated_at > latest ? m.updated_at : latest),
+    null,
+  );
   return {
     ...empty,
     rows: computeStandings(clubs, matches),
     counted: matches.filter(isCounted).length,
     total: matches.filter((m) => m.status !== "cancelled").length,
+    updatedAt: updatedAt ? new Date(updatedAt).toISOString() : null,
   };
 }

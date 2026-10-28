@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   // Keeps the dev badge out of `pnpm design:snap` screenshots; errors still show in the overlay.
   devIndicators: false,
   images: {
+    // 75 is the default; 85 is for the large cover of the first video.
+    qualities: [75, 85],
     // YouTube video previews.
     remotePatterns: [
       new URL("https://i.ytimg.com/vi/**"),

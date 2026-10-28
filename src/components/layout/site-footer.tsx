@@ -43,7 +43,6 @@ export function SiteFooter() {
               height={64}
               className="h-16 w-16 transition-transform duration-300 hover:-rotate-6 hover:scale-110"
             />
-            <p className="max-w-xs text-sm">{m.site.tagline}</p>
           </div>
           {/* The target of the "Contact us" button of the ad block on the home page. */}
           <div id="contacts" className="flex scroll-mt-24 flex-col gap-2">

@@ -1,8 +1,9 @@
-import { expect, test } from "./helpers/fixtures";
+import { expect, openMenu, test } from "./helpers/fixtures";
 
 test.describe("guest and login", () => {
   test("header offers sign-in and it leads to the login page", async ({ page }) => {
     await page.goto("/");
+    await openMenu(page);
     await page.getByRole("banner").getByRole("link", { name: "Войти" }).click();
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole("heading", { level: 1, name: "Вход" })).toBeVisible();

@@ -1,4 +1,4 @@
-import { expect, test } from "./helpers/fixtures";
+import { expect, openMenu, test } from "./helpers/fixtures";
 
 test.describe("league table (guest, DAZBY-126)", () => {
   test("the page opens, is in the header and has no horizontal scroll", async ({ page }) => {
@@ -6,7 +6,10 @@ test.describe("league table (guest, DAZBY-126)", () => {
     page.on("pageerror", (err) => errors.push(err.message));
 
     await page.goto("/standings");
-    await expect(page.getByRole("heading", { level: 1, name: "Таблица" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Турнирная таблица чемпионата" }),
+    ).toBeVisible();
+    await openMenu(page);
     await expect(page.getByRole("banner").getByRole("link", { name: "Таблица" })).toBeVisible();
     // Either the table (a season exists) or an empty state: both are valid content.
     await expect(
@@ -28,11 +31,16 @@ test.describe("league table (guest, DAZBY-126)", () => {
     const table = page.getByRole("table", { name: "Турнирная таблица чемпионата" });
     test.skip((await table.count()) === 0, "no season with clubs on this stand");
     await expect(page.getByText(/Учтено матчей: \d+ из \d+/)).toBeVisible();
+    // When the table was last recalculated, and how often it is.
+    await expect(page.getByText(/Обновлено: .+\.|Результатов матчей пока нет\./)).toBeVisible();
+    await expect(page.getByText(/не реже раза в 30 минут/)).toBeVisible();
   });
 
   test("unknown parameters do not break the page", async ({ page }) => {
     const response = await page.goto("/standings?tournament=net-takogo&season=x");
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole("heading", { level: 1, name: "Таблица" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Турнирная таблица чемпионата" }),
+    ).toBeVisible();
   });
 });

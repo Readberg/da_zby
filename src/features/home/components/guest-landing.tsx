@@ -92,9 +92,16 @@ export async function UpcomingMatches() {
 
   return (
     <section aria-labelledby="upcoming-title" className="flex flex-col gap-6">
-      <h2 id="upcoming-title" className="text-h3 sm:text-h2">
-        {t.upcomingTitle}
-      </h2>
+      <div className="flex flex-col items-start gap-3">
+        <h2 id="upcoming-title" className="text-h3 sm:text-h2">
+          {t.upcomingTitle}
+        </h2>
+        {tournament && tour && matches.length > 0 && (
+          <p className="rounded-sm bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
+            {tournament.name} · {m.home.nextTour.replace("{n}", String(tour.number))}
+          </p>
+        )}
+      </div>
       {!tournament || !tour || matches.length === 0 ? (
         <div className="rounded-lg border border-line bg-surface p-5">
           <p className="font-semibold">{m.home.soonTitle}</p>
@@ -125,10 +132,7 @@ export async function UpcomingMatches() {
                     </span>
                   </span>
                 </div>
-                <p className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted">
-                  <span className="rounded-sm bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
-                    {tournament.name} · {m.home.nextTour.replace("{n}", String(tour.number))}
-                  </span>
+                <p className="mt-4 text-center text-sm text-muted">
                   <time dateTime={match.kickoffAt}>
                     {formatDayMonth(match.kickoffAt, undefined, locale)}
                   </time>
