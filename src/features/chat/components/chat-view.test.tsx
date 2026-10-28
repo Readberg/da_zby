@@ -1,9 +1,9 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClientError } from "@/lib/api-client";
 import type { ChatMessage } from "@/server/api/v1/schemas/chat";
-import { ChatView } from "./chat-view";
+import { CONNECT_CHECK_MS, ChatView } from "./chat-view";
 
 const api = vi.fn();
 vi.mock("@/lib/api-client", async (importOriginal) => ({
@@ -15,6 +15,7 @@ vi.mock("@/lib/avatar", () => ({ avatarUrl: () => null }));
 type Handler = (payload: { new?: unknown; old?: unknown }) => void;
 let handlers: Record<string, Handler>;
 let onStatus: (state: string) => void;
+let channelsOpened = 0;
 const order: string[] = [];
 const setAuth = vi.fn(async (token: string) => {
   order.push(`setAuth:${token}`);
@@ -34,7 +35,10 @@ vi.mock("@/lib/supabase/client", () => ({
       },
     };
     return {
-      channel: () => channel,
+      channel: () => {
+        channelsOpened += 1;
+        return channel;
+      },
       removeChannel: vi.fn(),
       auth: { getSession: async () => ({ data: { session: { access_token: "jwt-1" } } }) },
       realtime: { setAuth },
@@ -68,6 +72,7 @@ function renderChat(over: Partial<React.ComponentProps<typeof ChatView>> = {}) {
 beforeEach(() => {
   handlers = {};
   order.length = 0;
+  channelsOpened = 0;
   onStatus = undefined as never;
   setAuth.mockClear();
   api.mockReset().mockResolvedValue({ messages: [], banned: false });
@@ -164,6 +169,42 @@ describe("ChatView", () => {
     act(() => handlers.system!({ extension: "system", status: "error" } as never));
     act(() => handlers.system!({ extension: "postgres_changes", status: "ok" } as never));
     expect(api).not.toHaveBeenCalled();
+  });
+
+  describe("connection watchdog (DAZBY-130)", () => {
+    afterEach(() => vi.useRealTimers());
+
+    it("opens the channel again when it has not connected in time", async () => {
+      vi.useFakeTimers();
+      renderChat();
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      expect(channelsOpened).toBe(1);
+
+      await act(() => vi.advanceTimersByTimeAsync(CONNECT_CHECK_MS));
+      expect(channelsOpened).toBe(2);
+      expect(screen.getByText("Подключаемся…")).toBeInTheDocument();
+    });
+
+    it("leaves a connected channel alone", async () => {
+      vi.useFakeTimers();
+      renderChat();
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      act(() => onStatus("SUBSCRIBED"));
+
+      await act(() => vi.advanceTimersByTimeAsync(CONNECT_CHECK_MS * 3));
+      expect(channelsOpened).toBe(1);
+    });
+
+    it("opens the channel again after it dropped and stayed down", async () => {
+      vi.useFakeTimers();
+      renderChat();
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      act(() => onStatus("SUBSCRIBED"));
+      act(() => onStatus("CLOSED"));
+
+      await act(() => vi.advanceTimersByTimeAsync(CONNECT_CHECK_MS));
+      expect(channelsOpened).toBe(2);
+    });
   });
 
   it("goes live and reloads once the channel is subscribed", async () => {

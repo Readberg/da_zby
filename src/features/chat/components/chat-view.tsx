@@ -42,6 +42,9 @@ function merge(current: ChatMessage[], incoming: ChatMessage[], now = Date.now()
 
 type Status = "connecting" | "live" | "offline";
 
+/** How long the channel may stay unconnected before it is thrown away and opened again. */
+export const CONNECT_CHECK_MS = 10_000;
+
 export function ChatView({
   variant = "page",
   initial,
@@ -55,6 +58,8 @@ export function ChatView({
   const [messages, setMessages] = useState<ChatMessage[]>(() => merge([], initial.messages));
   const [banned, setBanned] = useState(initial.banned);
   const [status, setStatus] = useState<Status>("connecting");
+  // Bumped by the watchdog below: a new number runs the connection effect again with a fresh channel.
+  const [attempt, setAttempt] = useState(0);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +86,13 @@ export function ChatView({
     const supabase = createClient();
     let channel: ReturnType<typeof supabase.channel> | undefined;
     let cancelled = false;
+    let connected = false;
+
+    // A channel that never joins (or has dropped for good) would leave "Подключаемся…" on screen
+    // forever; supabase-js retries on its own, this is the net under it (DAZBY-130).
+    const watchdog = setInterval(() => {
+      if (!connected) setAttempt((n) => n + 1);
+    }, CONNECT_CHECK_MS);
 
     void (async () => {
       // Realtime checks the row policy with the token of the channel. A client that subscribes
@@ -113,6 +125,7 @@ export function ChatView({
           if (payload.extension === "system" && payload.status === "ok") void reload();
         })
         .subscribe((state) => {
+          connected = state === "SUBSCRIBED";
           if (state === "SUBSCRIBED") {
             setStatus("live");
             void reload();
@@ -124,9 +137,10 @@ export function ChatView({
 
     return () => {
       cancelled = true;
+      clearInterval(watchdog);
       if (channel) void supabase.removeChannel(channel);
     };
-  }, [reload]);
+  }, [reload, attempt]);
 
   // Messages leave the screen when their day is over, even if nothing else happens.
   useEffect(() => {
