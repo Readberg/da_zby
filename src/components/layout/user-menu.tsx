@@ -1,13 +1,16 @@
 import Link from "next/link";
-import { buttonClasses } from "@/components/ui/button";
 import { UserIcon } from "@/components/ui/icons";
 import { getCurrentUser } from "@/server/services/current-user";
 import { getMessages } from "@/i18n/server";
 
 const itemClass =
-  "inline-flex min-h-11 items-center rounded-sm px-3 text-base font-semibold text-ink transition-colors duration-200 hover:bg-surface-hover sm:px-4";
+  "inline-flex min-h-11 items-center rounded-sm px-3 text-sm font-semibold uppercase tracking-wide text-muted transition-colors duration-200 hover:bg-surface-hover hover:text-ink";
 
-/** Header slot: "Войти" for guests, nickname + sign-out for signed-in users. */
+/** The person icon: the way to the sign-in page or to the profile. */
+const iconClass =
+  "inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted transition-colors duration-200 hover:bg-surface-hover hover:text-ink";
+
+/** Header slot: the person icon for guests; for signed-in users the profile icon and sign-out. */
 export async function UserMenu() {
   const t = getMessages();
   const user = await getCurrentUser();
@@ -18,10 +21,10 @@ export async function UserMenu() {
         href="/login"
         data-umami-event="cta-click"
         data-umami-event-where="header"
-        className={buttonClasses("secondary", "gap-2 px-5")}
+        aria-label={t.auth.login}
+        className={iconClass}
       >
-        <UserIcon className="h-5 w-5" />
-        {t.auth.login}
+        <UserIcon className="h-6 w-6" />
       </Link>
     );
   }
@@ -33,9 +36,8 @@ export async function UserMenu() {
           {t.auth.adminPanel}
         </Link>
       )}
-      <Link href="/profile" className={buttonClasses("secondary", "gap-2 px-5")}>
-        <UserIcon className="h-5 w-5" />
-        {t.auth.profile}
+      <Link href="/profile" aria-label={t.auth.profile} className={iconClass}>
+        <UserIcon className="h-6 w-6" />
       </Link>
       <form action="/auth/signout" method="post">
         <button type="submit" className={itemClass}>

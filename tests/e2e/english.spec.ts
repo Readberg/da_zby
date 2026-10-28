@@ -65,10 +65,11 @@ test.describe("English interface (D-088)", () => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
 
-    await page.getByRole("button", { name: "Язык: Русский" }).click();
+    const footer = page.getByRole("contentinfo");
+    await footer.getByRole("button", { name: "Язык: Русский" }).click();
     await page.getByRole("menuitemradio", { name: "English" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByRole("button", { name: "Language: English" })).toBeVisible();
+    await expect(footer.getByRole("button", { name: "Language: English" })).toBeVisible();
     expect(new URL(page.url()).pathname).toBe("/");
 
     // The choice survives a navigation and a reload.
@@ -77,9 +78,23 @@ test.describe("English interface (D-088)", () => {
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
-    await page.getByRole("button", { name: "Language: English" }).click();
+    await footer.getByRole("button", { name: "Language: English" }).click();
     await page.getByRole("menuitemradio", { name: "Русский" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Рейтинг");
+  });
+
+  test("the switcher in the header (flag and code) changes the language", async ({
+    page,
+    context,
+  }) => {
+    await context.clearCookies();
+    await page.goto("/");
+    const header = page.getByRole("banner");
+    await header.getByRole("button", { name: "Язык: Русский" }).click();
+    await page.getByRole("menuitemradio", { name: "English" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(header.getByRole("button", { name: "Language: English" })).toBeVisible();
+    await expect(header.getByRole("link", { name: "Support" })).toBeVisible();
   });
 });
