@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
-import { securityHeaders } from "./src/config/security-headers";
+import { securityHeaders, supabaseHost } from "./src/config/security-headers";
 import { resolveSiteUrl } from "./src/lib/site-url";
 
 const siteUrl = resolveSiteUrl(process.env);
+const supabase = supabaseHost(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -14,15 +15,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       new URL("https://i.ytimg.com/vi/**"),
       // User photos from the public Supabase Storage bucket "avatars".
-      new URL("https://*.supabase.co/storage/v1/object/public/avatars/**"),
+      new URL(`https://${supabase}/storage/v1/object/public/avatars/**`),
       // Club logos uploaded by admins.
-      new URL("https://*.supabase.co/storage/v1/object/public/club-logos/**"),
+      new URL(`https://${supabase}/storage/v1/object/public/club-logos/**`),
     ],
   },
   // Not in development: the dev server needs eval and websockets that the policy would report.
   async headers() {
     return process.env.NODE_ENV === "production"
-      ? [{ source: "/:path*", headers: securityHeaders() }]
+      ? [{ source: "/:path*", headers: securityHeaders(process.env.NEXT_PUBLIC_SUPABASE_URL) }]
       : [];
   },
   env: {

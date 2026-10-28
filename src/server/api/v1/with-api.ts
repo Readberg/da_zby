@@ -83,6 +83,11 @@ export function withApi<
     const instance = new URL(request.url).pathname;
 
     try {
+      // Who is asking comes first: an anonymous caller gets 401, not hints about the request shape.
+      const bearer = bearerToken(request);
+      const supabase = await createClient(bearer);
+      const user = await authenticate(endpoint.auth, bearer, supabase);
+
       let query = {} as z.infer<Query>;
       if (endpoint.query) {
         const parsed = endpoint.query.safeParse(
@@ -126,9 +131,6 @@ export function withApi<
         body = parsed.data;
       }
 
-      const bearer = bearerToken(request);
-      const supabase = await createClient(bearer);
-      const user = await authenticate(endpoint.auth, bearer, supabase);
       const result = await handler({ request, requestId, query, body, supabase, user });
 
       // The handler must honour the published contract; a mismatch is a server bug, not a client error.
