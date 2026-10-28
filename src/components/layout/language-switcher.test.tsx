@@ -11,11 +11,11 @@ vi.mock("@/lib/analytics", async (importOriginal) => ({
   track: (...args: unknown[]) => track(...args),
 }));
 
-function setup(locale: "ru" | "en") {
+function setup(locale: "ru" | "en", variant?: "header") {
   const reload = vi.fn();
   render(
     <MessagesProvider locale={locale} messages={clientDictionary(locale)}>
-      <LanguageSwitcher reload={reload} />
+      <LanguageSwitcher reload={reload} variant={variant} />
     </MessagesProvider>,
   );
   return reload;
@@ -35,6 +35,18 @@ describe("LanguageSwitcher", () => {
     expect(trigger()).toHaveAccessibleName("Язык: Русский");
     expect(trigger()).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("in the header shows the flag and the code, and still names the language for readers", async () => {
+    setup("ru", "header");
+    expect(trigger()).toHaveAccessibleName("Язык: Русский");
+    expect(trigger()).toHaveTextContent("ru");
+    expect(trigger().querySelector("svg")).not.toBeNull();
+    await userEvent.click(trigger());
+    expect(screen.getAllByRole("menuitemradio").map((item) => item.textContent)).toEqual([
+      "Русский",
+      "English",
+    ]);
   });
 
   it("opens a menu with both languages named in their own language and marks the current one", async () => {

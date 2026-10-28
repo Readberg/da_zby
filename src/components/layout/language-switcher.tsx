@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { LocaleFlag } from "@/components/ui/flags";
 import { CheckIcon, ChevronDownIcon, GlobeIcon } from "@/components/ui/icons";
 import { EVENTS, track } from "@/lib/analytics";
 import { cx } from "@/lib/cx";
@@ -13,12 +14,16 @@ import { useLocale, useMessages } from "@/i18n/client";
  * again, so every server-rendered text, date and number follows it. The address does not change.
  * A button opens a small menu in the site's style (not the system list): it opens upwards because
  * the footer is at the bottom, closes on Escape, Tab or a click outside, and works with the arrows.
+ * In the header ("header") it is compact: the flag and the code, and the menu opens downwards.
  */
 export function LanguageSwitcher({
   reload = () => window.location.reload(),
+  variant = "footer",
 }: {
   reload?: () => void;
+  variant?: "footer" | "header";
 }) {
+  const compact = variant === "header";
   const t = useMessages();
   const locale = useLocale();
   const [open, setOpen] = useState(false);
@@ -74,12 +79,30 @@ export function LanguageSwitcher({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        aria-label={`${t.footer.languageLabel}: ${LOCALE_NAMES[locale]}`}
+        aria-label={compact ? undefined : `${t.footer.languageLabel}: ${LOCALE_NAMES[locale]}`}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-line bg-bg px-4 text-ink transition-colors hover:border-muted"
+        className={cx(
+          "inline-flex min-h-11 cursor-pointer items-center text-ink transition-colors",
+          compact
+            ? "gap-2 rounded-sm border border-line px-3 text-sm font-semibold uppercase tracking-wide hover:bg-surface-hover"
+            : "gap-3 rounded-md border border-line bg-bg px-4 hover:border-muted",
+        )}
       >
-        <GlobeIcon className="h-5 w-5" />
-        {LOCALE_NAMES[locale]}
+        {compact ? (
+          <>
+            <LocaleFlag locale={locale} className="h-4 w-6 rounded-[2px]" />
+            {/* The code is for the eye; the name for assistive technology (the code is not a word). */}
+            <span aria-hidden="true">{locale}</span>
+            <span className="sr-only">
+              {t.footer.languageLabel}: {LOCALE_NAMES[locale]}
+            </span>
+          </>
+        ) : (
+          <>
+            <GlobeIcon className="h-5 w-5" />
+            {LOCALE_NAMES[locale]}
+          </>
+        )}
         <ChevronDownIcon
           className={cx("h-4 w-4 transition-transform duration-200", open && "rotate-180")}
         />
@@ -91,7 +114,12 @@ export function LanguageSwitcher({
           role="menu"
           aria-label={t.footer.languageLabel}
           onKeyDown={onMenuKey}
-          className="absolute bottom-full left-0 z-20 mb-2 min-w-full origin-bottom animate-page-in rounded-md border border-line bg-bg p-1"
+          className={cx(
+            "absolute z-20 min-w-full animate-page-in rounded-md border border-line bg-bg p-1",
+            compact
+              ? "right-0 top-full mt-2 min-w-40 origin-top"
+              : "bottom-full left-0 mb-2 origin-bottom",
+          )}
         >
           {LOCALES.map((code, index) => (
             <button
@@ -109,7 +137,10 @@ export function LanguageSwitcher({
                 code === locale && "font-semibold",
               )}
             >
-              {LOCALE_NAMES[code]}
+              <span className="inline-flex items-center gap-3">
+                {compact && <LocaleFlag locale={code} className="h-4 w-6 rounded-[2px]" />}
+                {LOCALE_NAMES[code]}
+              </span>
               {code === locale && <CheckIcon className="h-4 w-4" />}
             </button>
           ))}

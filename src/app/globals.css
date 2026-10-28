@@ -77,6 +77,16 @@
   --container-site: var(--container-max);
 }
 
+/* A score field is typed, not clicked: no spinner arrows (Firefox: textfield, WebKit: hidden). */
+@utility no-spin {
+  appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 @layer base {
   html {
     background-color: var(--color-bg);

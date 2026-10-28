@@ -124,6 +124,13 @@ export const en: MessagesShape<typeof ru> = {
     unavailableText: "YouTube did not answer. The latest episodes are always on our channel.",
     toChannel: "Go to the channel",
   },
+  support: {
+    button: "Support",
+    title: "Support Da Zabey",
+    description: "Support page of the Da Zabey project.",
+    soon: "The support page is coming soon. Thank you for wanting to help the channel.",
+    toHome: "To the home page",
+  },
   auth: {
     loginTitle: "Sign in",
     loginIntro: "Sign in with Telegram — no separate password needed.",

@@ -6,6 +6,7 @@ import { Loader } from "@/components/ui/loader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GuestLanding } from "@/features/home/components/guest-landing";
 import { GuestSlot, SessionKnown } from "@/features/home/components/home-fallback";
+import { HomeBackdrop } from "@/features/home/components/home-backdrop";
 import { MemberAction, NextTour } from "@/features/home/components/next-tour";
 import { Leaders } from "@/features/home/components/leaders";
 import { LatestVideos, LatestVideosSkeleton } from "@/features/videos/components/latest-videos";
@@ -82,7 +83,8 @@ async function MemberSwitch() {
 export default async function Home(props: PageProps<"/[locale]">) {
   await initLocale(props.params);
   return (
-    <>
+    <div className="relative isolate flex flex-1 flex-col">
+      <HomeBackdrop />
       <GuestSlot
         guest={<GuestLanding videos={<Videos />} />}
         loader={<Loader className="m-8 min-h-96 flex-1" showLabel />}
@@ -90,6 +92,6 @@ export default async function Home(props: PageProps<"/[locale]">) {
       <Suspense fallback={null}>
         <MemberSwitch />
       </Suspense>
-    </>
+    </div>
   );
 }
