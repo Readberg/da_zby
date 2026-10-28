@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { cx } from "@/lib/cx";
 
-const sizes = { sm: 40, md: 64, lg: 128 } as const;
+const sizes = { xs: 28, sm: 40, md: 64, lg: 128 } as const;
 
 /** Round user photo; falls back to the first letter of the name on the accent colour. */
 export function Avatar({

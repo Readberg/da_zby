@@ -56,6 +56,9 @@ test.describe("live chat (needs SUPABASE_SECRET_KEY)", () => {
       expect(error).toBeNull();
       note("other participant's insert done");
       await expect(page.getByText(`hello ${run}`)).toBeVisible({ timeout: 15_000 });
+      // The author's nickname and photo lead to the player's page.
+      const author = page.getByRole("link", { name: `lo_${run}` });
+      await expect(author.first()).toHaveAttribute("href", `/u/lo_${run}`);
 
       await page.getByLabel("Ваше сообщение").fill(`mine ${run}`);
       await page.getByRole("button", { name: "Отправить" }).click();

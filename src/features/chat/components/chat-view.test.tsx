@@ -85,6 +85,21 @@ describe("ChatView", () => {
     expect(screen.getByText("message 2")).toBeInTheDocument();
   });
 
+  it("links the avatar and the nickname of an author to the player's page", () => {
+    renderChat({ initial: { messages: [message(1)], banned: false } });
+    const links = screen.getAllByRole("link", { name: "other" });
+    expect(links).toHaveLength(2);
+    for (const link of links) expect(link).toHaveAttribute("href", "/u/other");
+  });
+
+  it("encodes a nickname that needs it in the address", () => {
+    const odd = { ...message(1), nickname: "Вася 2000" };
+    renderChat({ initial: { messages: [odd], banned: false } });
+    for (const link of screen.getAllByRole("link", { name: "Вася 2000" })) {
+      expect(link).toHaveAttribute("href", "/u/%D0%92%D0%B0%D1%81%D1%8F%202000");
+    }
+  });
+
   it("says so when nobody has written yet", () => {
     renderChat({ initial: { messages: [], banned: false } });
     expect(screen.getByText("Пока тихо. Напишите первым.")).toBeInTheDocument();

@@ -1,9 +1,10 @@
-import { expect, test } from "./helpers/fixtures";
+import { expect, openMenu, test } from "./helpers/fixtures";
 
 test.describe("predictions (guest)", () => {
   test("the page opens, is in the header and has no horizontal scroll", async ({ page }) => {
     await page.goto("/predictions");
     await expect(page.getByRole("heading", { level: 1, name: "Прогнозы" })).toBeVisible();
+    await openMenu(page);
     await expect(page.getByRole("banner").getByRole("link", { name: "Прогнозы" })).toBeVisible();
     // Either the pickers (a tournament exists) or the empty state: both are valid content.
     await expect(page.getByLabel("Турнир").or(page.getByText("Турниров пока нет"))).toBeVisible({

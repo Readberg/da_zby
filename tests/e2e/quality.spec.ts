@@ -50,7 +50,7 @@ test("headings use the condensed Cyrillic display font in caps", async ({ page }
 
 test("header and footer controls are at least 44 px tall", async ({ page }) => {
   await page.goto("/");
-  const targets = page.locator("header a, footer a");
+  const targets = page.locator("header a, footer a").filter({ visible: true });
   const count = await targets.count();
   expect(count).toBeGreaterThan(0);
   for (let i = 0; i < count; i++) {

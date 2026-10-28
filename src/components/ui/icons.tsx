@@ -192,7 +192,12 @@ export function CloseIcon(props: IconProps) {
 export function PlayIcon(props: IconProps) {
   return (
     <svg {...base} fill="currentColor" {...props}>
-      <path d="M8 5.6v12.8a1 1 0 0 0 1.5.9l10.6-6.4a1 1 0 0 0 0-1.8L9.5 4.7A1 1 0 0 0 8 5.6Z" />
+      <path
+        d="M9 6.6v10.8L18 12 9 6.6Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -233,6 +238,21 @@ export function HeartIcon(props: IconProps) {
   return (
     <svg {...base} fill="currentColor" {...props}>
       <path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 2.7 4.5 6.3 4.5c2 0 3.4 1 4.2 2.3L12 8.4l1.5-1.6c.8-1.3 2.2-2.3 4.2-2.3 3.6 0 5.4 3.8 3.9 7.2C19.5 16.4 12 21 12 21Z" />
+    </svg>
+  );
+}
+
+export function MenuIcon(props: IconProps) {
+  return (
+    <svg
+      {...base}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      {...props}
+    >
+      <path d="M4 7h16M4 12h16M4 17h16" />
     </svg>
   );
 }
