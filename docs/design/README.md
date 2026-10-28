@@ -8,6 +8,8 @@
 |---|---|
 | Логотип и референсы | `logo.png`, `ref-posts-matches.png`, `ref-posts-table-score.png`, `ref-predictions-table.png` |
 | Токены (цвета, шрифты, радиусы) | `docs/DESIGN.md` + код темы (Tailwind theme / CSS variables) |
+| Эмодзи Telegram (от владельца, 100×100: Гол, Минус, Двоеточие ×2, Интернет, Да Забей) | `telegram-emoji/` |
+| Логотипы клубов до замены 28.10.2026 (пути файлов в бакете `club-logos`, для отката) | `club-logos-before-2026-10-28.json` |
 | Каталог компонентов | `COMPONENTS.md` |
 | Снимки компонентов | `components/*.png` (создаёт `pnpm design:snap`) |
 | Снимки ключевых экранов | `screens/*.png` |
