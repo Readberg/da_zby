@@ -23,8 +23,8 @@ const setAuth = vi.fn(async (token: string) => {
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => {
     const channel = {
-      on: (_type: string, filter: { event: string }, handler: Handler) => {
-        handlers[filter.event] = handler;
+      on: (_type: string, filter: { event?: string }, handler: Handler) => {
+        handlers[_type === "system" ? "system" : filter.event!] = handler;
         return channel;
       },
       subscribe: (callback: (state: string) => void) => {
@@ -151,6 +151,19 @@ describe("ChatView", () => {
       handlers.DELETE!({ old: { id: message(1).id } });
     });
     await waitFor(() => expect(screen.queryByText("message 1")).toBeNull());
+  });
+
+  it("reads the list again when the server says the database stream is ready", async () => {
+    renderChat();
+    await waitFor(() => expect(handlers.system).toBeDefined());
+    api.mockClear();
+    act(() => handlers.system!({ extension: "system", status: "ok" } as never));
+    await waitFor(() => expect(api).toHaveBeenCalledWith("/chat"));
+
+    api.mockClear();
+    act(() => handlers.system!({ extension: "system", status: "error" } as never));
+    act(() => handlers.system!({ extension: "postgres_changes", status: "ok" } as never));
+    expect(api).not.toHaveBeenCalled();
   });
 
   it("goes live and reloads once the channel is subscribed", async () => {
