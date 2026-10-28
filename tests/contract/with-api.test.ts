@@ -78,3 +78,11 @@ describe("withApi", () => {
     await expectProblem(await route(apiRequest("/api/v1/test")), 500, "api.internal_error");
   });
 });
+
+describe("withApi order of checks", () => {
+  it("answers 401 to an anonymous caller before it looks at the query", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ error: null }, { user: null }));
+    const route = withApi(endpoint("user"), async ({ query }) => ({ data: query }));
+    await expectProblem(await route(apiRequest("/api/v1/test?limit=0")), 401, "auth.required");
+  });
+});

@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { resetRateLimits } from "@/lib/rate-limit";
 import { telegramLoginStartSchema, telegramLoginStatusSchema } from "@/server/api/v1/schemas/auth";
 import { TooManyLoginAttemptsError } from "@/server/services/login-tokens";
 import { apiRequest, expectApiHeaders, expectProblem, fakeSupabase } from "./helpers";
@@ -30,6 +31,7 @@ const statusRoute = await import("@/app/api/v1/auth/telegram/status/route");
 const TOKEN = "t".repeat(43);
 
 beforeEach(() => {
+  resetRateLimits();
   env.TELEGRAM_BOT_TOKEN = "123456:TEST-token-0123456789abcdef";
   env.SUPABASE_SECRET_KEY = "sb_secret_x";
   start.mockReset().mockResolvedValue({ token: TOKEN, code: "47", expiresInSeconds: 600 });
@@ -62,6 +64,19 @@ describe("POST /api/v1/auth/telegram/start", () => {
   it("answers 429 when too many attempts are in progress", async () => {
     start.mockRejectedValue(new TooManyLoginAttemptsError());
     await expectProblem(await call(), 429, "api.too_many_requests");
+  });
+
+  it("answers 429 to one address that starts too many attempts, others are not affected", async () => {
+    const from = (ip: string) =>
+      startRoute.POST(
+        apiRequest("/api/v1/auth/telegram/start", {
+          method: "POST",
+          headers: { "x-forwarded-for": ip },
+        }),
+      );
+    for (let i = 0; i < 10; i++) expect((await from("203.0.113.7")).status).toBe(200);
+    await expectProblem(await from("203.0.113.7"), 429, "api.too_many_requests");
+    expect((await from("203.0.113.8")).status).toBe(200);
   });
 });
 

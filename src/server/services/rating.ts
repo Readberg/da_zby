@@ -3,6 +3,7 @@ import { avatarUrl } from "@/lib/avatar";
 import { placeChanges, type Standing } from "@/lib/place-change";
 import { tourDeadline } from "@/lib/predictions";
 import type { Database } from "@/types/database";
+import { fetchAll } from "./paginate";
 
 type Db = SupabaseClient<Database>;
 
@@ -155,14 +156,17 @@ async function withTrend(
   const last = [...tours].filter((t) => graded.has(t.id)).sort((a, b) => b.number - a.number)[0];
   if (!last) return rows;
 
-  const board = await db
-    .from("tour_leaderboard")
-    .select("*, profiles(nickname, avatar_path)")
-    .eq("tour_id", last.id);
-  if (board.error) throw board.error;
+  const board = await fetchAll((from, to) =>
+    db
+      .from("tour_leaderboard")
+      .select("*, profiles(nickname, avatar_path)")
+      .eq("tour_id", last.id)
+      .order("user_id")
+      .range(from, to),
+  );
   const changes = placeChanges(
     rows.map(standing),
-    toRatingRows((board.data ?? []) as Raw[], false).map(standing),
+    toRatingRows(board as Raw[], false).map(standing),
   );
   return rows.map((row) => ({ ...row, trend: changes.get(row.userId) ?? null }));
 }
@@ -207,18 +211,22 @@ export async function getRatingPage(
   if (!season) return base;
   const closed = season.status === "closed";
 
-  const [toursResult, boardResult] = await Promise.all([
+  const [toursResult, boardData] = await Promise.all([
     db
       .from("tours")
       .select("id, number, title, deadline_override")
       .eq("season_id", season.id)
       .order("number"),
-    db
-      .from("season_leaderboard")
-      .select("*, profiles(nickname, avatar_path)")
-      .eq("season_id", season.id),
+    fetchAll((from, to) =>
+      db
+        .from("season_leaderboard")
+        .select("*, profiles(nickname, avatar_path)")
+        .eq("season_id", season.id)
+        .order("user_id")
+        .range(from, to),
+    ),
   ]);
-  for (const result of [toursResult, boardResult]) if (result.error) throw result.error;
+  if (toursResult.error) throw toursResult.error;
 
   const tourRows = toursResult.data ?? [];
   const tours = tourRows.map((t) => ({ number: t.number, title: t.title }));
@@ -226,7 +234,7 @@ export async function getRatingPage(
     choice.tour !== undefined ? tourRows.find((t) => t.number === choice.tour) : undefined;
 
   if (!chosen) {
-    const rows = toRatingRows((boardResult.data ?? []) as Raw[], closed);
+    const rows = toRatingRows(boardData as Raw[], closed);
     return {
       ...base,
       tours,
@@ -234,16 +242,19 @@ export async function getRatingPage(
     };
   }
 
-  const [tourBoard, matchesResult, clubsResult] = await Promise.all([
-    db
-      .from("tour_leaderboard")
-      .select("*, profiles(nickname, avatar_path)")
-      .eq("tour_id", chosen.id),
+  const [tourBoardData, matchesResult, clubsResult] = await Promise.all([
+    fetchAll((from, to) =>
+      db
+        .from("tour_leaderboard")
+        .select("*, profiles(nickname, avatar_path)")
+        .eq("tour_id", chosen.id)
+        .order("user_id")
+        .range(from, to),
+    ),
     db.from("matches").select("*").eq("tour_id", chosen.id).order("kickoff_at"),
     db.from("clubs").select("id, name"),
   ]);
-  for (const result of [tourBoard, matchesResult, clubsResult])
-    if (result.error) throw result.error;
+  for (const result of [matchesResult, clubsResult]) if (result.error) throw result.error;
 
   const matchRows = matchesResult.data ?? [];
   const names = new Map((clubsResult.data ?? []).map((c) => [c.id, c.name]));
@@ -264,15 +275,18 @@ export async function getRatingPage(
 
   const cells: RatingPageData["cells"] = {};
   if (matchRows.length > 0) {
-    const { data: predictions, error } = await db
-      .from("predictions")
-      .select("user_id, match_id, home_score, away_score, result, points")
-      .in(
-        "match_id",
-        matchRows.map((m) => m.id),
-      );
-    if (error) throw error;
-    for (const p of predictions ?? []) {
+    const predictions = await fetchAll((from, to) =>
+      db
+        .from("predictions")
+        .select("id, user_id, match_id, home_score, away_score, result, points")
+        .in(
+          "match_id",
+          matchRows.map((m) => m.id),
+        )
+        .order("id")
+        .range(from, to),
+    );
+    for (const p of predictions) {
       (cells[p.user_id] ??= {})[p.match_id] = {
         homeScore: p.home_score,
         awayScore: p.away_score,
@@ -291,7 +305,7 @@ export async function getRatingPage(
       title: chosen.title,
       deadlineAt: deadline ? deadline.toISOString() : null,
     },
-    rows: toRatingRows((tourBoard.data ?? []) as Raw[], false),
+    rows: toRatingRows(tourBoardData as Raw[], false),
     matches,
     cells,
   };
