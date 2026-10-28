@@ -114,7 +114,7 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
                   type="button"
                   onClick={() => play(video.id)}
                   className={cx(
-                    "group flex w-full cursor-pointer flex-col gap-3 rounded-lg border border-line bg-surface p-3 text-left transition-colors duration-200 hover:border-accent hover:bg-surface-hover focus-visible:border-accent lg:flex-row lg:items-start",
+                    "group flex w-full cursor-pointer flex-col gap-3 rounded-lg border border-line bg-surface p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:bg-surface-hover focus-visible:border-accent lg:flex-row lg:items-start",
                   )}
                 >
                   <span className="relative aspect-video w-full shrink-0 overflow-hidden rounded-md bg-line lg:w-40">
@@ -125,6 +125,12 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
                       sizes="(min-width: 1024px) 160px, (min-width: 480px) 50vw, 100vw"
                       className="object-cover transition-transform group-hover:scale-105"
                     />
+                    <span
+                      aria-hidden="true"
+                      className="absolute bottom-2 left-2 flex h-8 w-8 items-center justify-center rounded-sm bg-accent text-black"
+                    >
+                      <PlayIcon className="ml-0.5 h-4 w-4" />
+                    </span>
                   </span>
                   <span className="flex min-w-0 flex-col gap-1 px-1 pb-1 lg:px-0 lg:pb-0">
                     <span className="line-clamp-3 font-semibold group-hover:underline">

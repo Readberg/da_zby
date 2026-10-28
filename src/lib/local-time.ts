@@ -48,3 +48,31 @@ export function formatDateTime(
     timeZone: "UTC",
   }).format(shifted);
 }
+
+/** "19:00" in the given offset: the kickoff time alone, for match cards. */
+export function formatTimeOfDay(
+  iso: string,
+  offsetMinutes = DEFAULT_UTC_OFFSET_MINUTES,
+  locale: Locale = "ru",
+): string {
+  const shifted = new Date(new Date(iso).getTime() + offsetMinutes * 60_000);
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(shifted);
+}
+
+/** "31 октября" / "31 October" in the given offset: the day of the month alone. */
+export function formatDayMonth(
+  iso: string,
+  offsetMinutes = DEFAULT_UTC_OFFSET_MINUTES,
+  locale: Locale = "ru",
+): string {
+  const shifted = new Date(new Date(iso).getTime() + offsetMinutes * 60_000);
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  }).format(shifted);
+}

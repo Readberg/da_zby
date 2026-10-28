@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, localInputToUtcIso, utcIsoToLocalInput } from "./local-time";
+import {
+  formatDateTime,
+  formatDayMonth,
+  formatTimeOfDay,
+  localInputToUtcIso,
+  utcIsoToLocalInput,
+} from "./local-time";
 
 describe("localInputToUtcIso", () => {
   it("treats the input as UTC+3 by default", () => {
@@ -42,5 +48,23 @@ describe("formatDateTime", () => {
   it("formats in the offset of the viewer", () => {
     expect(formatDateTime("2026-10-25T15:30:00.000Z")).toBe("25 октября в 18:30");
     expect(formatDateTime("2026-10-25T15:30:00.000Z", 0)).toBe("25 октября в 15:30");
+  });
+});
+
+describe("formatTimeOfDay and formatDayMonth", () => {
+  it("give the kickoff time and the day apart, in the display offset", () => {
+    expect(formatTimeOfDay("2026-10-31T16:00:00.000Z")).toBe("19:00");
+    expect(formatDayMonth("2026-10-31T16:00:00.000Z")).toBe("31 октября");
+    expect(formatTimeOfDay("2026-10-31T16:00:00.000Z", 0)).toBe("16:00");
+  });
+
+  it("move the day when the offset crosses midnight", () => {
+    expect(formatDayMonth("2026-10-31T22:30:00.000Z")).toBe("1 ноября");
+    expect(formatTimeOfDay("2026-10-31T22:30:00.000Z")).toBe("01:30");
+  });
+
+  it("follow the language", () => {
+    expect(formatDayMonth("2026-10-31T16:00:00.000Z", 180, "en")).toBe("31 October");
+    expect(formatTimeOfDay("2026-10-31T16:00:00.000Z", 180, "en")).toBe("19:00");
   });
 });

@@ -53,18 +53,16 @@ test.describe("landing (guest)", () => {
     await expect(page.getByText(/Это сайт канала/)).toBeHidden();
   });
 
-  test("match rows keep both clubs, the time and the button inside the screen", async ({
+  test("match cards keep both clubs and the time inside the screen; one button serves them all", async ({
     page,
   }) => {
     await openHome(page);
-    const card = page
-      .getByRole("heading", { name: "Ближайшие матчи" })
-      .locator("xpath=ancestor::div[contains(@class,'rounded-lg')][1]");
+    const card = page.locator('[aria-labelledby="upcoming-title"]');
     const rows = card.locator("ul > li");
     test.skip((await rows.count()) === 0, "no matches in the next tour right now");
     const viewport = page.viewportSize()!;
     for (const row of await rows.all()) {
-      const names = row.locator("span.font-semibold");
+      const names = row.locator("span.leading-tight");
       await expect(names).toHaveCount(2);
       for (const name of await names.all()) {
         const box = await name.boundingBox();
@@ -72,11 +70,29 @@ test.describe("landing (guest)", () => {
         expect(box!.x).toBeGreaterThanOrEqual(0);
         expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
       }
-      const button = await row.getByRole("link", { name: "Сделать прогноз" }).boundingBox();
-      expect(button!.x).toBeGreaterThanOrEqual(0);
-      expect(button!.x + button!.width).toBeLessThanOrEqual(viewport.width);
-      expect(button!.height).toBeGreaterThanOrEqual(40);
+      await expect(row.getByRole("link")).toHaveCount(0);
     }
+    const buttons = card.getByRole("link", { name: "Сделать прогноз" });
+    await expect(buttons).toHaveCount(1);
+    const button = await buttons.boundingBox();
+    expect(button!.x).toBeGreaterThanOrEqual(0);
+    expect(button!.x + button!.width).toBeLessThanOrEqual(viewport.width);
+    expect(button!.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test("shows the main video and three more, and the ad block leads to the contacts", async ({
+    page,
+  }) => {
+    await openHome(page);
+    const videos = page.locator('[aria-labelledby="videos-title"]');
+    test.skip((await videos.getByRole("button").count()) === 0, "videos are not available now");
+    await expect(videos.getByRole("button")).toHaveCount(4);
+
+    const ad = page.locator('[aria-labelledby="ad-title"]');
+    await expect(ad.getByRole("heading", { name: "Здесь могла быть ваша реклама" })).toBeVisible();
+    await ad.getByRole("link", { name: "Связаться" }).click();
+    await expect(page.locator("#contacts")).toBeInViewport();
+    await expect(page.locator("#contacts").getByText("Контакты")).toBeVisible();
   });
 
   test("the calls to action carry their Umami event, so clicks are counted by place", async ({

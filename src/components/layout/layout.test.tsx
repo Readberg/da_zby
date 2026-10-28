@@ -33,6 +33,13 @@ describe("SiteHeader", () => {
 });
 
 describe("SiteFooter", () => {
+  it("shows the logo without the site name and has the contacts anchor", () => {
+    const { container } = render(<SiteFooter />);
+    expect(screen.queryByText("Да забей", { selector: "span" })).toBeNull();
+    expect(container.querySelector("#contacts")).not.toBeNull();
+    expect(screen.getByText("Контакты")).toBeVisible();
+  });
+
   it("shows every confirmed social link", () => {
     render(<SiteFooter />);
     const nav = screen.getByRole("navigation", { name: "Мы в соцсетях" });

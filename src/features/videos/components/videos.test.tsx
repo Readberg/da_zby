@@ -61,10 +61,10 @@ describe("VideoShowcase", () => {
 });
 
 describe("LatestVideos", () => {
-  it("renders the showcase with six videos", async () => {
+  it("asks for four videos: the main one and three beside it", async () => {
     const loadVideos = vi.fn(async () => videos);
     render(await LatestVideos({ loadVideos }));
-    expect(loadVideos).toHaveBeenCalledWith(6);
+    expect(loadVideos).toHaveBeenCalledWith(4);
     expect(screen.getByRole("button", { name: "Смотреть видео: Выпуск 1" })).toBeInTheDocument();
   });
 

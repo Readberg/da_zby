@@ -6,7 +6,8 @@ import { VideosUnavailableError, type Video } from "@/server/services/videos";
 import { VideoShowcase } from "./video-showcase";
 import { getMessages } from "@/i18n/server";
 
-export const HOME_VIDEOS_COUNT = 6;
+/** The newest one is the main video, the next three are listed beside it. */
+export const HOME_VIDEOS_COUNT = 4;
 
 const channelUrl = siteConfig.social.find((link) => link.id === "youtube")?.url ?? "";
 
