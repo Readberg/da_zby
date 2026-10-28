@@ -15,6 +15,10 @@ vi.mock("@/lib/avatar", () => ({ avatarUrl: () => null }));
 type Handler = (payload: { new?: unknown; old?: unknown }) => void;
 let handlers: Record<string, Handler>;
 let onStatus: (state: string) => void;
+const order: string[] = [];
+const setAuth = vi.fn(async (token: string) => {
+  order.push(`setAuth:${token}`);
+});
 
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => {
@@ -24,11 +28,17 @@ vi.mock("@/lib/supabase/client", () => ({
         return channel;
       },
       subscribe: (callback: (state: string) => void) => {
+        order.push("subscribe");
         onStatus = callback;
         return channel;
       },
     };
-    return { channel: () => channel, removeChannel: vi.fn() };
+    return {
+      channel: () => channel,
+      removeChannel: vi.fn(),
+      auth: { getSession: async () => ({ data: { session: { access_token: "jwt-1" } } }) },
+      realtime: { setAuth },
+    };
   },
 }));
 
@@ -57,6 +67,9 @@ function renderChat(over: Partial<React.ComponentProps<typeof ChatView>> = {}) {
 
 beforeEach(() => {
   handlers = {};
+  order.length = 0;
+  onStatus = undefined as never;
+  setAuth.mockClear();
   api.mockReset().mockResolvedValue({ messages: [], banned: false });
 });
 
@@ -112,8 +125,14 @@ describe("ChatView", () => {
     expect(screen.queryByLabelText("Ваше сообщение")).toBeNull();
   });
 
+  it("gives Realtime the session token before it subscribes", async () => {
+    renderChat();
+    await waitFor(() => expect(order).toEqual(["setAuth:jwt-1", "subscribe"]));
+  });
+
   it("adds a live message from Realtime and drops a deleted one", async () => {
     renderChat();
+    await waitFor(() => expect(handlers.INSERT).toBeDefined());
     act(() => {
       handlers.INSERT!({
         new: {
@@ -137,6 +156,7 @@ describe("ChatView", () => {
   it("goes live and reloads once the channel is subscribed", async () => {
     renderChat();
     expect(screen.getByText("Подключаемся…")).toBeInTheDocument();
+    await waitFor(() => expect(onStatus).toBeTypeOf("function"));
     act(() => onStatus("SUBSCRIBED"));
     expect(await screen.findByText("На связи")).toBeInTheDocument();
     expect(api).toHaveBeenCalledWith("/chat");
