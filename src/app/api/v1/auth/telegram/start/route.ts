@@ -1,5 +1,6 @@
 import { serverEnv } from "@/lib/env.server";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale } from "@/i18n/config";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { endpoints } from "@/server/api/v1/endpoints";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
@@ -17,6 +18,16 @@ export const POST = withApi(endpoints.telegramLoginStart, async ({ request }) =>
       ERROR_CODES.loginUnavailable,
       "Service Unavailable",
       "Telegram sign-in is not configured.",
+    );
+  }
+
+  // One client cannot use up the shared pool of live attempts (see MAX_LIVE_TOKENS).
+  if (!allowRequest(`login-start:${clientIp(request.headers)}`, 10, 10 * 60_000)) {
+    throw new ApiError(
+      429,
+      ERROR_CODES.tooManyRequests,
+      "Too Many Requests",
+      "Too many sign-in attempts from your address. Try again in a few minutes.",
     );
   }
 

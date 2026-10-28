@@ -41,6 +41,7 @@ export function fakeDb(
       "or",
       "order",
       "limit",
+      "range",
     ]) {
       chain[method] = (...args: unknown[]) => {
         log(method, args);
