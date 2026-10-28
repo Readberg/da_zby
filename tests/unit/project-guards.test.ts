@@ -15,7 +15,9 @@ const sources = files("src", /\.(ts|tsx|css)$/).filter((f) => !/\.test\.tsx?$/.t
 
 describe("design tokens guard (DAZBY-17)", () => {
   // Raw colours live only in the token file; the browser theme colour must be a literal.
+  // National flags are content with colours of their own (like club logos), not part of the theme.
   const allowed = [
+    join("src", "components", "ui", "flags.tsx"),
     join("src", "app", "globals.css"),
     join("src", "app", "[locale]", "layout.tsx"),
     join("src", "lib", "og-theme.ts"),

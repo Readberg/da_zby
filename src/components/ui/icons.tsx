@@ -228,3 +228,11 @@ export function UserIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function HeartIcon(props: IconProps) {
+  return (
+    <svg {...base} fill="currentColor" {...props}>
+      <path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 2.7 4.5 6.3 4.5c2 0 3.4 1 4.2 2.3L12 8.4l1.5-1.6c.8-1.3 2.2-2.3 4.2-2.3 3.6 0 5.4 3.8 3.9 7.2C19.5 16.4 12 21 12 21Z" />
+    </svg>
+  );
+}

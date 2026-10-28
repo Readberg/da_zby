@@ -24,7 +24,13 @@ export function Input({ invalid, className, ...props }: InputProps) {
   return (
     <input
       aria-invalid={invalid || undefined}
-      className={cx("min-h-11", controlBase, controlBorder(invalid), className)}
+      className={cx(
+        "min-h-11",
+        controlBase,
+        controlBorder(invalid),
+        props.type === "number" && "no-spin",
+        className,
+      )}
       {...props}
     />
   );
