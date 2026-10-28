@@ -21,7 +21,11 @@ export function SiteHeader() {
           <Image src={logo} alt="" width={48} height={48} priority className="h-12 w-12" />
           <span className="font-display text-lg uppercase text-ink">{t.site.name}</span>
         </Link>
-        <nav aria-label={t.nav.label} className="order-last w-full sm:order-none sm:w-auto">
+        {/* On a phone the links scroll sideways when they do not fit; the current one is scrolled into view. */}
+        <nav
+          aria-label={t.nav.label}
+          className="order-last w-full overflow-x-auto [scrollbar-width:none] sm:order-none sm:w-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden"
+        >
           {/* usePathname() needs Suspense on dynamic routes such as /u/[nickname]. */}
           <Suspense fallback={<NavList link={StaticNavLink} />}>
             <NavList link={NavLink} />
@@ -41,9 +45,9 @@ export function SiteHeader() {
 function NavList({ link: Link }: { link: typeof NavLink }) {
   const t = getMessages();
   return (
-    <ul className="flex items-center justify-center gap-1">
+    <ul className="mx-auto flex w-max items-center gap-1">
       {siteConfig.nav.map((item) => (
-        <li key={item.id}>
+        <li key={item.id} className="shrink-0">
           <Link href={item.href} prefetch={"prefetch" in item ? item.prefetch : undefined}>
             {t.nav[item.id]}
           </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { useAppPathname } from "@/i18n/use-app-pathname";
 import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
@@ -14,8 +15,14 @@ type NavLinkProps = { href: string; children: ReactNode; prefetch?: boolean };
 export function NavLink({ href, children, prefetch }: NavLinkProps) {
   const pathname = useAppPathname();
   const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const ref = useRef<HTMLAnchorElement>(null);
+  // The phone's nav row scrolls sideways: bring the current page's link into view.
+  useEffect(() => {
+    if (active) ref.current?.scrollIntoView?.({ inline: "center", block: "nearest" });
+  }, [active]);
   return (
     <Link
+      ref={ref}
       href={href}
       prefetch={prefetch}
       aria-current={active ? "page" : undefined}
