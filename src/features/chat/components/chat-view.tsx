@@ -8,6 +8,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
+import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/field";
@@ -44,6 +45,9 @@ type Status = "connecting" | "live" | "offline";
 
 /** How long the channel may stay unconnected before it is thrown away and opened again. */
 export const CONNECT_CHECK_MS = 10_000;
+
+/** The public page of a player (nicknames are unique). */
+const profileHref = (nickname: string) => `/u/${encodeURIComponent(nickname)}`;
 
 export function ChatView({
   variant = "page",
@@ -226,7 +230,7 @@ export function ChatView({
 
   return (
     <div className={dock ? "flex h-full min-h-0 flex-col gap-2" : "flex flex-col gap-4"}>
-      <p className="text-sm text-muted" role="status">
+      <p className={dock ? "text-xs text-muted" : "text-sm text-muted"} role="status">
         <span
           aria-hidden="true"
           className={`mr-2 inline-block h-2 w-2 rounded-full ${status === "live" ? "bg-accent" : "bg-muted"}`}
@@ -240,7 +244,7 @@ export function ChatView({
         aria-label={t.listLabel}
         className={
           dock
-            ? "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-md border border-line bg-bg p-3"
+            ? "flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto rounded-md border border-line bg-bg p-2.5"
             : "flex h-[60vh] min-h-72 flex-col gap-3 overflow-y-auto rounded-lg border border-line bg-surface p-3 sm:p-4"
         }
       >
@@ -248,13 +252,28 @@ export function ChatView({
         {messages.map((message) => {
           const mine = message.userId === currentUserId;
           return (
-            <li key={message.id} className="flex gap-3">
-              <Avatar src={avatarUrl(message.avatarPath)} name={message.nickname} size="sm" />
+            <li key={message.id} className={dock ? "flex gap-2" : "flex gap-3"}>
+              <Link
+                href={profileHref(message.nickname)}
+                aria-label={message.nickname}
+                className="h-fit shrink-0 rounded-full transition-opacity duration-200 hover:opacity-80"
+              >
+                <Avatar
+                  src={avatarUrl(message.avatarPath)}
+                  name={message.nickname}
+                  size={dock ? "xs" : "sm"}
+                />
+              </Link>
               <div className="min-w-0 flex-1">
-                <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-                  <span className={`font-semibold ${mine ? "text-accent" : "text-ink"}`}>
+                <p
+                  className={`flex flex-wrap items-baseline gap-x-2 ${dock ? "text-xs" : "text-sm"}`}
+                >
+                  <Link
+                    href={profileHref(message.nickname)}
+                    className={`font-semibold hover:underline ${mine ? "text-accent" : "text-ink"}`}
+                  >
                     {message.nickname}
-                  </span>
+                  </Link>
                   <time dateTime={message.createdAt} className="text-muted">
                     {time(message.createdAt)}
                   </time>
@@ -279,7 +298,11 @@ export function ChatView({
                     </button>
                   )}
                 </p>
-                <p className="whitespace-pre-wrap break-words text-base text-ink">{message.body}</p>
+                <p
+                  className={`whitespace-pre-wrap break-words text-ink ${dock ? "text-sm leading-snug" : "text-base"}`}
+                >
+                  {message.body}
+                </p>
               </div>
             </li>
           );
@@ -308,17 +331,27 @@ export function ChatView({
             onKeyDown={onKeyDown}
             maxLength={MAX_LENGTH}
             placeholder={t.placeholder}
-            rows={2}
-            className="min-h-16"
+            rows={dock ? 1 : 2}
+            className={dock ? "min-h-10! resize-none py-2 text-sm" : "min-h-16"}
             invalid={error !== null}
             aria-describedby="chat-hint"
           />
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p id="chat-hint" className="text-sm text-muted">
+            <p id="chat-hint" className={dock ? "sr-only" : "text-sm text-muted"}>
               {t.hint}{" "}
               {t.counter.replace("{n}", String(text.length)).replace("{max}", String(MAX_LENGTH))}
             </p>
-            <Button type="submit" loading={sending} disabled={text.trim().length === 0}>
+            {dock && (
+              <span aria-hidden="true" className="text-xs text-muted">
+                {t.counter.replace("{n}", String(text.length)).replace("{max}", String(MAX_LENGTH))}
+              </span>
+            )}
+            <Button
+              type="submit"
+              loading={sending}
+              disabled={text.trim().length === 0}
+              className={dock ? "min-h-9 px-4 text-sm" : undefined}
+            >
               {t.send}
             </Button>
           </div>

@@ -8,6 +8,11 @@ import { formatDate } from "@/lib/time";
 import type { Video } from "@/server/services/videos";
 import { useMessages, useLocale } from "@/i18n/client";
 
+/** The 1280-pixel picture of a video; the feed only gives the 480-pixel one, too soft for the big cover. */
+function largeThumbnail(video: Video) {
+  return video.thumbnailUrl.replace("/hqdefault.jpg", "/maxresdefault.jpg");
+}
+
 function embedUrl(id: string, autoplay: boolean) {
   return `https://www.youtube-nocookie.com/embed/${id}?rel=0${autoplay ? "&autoplay=1" : ""}`;
 }
@@ -24,6 +29,8 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
   const [selectedId, setSelectedId] = useState(videos[0]?.id);
   const [autoplay, setAutoplay] = useState(false);
   const [started, setStarted] = useState(false);
+  // Videos that have no large picture on YouTube fall back to the one the feed gave.
+  const [noLarge, setNoLarge] = useState<string[]>([]);
   const playerRef = useRef<HTMLDivElement>(null);
 
   const selected = videos.find((video) => video.id === selectedId) ?? videos[0];
@@ -64,18 +71,24 @@ export function VideoShowcase({ videos }: { videos: Video[] }) {
               className="group absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-accent/80"
             >
               <Image
-                src={selected.thumbnailUrl}
+                src={
+                  noLarge.includes(selected.id) ? selected.thumbnailUrl : largeThumbnail(selected)
+                }
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 60vw, 100vw"
+                quality={85}
+                onError={() =>
+                  setNoLarge((ids) => (ids.includes(selected.id) ? ids : [...ids, selected.id]))
+                }
                 className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               />
               <span
                 aria-hidden="true"
                 className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/20"
               />
-              <span className="relative flex h-16 w-16 items-center justify-center rounded-lg bg-accent text-black transition-colors duration-200 group-hover:bg-accent-hover group-active:scale-95 sm:h-20 sm:w-20">
-                <PlayIcon className="ml-1 h-8 w-8 sm:h-10 sm:w-10" />
+              <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-accent text-black transition-all duration-200 group-hover:scale-105 group-hover:bg-accent-hover group-active:scale-95 sm:h-20 sm:w-20">
+                <PlayIcon className="h-9 w-9 sm:h-11 sm:w-11" />
               </span>
             </button>
           )}

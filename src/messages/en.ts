@@ -5,7 +5,6 @@ import type { MessagesShape } from "./types";
 export const en: MessagesShape<typeof ru> = {
   site: {
     name: "Da Zabey",
-    tagline: "Belarusian sports blog",
     skipToContent: "Skip to content",
     description:
       "Da Zabey is a blog about Belarusian sports: fresh videos from the channel and a predictions tournament.",
@@ -13,6 +12,7 @@ export const en: MessagesShape<typeof ru> = {
   },
   nav: {
     label: "Main navigation",
+    menu: "Menu",
     home: "Home",
     predictions: "Predictions",
     rating: "Standings",
@@ -280,6 +280,11 @@ export const en: MessagesShape<typeof ru> = {
   },
   standings: {
     title: "League table",
+    heading: "Championship league table",
+    lead: "How the clubs stand in the championship, from the matches played. This is not the predictors' standings: those are on the Standings page.",
+    updated: "Updated: {date}.",
+    noResults: "No match results yet.",
+    refresh: "The table is recalculated when results are entered and at least every 30 minutes.",
     noTournaments: "No tournaments yet. Check back later.",
     empty: "There are no clubs in this season yet.",
     caption: "Championship league table",

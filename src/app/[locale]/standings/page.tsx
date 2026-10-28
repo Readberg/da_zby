@@ -4,9 +4,10 @@ import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StandingsPicker } from "@/features/standings/components/standings-picker";
 import { StandingsTable } from "@/features/standings/components/standings-table";
+import { formatDateTime } from "@/lib/local-time";
 import { firstParam } from "@/lib/search-params";
 import { getStandingsPageCached } from "@/server/services/standings.cached";
-import { getMessages, initLocale, messagesFor } from "@/i18n/server";
+import { getLocale, getMessages, initLocale, messagesFor } from "@/i18n/server";
 
 export async function generateMetadata({
   params,
@@ -44,6 +45,15 @@ async function StandingsContent({
         <p className="text-muted">{t.standings.empty}</p>
       ) : (
         <section className="flex flex-col gap-4">
+          <p className="text-sm text-muted">
+            {data.updatedAt
+              ? t.standings.updated.replace(
+                  "{date}",
+                  formatDateTime(data.updatedAt, undefined, getLocale()),
+                )
+              : t.standings.noResults}{" "}
+            {t.standings.refresh}
+          </p>
           <StandingsTable rows={data.rows} />
           <p className="text-sm text-muted">
             {t.standings.counted
@@ -62,7 +72,8 @@ export default async function StandingsPage(props: PageProps<"/[locale]/standing
   const t = getMessages();
   return (
     <Container className="flex flex-col gap-6 py-8 sm:py-12 lg:py-20">
-      <h1 className="text-h3 sm:text-h1">{t.standings.title}</h1>
+      <h1 className="text-h3 sm:text-h1">{t.standings.heading}</h1>
+      <p className="max-w-2xl text-muted">{t.standings.lead}</p>
       <Suspense fallback={<Skeleton className="h-96" />}>
         <StandingsContent searchParams={props.searchParams} />
       </Suspense>

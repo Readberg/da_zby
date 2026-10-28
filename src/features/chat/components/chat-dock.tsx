@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ChatIcon, CloseIcon } from "@/components/ui/icons";
+import { ChatIcon, ChevronDownIcon } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api-client";
 import type { ProfileMe } from "@/server/api/v1/schemas/profile";
@@ -108,7 +108,7 @@ export function ChatDock({ userId, isAdmin }: { userId: string; isAdmin: boolean
     function onKeyDown(event: globalThis.KeyboardEvent) {
       if (event.key !== "Escape" || event.defaultPrevented) return;
       writeOpen(false);
-      // The window is gone after this render; the round button takes the focus.
+      // The window is gone after this render; the tab takes the focus.
       requestAnimationFrame(() => toggleRef.current?.focus());
     }
     document.addEventListener("keydown", onKeyDown);
@@ -125,20 +125,23 @@ export function ChatDock({ userId, isAdmin }: { userId: string; isAdmin: boolean
           aria-label={t.dockLabel}
           ref={panelRef}
           tabIndex={-1}
-          className="fixed bottom-6 right-6 z-40 flex h-[min(34rem,calc(100vh-3rem))] outline-none w-88 flex-col overflow-hidden rounded-lg border border-line bg-surface"
+          className="fixed bottom-0 right-6 z-40 flex h-[min(26rem,calc(100vh-4rem))] w-72 animate-page-in flex-col overflow-hidden rounded-t-lg border border-b-0 border-line bg-surface outline-none"
         >
-          <header className="flex items-center justify-between border-b border-line px-4 py-2">
-            <h2 className="font-display text-lg uppercase">{t.title}</h2>
+          <header className="flex shrink-0 items-center justify-between border-b border-line">
+            <h2 className="flex items-center gap-2 px-3 font-display text-sm uppercase tracking-wide">
+              <ChatIcon className="h-4 w-4 text-accent" />
+              {t.title}
+            </h2>
             <button
               type="button"
               onClick={() => writeOpen(false)}
               aria-label={t.closeLabel}
-              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm text-ink transition-colors duration-200 hover:bg-surface-hover"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center text-muted transition-colors duration-200 hover:bg-surface-hover hover:text-ink"
             >
-              <CloseIcon className="h-5 w-5" />
+              <ChevronDownIcon className="h-4 w-4" />
             </button>
           </header>
-          <div className="min-h-0 flex-1 p-3">
+          <div className="min-h-0 flex-1 p-2">
             <DockBody userId={userId} isAdmin={isAdmin} />
           </div>
         </section>
@@ -154,9 +157,13 @@ export function ChatDock({ userId, isAdmin }: { userId: string; isAdmin: boolean
           aria-expanded="false"
           aria-controls="chat-dock"
           aria-label={t.openLabel}
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-lg bg-accent text-black transition-colors duration-200 hover:bg-accent-hover active:scale-95"
+          className="fixed bottom-0 right-6 z-40 flex h-10 w-48 cursor-pointer items-center justify-between rounded-t-lg border border-b-0 border-line bg-surface px-3 font-display text-sm uppercase tracking-wide text-ink transition-colors duration-200 hover:bg-surface-hover"
         >
-          <ChatIcon className="h-7 w-7" />
+          <span className="flex items-center gap-2">
+            <ChatIcon className="h-4 w-4 text-accent" />
+            {t.title}
+          </span>
+          <ChevronDownIcon className="h-4 w-4 rotate-180 text-muted" />
         </button>
       )}
     </div>

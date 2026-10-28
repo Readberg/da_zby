@@ -1,6 +1,6 @@
 import { en } from "../../src/messages/en";
 import { ru } from "../../src/messages/ru";
-import { expect, test } from "./helpers/fixtures";
+import { expect, openMenu, test } from "./helpers/fixtures";
 
 /** Every text of the participant interface that differs between the languages (admin is Russian only). */
 function differingTexts(): string[] {
@@ -40,6 +40,7 @@ test.describe("English interface (D-088)", () => {
     );
     await expect(page.getByRole("link", { name: "Sign in with Telegram" }).first()).toBeVisible();
     await expect(page).toHaveTitle("Da Zabey");
+    await openMenu(page);
     await expect(page.getByRole("link", { name: "Standings" }).first()).toBeVisible();
   });
 

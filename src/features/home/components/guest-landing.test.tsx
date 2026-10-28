@@ -35,13 +35,15 @@ function pub(matchCount: number): PredictionsPublic {
 beforeEach(() => home.mockReset());
 
 describe("UpcomingMatches", () => {
-  it("lists at most four match cards of the next tour with time, day and tour", async () => {
+  it("lists at most four match cards of the next tour with time and day", async () => {
     home.mockResolvedValue({ pub: pub(6), leaders: [] });
     render(await UpcomingMatches());
     const rows = screen.getAllByRole("listitem");
     expect(rows).toHaveLength(4);
     expect(within(rows[0]).getByText("Дом0")).toBeVisible();
-    expect(within(rows[0]).getByText(/Высшая лига · Ближайший тур · 7/)).toBeVisible();
+    // The league and the tour are said once, under the heading, not in every card.
+    expect(screen.getAllByText(/Высшая лига · Ближайший тур · 7/)).toHaveLength(1);
+    expect(within(rows[0]).queryByText(/Высшая лига/)).toBeNull();
     // The kickoff time stands where a score would, the day below it.
     expect(within(rows[0]).getByText(/^\d{2}:\d{2}$/)).toBeVisible();
     expect(within(rows[0]).getByText(/^\d{1,2} [а-я]+$/)).toBeVisible();

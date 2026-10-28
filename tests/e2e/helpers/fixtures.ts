@@ -28,3 +28,16 @@ export const test = base.extend({
 });
 
 export { expect };
+
+/**
+ * On a phone the header links live in the burger panel. Unfolds it (when there is a burger on the
+ * screen) and waits until it is open; a click before the page is interactive is simply repeated.
+ */
+export async function openMenu(page: Page) {
+  const burger = page.getByRole("button", { name: /^(Меню|Menu)$/ });
+  if (!(await burger.isVisible())) return;
+  await expect(async () => {
+    if ((await burger.getAttribute("aria-expanded")) !== "true") await burger.click();
+    await expect(burger).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+}
