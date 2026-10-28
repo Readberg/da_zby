@@ -12,7 +12,7 @@ export function HomeBackdrop() {
       className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[640px] overflow-hidden"
     >
       <Image src={photo} alt="" fill sizes="100vw" className="object-cover object-[50%_28%]" />
-      <div className="absolute inset-0 bg-bg/70" />
+      <div className="absolute inset-0 bg-bg/[0.82]" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-linear-to-b from-transparent to-bg" />
     </div>
   );

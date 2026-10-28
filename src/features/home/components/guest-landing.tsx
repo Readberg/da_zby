@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig, type SocialId } from "@/config/site";
-import { formatDateTime } from "@/lib/local-time";
+import { formatDayMonth, formatTimeOfDay } from "@/lib/local-time";
 import { points } from "@/lib/plural";
 import { getHomeCached } from "@/server/services/home.cached";
 import { FaqList } from "./faq-list";
@@ -81,7 +81,7 @@ function Hero() {
   );
 }
 
-/** The next tour matches (real data); every row leads to sign-in and then to the tour. */
+/** The next tour matches (real data) as cards; one button below leads to sign-in and the tour. */
 export async function UpcomingMatches() {
   const locale = getLocale();
   const m = getMessages();
@@ -91,67 +91,65 @@ export async function UpcomingMatches() {
   const { tour, matches, tournament } = composePredictionsPage(pub, {}, undefined, new Date());
 
   return (
-    <div className="rounded-lg border border-line bg-surface p-4 sm:p-6">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-2xl normal-case sm:text-h3">{t.upcomingTitle}</h2>
-        <Link
-          href={LOGIN_HREF}
-          data-umami-event="cta-click"
-          data-umami-event-where="matches-all"
-          className="inline-flex min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-sm border border-line px-4 text-sm font-semibold transition-colors duration-200 hover:bg-surface-hover"
-        >
-          {t.allMatches}
-          <ArrowRightIcon className="h-4 w-4" />
-        </Link>
-      </div>
+    <section aria-labelledby="upcoming-title" className="flex flex-col gap-6">
+      <h2 id="upcoming-title" className="text-h3 sm:text-h2">
+        {t.upcomingTitle}
+      </h2>
       {!tournament || !tour || matches.length === 0 ? (
-        <div className="rounded-lg border border-line bg-bg p-5">
+        <div className="rounded-lg border border-line bg-surface p-5">
           <p className="font-semibold">{m.home.soonTitle}</p>
           <p className="mt-1 text-muted">{m.home.soonText}</p>
         </div>
       ) : (
-        <ul className="flex flex-col divide-y divide-line rounded-lg border border-line bg-bg px-3 sm:px-4">
-          {matches.slice(0, 4).map((match) => (
-            <li
-              key={match.id}
-              className="flex flex-col gap-3 py-4 sm:grid sm:grid-cols-[1fr_auto] sm:items-center sm:gap-x-4 sm:gap-y-2 sm:py-3"
-            >
-              <p className="text-sm text-muted sm:col-span-2">
-                {tournament.name} · {m.home.nextTour.replace("{n}", String(tour.number))}
-              </p>
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row-reverse sm:justify-start sm:gap-2 sm:text-right">
-                  <ClubLogo src={match.home.logoUrl} name={match.home.name} size={40} />
-                  <span className="min-w-0 break-words font-semibold leading-tight sm:truncate">
-                    {match.home.name}
-                  </span>
-                </span>
-                <span className="w-20 shrink-0 text-center text-xs text-muted sm:w-auto sm:px-1">
-                  {formatDateTime(match.kickoffAt, undefined, locale)}
-                </span>
-                <span className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row sm:gap-2 sm:text-left">
-                  <ClubLogo src={match.away.logoUrl} name={match.away.name} size={40} />
-                  <span className="min-w-0 break-words font-semibold leading-tight sm:truncate">
-                    {match.away.name}
-                  </span>
-                </span>
-              </div>
-              <Link
-                href={LOGIN_HREF}
-                data-umami-event="cta-click"
-                data-umami-event-where="match"
-                className={buttonClasses(
-                  "primary",
-                  "min-h-11 w-full px-4 text-sm sm:w-auto sm:min-h-10 sm:px-5",
-                )}
+        <>
+          <ul className="flex flex-col gap-3 sm:gap-4">
+            {matches.slice(0, 4).map((match) => (
+              <li
+                key={match.id}
+                className="rounded-lg border border-line bg-surface px-3 py-5 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-hover sm:px-8 sm:py-6"
               >
-                {t.predict}
-              </Link>
-            </li>
-          ))}
-        </ul>
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-6">
+                  <span className="flex min-w-0 flex-col items-center gap-2 text-center sm:flex-row-reverse sm:justify-start sm:gap-4 sm:text-right">
+                    <ClubLogo src={match.home.logoUrl} name={match.home.name} size={56} />
+                    <span className="min-w-0 break-words text-base font-semibold leading-tight sm:text-xl">
+                      {match.home.name}
+                    </span>
+                  </span>
+                  <span className="font-display text-3xl leading-none text-accent sm:text-5xl">
+                    {formatTimeOfDay(match.kickoffAt, undefined, locale)}
+                  </span>
+                  <span className="flex min-w-0 flex-col items-center gap-2 text-center sm:flex-row sm:gap-4 sm:text-left">
+                    <ClubLogo src={match.away.logoUrl} name={match.away.name} size={56} />
+                    <span className="min-w-0 break-words text-base font-semibold leading-tight sm:text-xl">
+                      {match.away.name}
+                    </span>
+                  </span>
+                </div>
+                <p className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted">
+                  <span className="rounded-sm bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
+                    {tournament.name} · {m.home.nextTour.replace("{n}", String(tour.number))}
+                  </span>
+                  <time dateTime={match.kickoffAt}>
+                    {formatDayMonth(match.kickoffAt, undefined, locale)}
+                  </time>
+                </p>
+              </li>
+            ))}
+          </ul>
+          <div className="flex justify-center">
+            <Link
+              href={LOGIN_HREF}
+              data-umami-event="cta-click"
+              data-umami-event-where="matches"
+              className={buttonClasses("primary", "min-h-12 w-full gap-3 px-8 text-base sm:w-auto")}
+            >
+              {t.predict}
+              <ArrowRightIcon className="h-5 w-5" />
+            </Link>
+          </div>
+        </>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -372,7 +370,27 @@ function Faq() {
   );
 }
 
-/** Landing for guests: the promise, the next matches, how it works, videos and questions. */
+/** Where advertisers can write: a block in the style of a sponsors section, leading to the contacts. */
+export function AdSpace() {
+  const t = getMessages().landing.ad;
+  return (
+    <section aria-labelledby="ad-title" className="flex flex-col items-center gap-4 text-center">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{t.eyebrow}</p>
+      <h2 id="ad-title" className="text-h3 sm:text-h2">
+        {t.title}
+      </h2>
+      <div className="flex w-full flex-col items-center gap-6 rounded-lg border border-line bg-surface px-6 py-10 sm:py-14">
+        <p className="max-w-xl text-lg text-muted">{t.text}</p>
+        <a href="#contacts" className={buttonClasses("primary", "gap-3 px-8")}>
+          {t.button}
+          <ArrowRightIcon className="h-5 w-5" />
+        </a>
+      </div>
+    </section>
+  );
+}
+
+/** Landing for guests: the promise, the next matches, how it works, videos, questions and an ad space. */
 export function GuestLanding({ videos }: { videos: ReactNode }) {
   return (
     <Container
@@ -389,6 +407,7 @@ export function GuestLanding({ videos }: { videos: ReactNode }) {
       <Panels />
       {videos}
       <Faq />
+      <AdSpace />
     </Container>
   );
 }

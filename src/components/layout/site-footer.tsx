@@ -21,6 +21,10 @@ const socialIcons: Record<SocialId, ReactNode> = {
   threads: <ThreadsIcon className="h-5 w-5" />,
 };
 
+/** A contact line: the icon turns yellow and the line steps to the right when pointed at. */
+const contactClass =
+  "group inline-flex min-h-11 w-fit items-center gap-3 transition-all duration-200 hover:translate-x-1 hover:text-ink";
+
 export function SiteFooter() {
   const m = getMessages();
   const social = siteConfig.social.filter((link) => link.url);
@@ -29,22 +33,32 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-auto border-t border-line bg-surface text-muted">
-      <Container className="flex flex-col gap-8 py-10">
-        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr]">
-          <div className="flex items-center gap-3 self-start text-ink">
-            <Image src={logo} alt="" width={48} height={48} className="h-12 w-12" />
-            <span className="font-display text-xl uppercase">{m.site.name}</span>
+      <Container className="flex flex-col gap-10 py-12">
+        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr]">
+          <div className="flex flex-col items-start gap-4">
+            <Image
+              src={logo}
+              alt=""
+              width={64}
+              height={64}
+              className="h-16 w-16 transition-transform duration-300 hover:-rotate-6 hover:scale-110"
+            />
+            <p className="max-w-xs text-sm">{m.site.tagline}</p>
           </div>
-          <div className="flex flex-col gap-2">
-            <p className="font-semibold text-ink">{m.footer.contacts}</p>
+          {/* The target of the "Contact us" button of the ad block on the home page. */}
+          <div id="contacts" className="flex scroll-mt-24 flex-col gap-2">
+            <p className="font-display text-lg uppercase tracking-wide text-ink">
+              {m.footer.contacts}
+            </p>
+            <span aria-hidden="true" className="mb-2 block h-0.5 w-8 bg-accent" />
             {telegram && (
               <a
                 href={telegram.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center gap-3 transition-colors hover:text-ink"
+                className={contactClass}
               >
-                <TelegramIcon className="h-5 w-5 text-ink" />
+                <TelegramIcon className="h-5 w-5 text-ink transition-colors duration-200 group-hover:text-accent" />
                 {m.footer.social.telegram}
                 <span className="sr-only">{m.common.opensInNewTab}</span>
               </a>
@@ -54,9 +68,9 @@ export function SiteFooter() {
                 href={instagram.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center gap-3 transition-colors hover:text-ink"
+                className={contactClass}
               >
-                <InstagramIcon className="h-5 w-5 text-ink" />
+                <InstagramIcon className="h-5 w-5 text-ink transition-colors duration-200 group-hover:text-accent" />
                 {m.footer.social.instagram}
                 <span className="sr-only">{m.common.opensInNewTab}</span>
               </a>
@@ -65,9 +79,7 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-col gap-4 border-t border-line pt-6 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm">
-            {m.footer.rights} · {m.site.tagline}
-          </p>
+          <p className="text-sm">{m.footer.rights}</p>
           <div className="flex flex-wrap items-center gap-4">
             <LanguageSwitcher />
             <nav aria-label={m.footer.socialLabel}>
@@ -78,7 +90,7 @@ export function SiteFooter() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-11 w-11 items-center justify-center rounded-sm border border-line text-ink transition-colors duration-200 hover:border-accent hover:text-accent"
+                      className="flex h-11 w-11 items-center justify-center rounded-sm border border-line bg-bg text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:bg-surface-hover hover:text-accent"
                     >
                       {socialIcons[link.id]}
                       <span className="sr-only">
