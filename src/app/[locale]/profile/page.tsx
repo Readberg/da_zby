@@ -42,7 +42,7 @@ async function ProfileContent() {
 export default async function ProfilePage(props: PageProps<"/[locale]/profile">) {
   await initLocale(props.params);
   return (
-    <Container className="py-8 sm:py-12">
+    <Container className="py-8 sm:py-12 lg:py-20">
       <Suspense fallback={<Skeleton className="h-64 max-w-xl" />}>
         <ProfileContent />
       </Suspense>

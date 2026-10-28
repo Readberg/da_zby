@@ -35,7 +35,7 @@ export default async function ChatPage(props: PageProps<"/[locale]/chat">) {
   await initLocale(props.params);
   const t = getMessages();
   return (
-    <Container className="flex flex-col gap-4 py-8 sm:py-12">
+    <Container className="flex flex-col gap-4 py-8 sm:py-12 lg:py-20">
       <h1 className="font-display text-4xl uppercase">{t.chat.title}</h1>
       <p className="max-w-prose text-muted">{t.chat.lead}</p>
       <Suspense fallback={<Skeleton className="h-96" />}>
