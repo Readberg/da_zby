@@ -137,7 +137,7 @@ export default async function RatingPage(props: PageProps<"/[locale]/rating">) {
   await initLocale(props.params);
   const t = getMessages();
   return (
-    <Container className="flex flex-col gap-6 py-8 sm:py-12">
+    <Container className="flex flex-col gap-6 py-8 sm:py-12 lg:py-20">
       <h1 className="text-h3 sm:text-h1">{t.rating.title}</h1>
       <Suspense fallback={<Skeleton className="h-96" />}>
         <RatingContent searchParams={props.searchParams} />

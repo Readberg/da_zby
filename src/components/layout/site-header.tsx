@@ -11,7 +11,7 @@ import { getMessages } from "@/i18n/server";
 export function SiteHeader() {
   const t = getMessages();
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg/80 text-ink backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-line bg-bg text-ink">
       <Container className="flex min-h-18 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2 sm:flex-nowrap">
         <Link
           href="/"
