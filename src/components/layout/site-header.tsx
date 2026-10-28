@@ -19,7 +19,9 @@ export function SiteHeader() {
           className="mr-auto flex items-center gap-3 sm:mr-0"
         >
           <Image src={logo} alt="" width={48} height={48} priority className="h-12 w-12" />
-          <span className="font-display text-lg uppercase text-ink">{t.site.name}</span>
+          <span className="font-display text-lg uppercase whitespace-nowrap text-ink">
+            {t.site.name}
+          </span>
         </Link>
         {/* On a phone the links scroll sideways when they do not fit; the current one is scrolled into view. */}
         <nav
