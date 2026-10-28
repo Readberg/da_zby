@@ -7,7 +7,7 @@ vi.mock("next/server", () => ({ connection: async () => {} }));
 vi.mock("next/image", () => ({ default: () => null }));
 vi.mock("@/server/services/home.cached", () => ({ getHomeCached: () => home() }));
 
-const { UpcomingMatches } = await import("./guest-landing");
+const { AdSpace, UpcomingMatches } = await import("./guest-landing");
 
 const club = (name: string) => ({ id: name, name, logoUrl: null });
 const future = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString();
@@ -35,15 +35,26 @@ function pub(matchCount: number): PredictionsPublic {
 beforeEach(() => home.mockReset());
 
 describe("UpcomingMatches", () => {
-  it("lists at most four matches of the next tour, each leading to sign-in", async () => {
+  it("lists at most four match cards of the next tour with time, day and tour", async () => {
     home.mockResolvedValue({ pub: pub(6), leaders: [] });
     render(await UpcomingMatches());
     const rows = screen.getAllByRole("listitem");
     expect(rows).toHaveLength(4);
     expect(within(rows[0]).getByText("Дом0")).toBeVisible();
     expect(within(rows[0]).getByText(/Высшая лига · Ближайший тур · 7/)).toBeVisible();
-    for (const link of screen.getAllByRole("link", { name: "Сделать прогноз" })) {
-      expect(link).toHaveAttribute("href", "/login?next=%2Fpredictions");
+    // The kickoff time stands where a score would, the day below it.
+    expect(within(rows[0]).getByText(/^\d{2}:\d{2}$/)).toBeVisible();
+    expect(within(rows[0]).getByText(/^\d{1,2} [а-я]+$/)).toBeVisible();
+  });
+
+  it("has one button for every match, not one per row", async () => {
+    home.mockResolvedValue({ pub: pub(6), leaders: [] });
+    render(await UpcomingMatches());
+    const links = screen.getAllByRole("link", { name: "Сделать прогноз" });
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute("href", "/login?next=%2Fpredictions");
+    for (const row of screen.getAllByRole("listitem")) {
+      expect(within(row).queryByRole("link")).toBeNull();
     }
   });
 
@@ -52,5 +63,14 @@ describe("UpcomingMatches", () => {
     render(await UpcomingMatches());
     expect(screen.getByText("Скоро начнём")).toBeVisible();
     expect(screen.queryByRole("link", { name: "Сделать прогноз" })).toBeNull();
+  });
+});
+
+describe("AdSpace", () => {
+  it("says an ad could be here and leads to the contacts in the footer", () => {
+    render(<AdSpace />);
+    expect(screen.getByRole("heading", { name: "Здесь могла быть ваша реклама" })).toBeVisible();
+    expect(screen.getByText("Партнёры")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Связаться" })).toHaveAttribute("href", "#contacts");
   });
 });

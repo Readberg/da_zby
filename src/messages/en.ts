@@ -52,6 +52,12 @@ export const en: MessagesShape<typeof ru> = {
       lead: "Top the standings",
       free: "Free",
     },
+    ad: {
+      eyebrow: "Partners",
+      title: "Your ad could be here",
+      text: "Tell the Da Zabey audience about your brand: fans of Belarusian football. Write to us and we will discuss the format.",
+      button: "Get in touch",
+    },
     faqTitle: "Questions?\nAnswers.",
     faq: [
       {
