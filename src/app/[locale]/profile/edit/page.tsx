@@ -51,7 +51,7 @@ export default async function EditProfilePage(props: PageProps<"/[locale]/profil
   await initLocale(props.params);
   const t = getMessages();
   return (
-    <Container className="flex flex-col items-center py-8 sm:py-12">
+    <Container className="flex flex-col items-center py-8 sm:py-12 lg:py-20">
       <div className="flex w-full max-w-xl flex-col gap-4">
         <Link
           href="/profile"

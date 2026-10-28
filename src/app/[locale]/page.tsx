@@ -45,7 +45,7 @@ function Videos() {
 function MemberHome() {
   const t = getMessages();
   return (
-    <Container className="flex flex-col gap-12 py-8 sm:gap-16 sm:py-12">
+    <Container className="flex flex-col gap-12 py-8 sm:gap-16 sm:py-12 lg:gap-24 lg:py-20">
       <section aria-labelledby="next-tour-title" className="flex flex-col gap-4">
         <h1 id="next-tour-title" className="text-h3 sm:text-h2">
           {t.home.memberTitle}

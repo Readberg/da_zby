@@ -375,7 +375,7 @@ function Faq() {
 /** Landing for guests: the promise, the next matches, how it works, videos and questions. */
 export function GuestLanding({ videos }: { videos: ReactNode }) {
   return (
-    <Container data-home-guest className="flex flex-col gap-14 py-6 sm:gap-20 sm:py-10">
+    <Container data-home-guest className="flex flex-col gap-14 py-6 sm:gap-20 sm:py-10 lg:gap-24 lg:py-20">
       <Hero />
       <div className="grid gap-6">
         <Suspense fallback={<Skeleton className="h-80 w-full rounded-lg" />}>
