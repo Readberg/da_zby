@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { avatarUrl } from "@/lib/avatar";
+import { dayKey, dayLabel } from "@/lib/chat-days";
+import { CHAT_TTL_MS } from "@/lib/chat-retention";
 import { messageFromRow } from "@/lib/chat-row";
 import { createClient } from "@/lib/supabase/client";
 import { INTL_LOCALE } from "@/lib/time";
@@ -21,7 +23,6 @@ import { useLocale, useMessages } from "@/i18n/client";
 import type { ChatList, ChatMessage } from "@/server/api/v1/schemas/chat";
 
 const MAX_LENGTH = 500;
-const DAY_MS = 24 * 3_600_000;
 
 /** `page` fills the /chat page; `dock` fills the floating window and scrolls inside it. */
 type Props = {
@@ -32,12 +33,12 @@ type Props = {
   utcOffsetMinutes: number;
 };
 
-/** Keeps only what is younger than a day, oldest first, no duplicates. */
+/** Keeps only what is younger than the chat's term (3 days), oldest first, no duplicates. */
 function merge(current: ChatMessage[], incoming: ChatMessage[], now = Date.now()): ChatMessage[] {
   const byId = new Map<string, ChatMessage>();
   for (const message of [...current, ...incoming]) byId.set(message.id, message);
   return [...byId.values()]
-    .filter((message) => now - new Date(message.createdAt).getTime() < DAY_MS)
+    .filter((message) => now - new Date(message.createdAt).getTime() < CHAT_TTL_MS)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
@@ -64,6 +65,8 @@ export function ChatView({
   const [status, setStatus] = useState<Status>("connecting");
   // Bumped by the watchdog below: a new number runs the connection effect again with a fresh channel.
   const [attempt, setAttempt] = useState(0);
+  // "Now" for the day separators ("Today", "Yesterday"); moves on with the minute timer below.
+  const [now, setNow] = useState(() => Date.now());
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +151,10 @@ export function ChatView({
 
   // Messages leave the screen when their day is over, even if nothing else happens.
   useEffect(() => {
-    const timer = setInterval(() => setMessages((current) => merge(current, [])), 60_000);
+    const timer = setInterval(() => {
+      setNow(Date.now());
+      setMessages((current) => merge(current, []));
+    }, 60_000);
     return () => clearInterval(timer);
   }, []);
 
@@ -249,9 +255,21 @@ export function ChatView({
         }
       >
         {messages.length === 0 && <li className="m-auto text-muted">{t.empty}</li>}
-        {messages.map((message) => {
+        {messages.flatMap((message, index) => {
           const mine = message.userId === currentUserId;
-          return (
+          const day = dayKey(message.createdAt, utcOffsetMinutes);
+          const startsDay =
+            index === 0 || day !== dayKey(messages[index - 1]!.createdAt, utcOffsetMinutes);
+          const separator = startsDay ? (
+            <li key={`day-${day}`} className="flex items-center gap-3 text-xs text-muted">
+              <span aria-hidden="true" className="h-px flex-1 bg-line" />
+              <time dateTime={day}>
+                {dayLabel(message.createdAt, now, utcOffsetMinutes, locale, t)}
+              </time>
+              <span aria-hidden="true" className="h-px flex-1 bg-line" />
+            </li>
+          ) : null;
+          const item = (
             <li key={message.id} className={dock ? "flex gap-2" : "flex gap-3"}>
               <Link
                 href={profileHref(message.nickname)}
@@ -306,6 +324,7 @@ export function ChatView({
               </div>
             </li>
           );
+          return [separator, item];
         })}
       </ol>
 

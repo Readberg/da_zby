@@ -15,7 +15,7 @@ const row = (n: number, minutesAgo: number) => ({
 });
 
 describe("listChat", () => {
-  it("asks only for the last 24 hours and returns them oldest first", async () => {
+  it("asks only for the last 3 days and returns them oldest first", async () => {
     const { db, calls } = fakeDb(
       { chat_messages: { data: [row(2, 1), row(1, 5)] } },
       { chat_is_banned: { data: false } },
@@ -26,8 +26,8 @@ describe("listChat", () => {
     expect(result.banned).toBe(false);
     const since = calls.chat_messages!.find((c) => c.method === "gt")!.args[1] as string;
     const ageHours = (Date.now() - new Date(since).getTime()) / 3_600_000;
-    expect(ageHours).toBeGreaterThan(23.99);
-    expect(ageHours).toBeLessThan(24.01);
+    expect(ageHours).toBeGreaterThan(71.99);
+    expect(ageHours).toBeLessThan(72.01);
   });
 
   it("reports a ban", async () => {

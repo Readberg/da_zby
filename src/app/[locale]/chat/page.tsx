@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/chat">):
   return { title: t.chat.title, description: t.chat.description, robots: { index: false } };
 }
 
-/** The common chat: a signed-in page, messages of the last 24 hours, live through Realtime. */
+/** The common chat: a signed-in page, messages of the last 3 days, live through Realtime. */
 async function ChatContent() {
   const user = await requireProfile("/chat");
   const supabase = await createClient();

@@ -25,7 +25,7 @@ export function toChatMessage(row: Tables<"chat_messages">): ChatMessage {
   };
 }
 
-/** Messages of the last 24 hours, oldest first, and whether the caller is shut out of the chat. */
+/** Messages of the last 3 days, oldest first, and whether the caller is shut out of the chat. */
 export async function listChat(supabase: Db, userId: string): Promise<ChatList> {
   const since = new Date(Date.now() - CHAT_TTL_HOURS * 3_600_000).toISOString();
   const [messages, banned] = await Promise.all([
