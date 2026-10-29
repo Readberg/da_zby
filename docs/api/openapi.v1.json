@@ -6395,6 +6395,137 @@
         }
       }
     },
+    "/auth/telegram/miniapp": {
+      "post": {
+        "operationId": "telegramMiniAppLogin",
+        "summary": "Sign in from inside the Telegram Mini App",
+        "description": "The site opened as a Mini App sends the signed launch data it got from Telegram. The signature is checked with the bot token and the launch must be less than an hour old; then the session cookie is set for that Telegram user (an account is created on the first visit). No number to pick: Telegram has already shown who the visitor is.",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "initData": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 4096,
+                    "description": "The signed launch data of the Mini App (`Telegram.WebApp.initData`), unchanged."
+                  }
+                },
+                "required": [
+                  "initData"
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-auth-level": "public",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "signedIn": {
+                          "type": "boolean",
+                          "const": true,
+                          "description": "The session cookie is set; reload the page."
+                        }
+                      },
+                      "required": [
+                        "signedIn"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/telegram/status": {
       "get": {
         "operationId": "telegramLoginStatus",
@@ -6638,8 +6769,8 @@
     "/chat": {
       "get": {
         "operationId": "chatList",
-        "summary": "The common chat: messages of the last 24 hours",
-        "description": "Signed-in users only. Messages older than 24 hours are not returned and are deleted for good (D-098). Live updates come through Supabase Realtime; this endpoint is the first load and the fallback.",
+        "summary": "The common chat: messages of the last 3 days",
+        "description": "Signed-in users only. Messages older than 3 days are not returned and are deleted for good (D-098). Live updates come through Supabase Realtime; this endpoint is the first load and the fallback.",
         "tags": [
           "chat"
         ],
@@ -6711,7 +6842,7 @@
                             ],
                             "additionalProperties": false
                           },
-                          "description": "The last 24 hours, oldest first."
+                          "description": "The last 3 days, oldest first."
                         },
                         "banned": {
                           "type": "boolean",
@@ -7062,7 +7193,7 @@
       "put": {
         "operationId": "adminChatBan",
         "summary": "Shut a user out of the chat or let them back",
-        "description": "Idempotent. Messages the user already wrote stay until deleted or until 24 hours pass.",
+        "description": "Idempotent. Messages the user already wrote stay until deleted or until 3 days pass.",
         "tags": [
           "admin"
         ],

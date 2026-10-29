@@ -109,7 +109,7 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 - Страница `/predictions` читает данные напрямую через сервис (RSC), параметры адреса: `tournament` (slug), `season` (id), `tour` (номер).
 
 ### Чат (DAZBY-117, D-098)
-- `GET /api/v1/chat` (вошедший): `{ messages, banned }` — последние 24 часа, старые сверху. Живые обновления идут не через API, а через Supabase Realtime (канал изменений таблицы `chat_messages`, права по RLS); этот эндпоинт — первая загрузка и восстановление после обрыва.
+- `GET /api/v1/chat` (вошедший): `{ messages, banned }` — последние 3 дня (D-126), старые сверху. Живые обновления идут не через API, а через Supabase Realtime (канал изменений таблицы `chat_messages`, права по RLS); этот эндпоинт — первая загрузка и восстановление после обрыва.
 - `POST /api/v1/chat` (вошедший): тело `{ body }`, 1–500 символов после обрезки пробелов. Автор берётся из сессии. Ошибки: 403 `chat.banned`, 409 `chat.no_nickname`, 429 `api.too_many_requests` (одно сообщение в 2 секунды), 422.
 - `DELETE /api/v1/chat` (вошедший): тело `{ id }`; автор удаляет своё, админ любое; чужое — 404.
 - `PUT /api/v1/admin/chat/bans` (админ): тело `{ userId, banned }`, идемпотентно.
@@ -126,6 +126,7 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 - `POST|PATCH|DELETE /admin/matches`: матч (клубы только из состава сезона, `kickoffAt` — момент времени в UTC). Результат: `status: finished` + `homeScore`/`awayScore` (итог с доп. временем, без пенальти); другой статус обнуляет счёт. Очки считает триггер БД. Матч с прогнозами не удаляется — ставьте «отменён».
 
 ### Вход через Telegram (D-056)
+- `POST /api/v1/auth/telegram/miniapp` (публичный, D-128): тело `{ initData }` — подписанные данные запуска Telegram Mini App без изменений; проверяется подпись токеном бота и свежесть (не старше часа); ставит cookie сессии и отвечает `{ signedIn: true }`; 401 `auth.required` (подпись неверна или данные устарели), 422, 429 (20 попыток за 10 минут с адреса), 503 `auth.telegram_unavailable`.
 - `POST /api/v1/auth/telegram/start` (публичный): создаёт попытку, отвечает `{ token, code, appUrl, webUrl, expiresInSeconds }`; 429 `api.too_many_requests` при слишком большом числе незавершённых попыток или при более чем 10 попытках за 10 минут с одного адреса, 503 `auth.telegram_unavailable`, если вход не настроен.
 - `GET /api/v1/auth/telegram/status?token=` (публичный): `{ status: pending | confirmed | expired }`. При `confirmed` браузер переходит на `/auth/telegram?token=…` (не часть API: ставит cookie сессии).
 - Вебхук бота `/api/telegram/webhook` — не часть публичного контракта (вызывает только Telegram).

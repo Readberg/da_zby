@@ -53,6 +53,8 @@ import {
 } from "./schemas/admin";
 import {
   telegramLoginStartSchema,
+  telegramMiniAppBodySchema,
+  telegramMiniAppSchema,
   telegramLoginStatusQuerySchema,
   telegramLoginStatusSchema,
 } from "./schemas/auth";
@@ -489,6 +491,19 @@ export const endpoints = {
     cacheControl: "no-store",
     errors: [429, 503],
   }),
+  telegramMiniAppLogin: defineEndpoint({
+    method: "post",
+    path: "/auth/telegram/miniapp",
+    summary: "Sign in from inside the Telegram Mini App",
+    description:
+      "The site opened as a Mini App sends the signed launch data it got from Telegram. The signature is checked with the bot token and the launch must be less than an hour old; then the session cookie is set for that Telegram user (an account is created on the first visit). No number to pick: Telegram has already shown who the visitor is.",
+    tags: ["auth"],
+    auth: "public",
+    body: telegramMiniAppBodySchema,
+    output: telegramMiniAppSchema,
+    cacheControl: "no-store",
+    errors: [401, 422, 429, 503],
+  }),
   telegramLoginStatus: defineEndpoint({
     method: "get",
     path: "/auth/telegram/status",
@@ -517,9 +532,9 @@ export const endpoints = {
   chatList: defineEndpoint({
     method: "get",
     path: "/chat",
-    summary: "The common chat: messages of the last 24 hours",
+    summary: "The common chat: messages of the last 3 days",
     description:
-      "Signed-in users only. Messages older than 24 hours are not returned and are deleted for good (D-098). Live updates come through Supabase Realtime; this endpoint is the first load and the fallback.",
+      "Signed-in users only. Messages older than 3 days are not returned and are deleted for good (D-098). Live updates come through Supabase Realtime; this endpoint is the first load and the fallback.",
     tags: ["chat"],
     auth: "user",
     output: chatListSchema,
@@ -557,7 +572,7 @@ export const endpoints = {
     path: "/admin/chat/bans",
     summary: "Shut a user out of the chat or let them back",
     description:
-      "Idempotent. Messages the user already wrote stay until deleted or until 24 hours pass.",
+      "Idempotent. Messages the user already wrote stay until deleted or until 3 days pass.",
     tags: ["admin"],
     auth: "admin",
     body: chatBanBodySchema,

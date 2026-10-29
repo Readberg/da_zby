@@ -12,6 +12,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteLoader } from "@/components/layout/site-loader";
 import { ChatDockGate } from "@/features/chat/components/chat-dock-gate";
 import { SiteHeader } from "@/components/layout/site-header";
+import { TelegramMiniApp } from "@/components/layout/telegram-mini-app";
 import { LOCALES, isLocale } from "@/i18n/config";
 import { bodyFont, headingFont } from "../fonts";
 import "../globals.css";
@@ -70,6 +71,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
           </a>
           <Suspense fallback={null}>
             <NavigationProgress />
+            <TelegramMiniApp />
           </Suspense>
           <SiteHeader />
           <main id="content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
