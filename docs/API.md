@@ -126,6 +126,7 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 - `POST|PATCH|DELETE /admin/matches`: матч (клубы только из состава сезона, `kickoffAt` — момент времени в UTC). Результат: `status: finished` + `homeScore`/`awayScore` (итог с доп. временем, без пенальти); другой статус обнуляет счёт. Очки считает триггер БД. Матч с прогнозами не удаляется — ставьте «отменён».
 
 ### Вход через Telegram (D-056)
+- `POST /api/v1/auth/telegram/miniapp` (публичный, D-128): тело `{ initData }` — подписанные данные запуска Telegram Mini App без изменений; проверяется подпись токеном бота и свежесть (не старше часа); ставит cookie сессии и отвечает `{ signedIn: true }`; 401 `auth.required` (подпись неверна или данные устарели), 422, 429 (20 попыток за 10 минут с адреса), 503 `auth.telegram_unavailable`.
 - `POST /api/v1/auth/telegram/start` (публичный): создаёт попытку, отвечает `{ token, code, appUrl, webUrl, expiresInSeconds }`; 429 `api.too_many_requests` при слишком большом числе незавершённых попыток или при более чем 10 попытках за 10 минут с одного адреса, 503 `auth.telegram_unavailable`, если вход не настроен.
 - `GET /api/v1/auth/telegram/status?token=` (публичный): `{ status: pending | confirmed | expired }`. При `confirmed` браузер переходит на `/auth/telegram?token=…` (не часть API: ставит cookie сессии).
 - Вебхук бота `/api/telegram/webhook` — не часть публичного контракта (вызывает только Telegram).

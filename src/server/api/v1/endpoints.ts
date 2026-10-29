@@ -53,6 +53,8 @@ import {
 } from "./schemas/admin";
 import {
   telegramLoginStartSchema,
+  telegramMiniAppBodySchema,
+  telegramMiniAppSchema,
   telegramLoginStatusQuerySchema,
   telegramLoginStatusSchema,
 } from "./schemas/auth";
@@ -488,6 +490,19 @@ export const endpoints = {
     output: telegramLoginStartSchema,
     cacheControl: "no-store",
     errors: [429, 503],
+  }),
+  telegramMiniAppLogin: defineEndpoint({
+    method: "post",
+    path: "/auth/telegram/miniapp",
+    summary: "Sign in from inside the Telegram Mini App",
+    description:
+      "The site opened as a Mini App sends the signed launch data it got from Telegram. The signature is checked with the bot token and the launch must be less than an hour old; then the session cookie is set for that Telegram user (an account is created on the first visit). No number to pick: Telegram has already shown who the visitor is.",
+    tags: ["auth"],
+    auth: "public",
+    body: telegramMiniAppBodySchema,
+    output: telegramMiniAppSchema,
+    cacheControl: "no-store",
+    errors: [401, 422, 429, 503],
   }),
   telegramLoginStatus: defineEndpoint({
     method: "get",

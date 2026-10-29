@@ -9,6 +9,7 @@ import { ClubLogo } from "@/components/ui/club-logo";
 import { Input } from "@/components/ui/field";
 import { EVENTS, track } from "@/lib/analytics";
 import { ApiClientError, api } from "@/lib/api-client";
+import { tmaHaptic } from "@/lib/telegram-miniapp";
 import { formatDateTime } from "@/lib/local-time";
 import { CountUp } from "@/components/ui/count-up";
 import { pointsWord } from "@/lib/plural";
@@ -165,6 +166,7 @@ export function PredictionTable({
       await api("/predictions", { method: "PUT", json: { tourId, items } });
       track(EVENTS.predictionSaved, { count: items.length });
       setMessage({ text: t.predictions.saved, failed: false });
+      tmaHaptic("success");
       router.refresh();
     } catch (cause) {
       const isClosed =
@@ -174,6 +176,7 @@ export function PredictionTable({
         text: isClosed ? t.predictions.closedNow : t.predictions.saveFailed,
         failed: true,
       });
+      tmaHaptic("error");
       if (isClosed) router.refresh();
     } finally {
       setBusy(false);
