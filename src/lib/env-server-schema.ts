@@ -19,6 +19,9 @@ export const serverEnvSchema = z.object({
     .optional(),
   // Own key of TheSportsDB for the schedule import (D-090); without it the free test key is used.
   THESPORTSDB_API_KEY: z.string().min(1).optional(),
+  // Secret of the results timer (D-127): the scheduler sends it as a Bearer token; without it the
+  // endpoint answers 503 and nothing is entered automatically.
+  CRON_SECRET: z.string().min(24).optional(),
   YOUTUBE_CHANNEL_ID: z.string().regex(/^UC[\w-]{22}$/, "expected a channel id like UC…"),
 });
 

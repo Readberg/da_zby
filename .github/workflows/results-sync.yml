@@ -1,0 +1,36 @@
+name: results-sync
+
+# Every 10 minutes: the site looks at matches that ended 20 minutes ago or earlier and enters their
+# results (D-127). With no such match it answers at once and does not ask the results source.
+# GitHub runs scheduled workflows only from the default branch, so this one starts after a release.
+# Secret: CRON_SECRET (the same value is the CRON_SECRET variable of the Railway service).
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: results-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      STAND_URL: https://dazby-production.up.railway.app
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Enter the results of finished matches
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::Set the CRON_SECRET secret (Settings, Secrets and variables, Actions)."
+            exit 1
+          fi
+          curl -fsS --max-time 90 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$STAND_URL/api/cron/results" | jq -c '{due, toursAsked, updated: (.updated | length), waiting, attention}'

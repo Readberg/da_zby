@@ -1,8 +1,9 @@
 import { z } from "zod";
 
+import { CHAT_TTL_HOURS } from "@/lib/chat-retention";
+
 export const CHAT_MAX_LENGTH = 500;
-/** How long a message lives (D-098). The database enforces it; the number is for the contract text. */
-export const CHAT_TTL_HOURS = 24;
+export { CHAT_TTL_HOURS };
 
 export const chatMessageSchema = z.object({
   id: z.uuid(),
@@ -15,7 +16,7 @@ export const chatMessageSchema = z.object({
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 
 export const chatListSchema = z.object({
-  messages: z.array(chatMessageSchema).describe("The last 24 hours, oldest first."),
+  messages: z.array(chatMessageSchema).describe("The last 3 days, oldest first."),
   banned: z.boolean().describe("True if an admin has shut the caller out of the chat."),
 });
 export type ChatList = z.infer<typeof chatListSchema>;

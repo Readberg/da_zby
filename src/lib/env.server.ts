@@ -7,5 +7,6 @@ export const serverEnv = parseEnv(serverEnvSchema, {
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   TELEGRAM_ADMIN_IDS: process.env.TELEGRAM_ADMIN_IDS,
   THESPORTSDB_API_KEY: process.env.THESPORTSDB_API_KEY,
+  CRON_SECRET: process.env.CRON_SECRET,
   YOUTUBE_CHANNEL_ID: process.env.YOUTUBE_CHANNEL_ID,
 });

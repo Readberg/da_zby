@@ -284,7 +284,8 @@ export const en: MessagesShape<typeof ru> = {
     lead: "How the clubs stand in the championship, from the matches played. This is not the predictors' standings: those are on the Standings page.",
     updated: "Updated: {date}.",
     noResults: "No match results yet.",
-    refresh: "The table is recalculated when results are entered and at least every 30 minutes.",
+    refresh:
+      "The table updates automatically 20 minutes after the matches end, and at once when results are entered by hand.",
     noTournaments: "No tournaments yet. Check back later.",
     empty: "There are no clubs in this season yet.",
     caption: "Championship league table",
@@ -313,9 +314,11 @@ export const en: MessagesShape<typeof ru> = {
   },
   chat: {
     title: "Chat",
-    description: "A common chat for signed-in members. Messages are kept for 24 hours.",
-    lead: "A common chat for members. Messages live for 24 hours and then vanish for good.",
+    description: "A common chat for signed-in members. Messages are kept for 3 days.",
+    lead: "A common chat for members. Messages live for 3 days and then vanish for good.",
     empty: "Quiet so far. Write the first message.",
+    today: "Today",
+    yesterday: "Yesterday",
     listLabel: "Chat messages",
     inputLabel: "Your message",
     placeholder: "Write something…",
