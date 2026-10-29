@@ -28,8 +28,10 @@ jobs:
       - name: Enter the results of finished matches
         run: |
           if [ -z "$CRON_SECRET" ]; then
-            echo "::error::Set the CRON_SECRET secret (Settings, Secrets and variables, Actions)."
-            exit 1
+            # Not an error: until the owner sets the secret the automatic results are simply off, and
+            # a failing run every 10 minutes would only send e-mails (docs/SETUP.md, section J).
+            echo "::warning::CRON_SECRET is not set: automatic results are off. See docs/SETUP.md, section J."
+            exit 0
           fi
           curl -fsS --max-time 90 -X POST \
             -H "Authorization: Bearer $CRON_SECRET" \
