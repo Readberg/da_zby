@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { Loader } from "@/components/ui/loader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GuestLanding } from "@/features/home/components/guest-landing";
+import { AdSpace, GuestLanding } from "@/features/home/components/guest-landing";
 import { GuestSlot, SessionKnown } from "@/features/home/components/home-fallback";
 import { HomeBackdrop } from "@/features/home/components/home-backdrop";
 import { MemberAction, NextTour } from "@/features/home/components/next-tour";
@@ -42,7 +42,7 @@ function Videos() {
   );
 }
 
-/** Signed-in visitors: the next tour with the main action, the season leaders and the videos. */
+/** Signed-in visitors: the next tour with the main action, the season leaders, the videos and the ad space. */
 function MemberHome() {
   const t = getMessages();
   return (
@@ -60,6 +60,7 @@ function MemberHome() {
       </section>
       <Leaders />
       <Videos />
+      <AdSpace />
     </Container>
   );
 }
