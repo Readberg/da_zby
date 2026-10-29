@@ -87,6 +87,23 @@
   }
 }
 
+/*
+ * Telegram Mini App (D-128). Telegram reports what its own bars and the phone's notch cover as
+ * --tg-* variables; they are empty outside Telegram, so these rules change nothing for a visitor.
+ */
+html.tma header {
+  padding-top: calc(
+    var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px)
+  );
+}
+html.tma footer {
+  padding-bottom: var(--tg-safe-area-inset-bottom, 0px);
+}
+html.tma body {
+  padding-left: var(--tg-safe-area-inset-left, 0px);
+  padding-right: var(--tg-safe-area-inset-right, 0px);
+}
+
 @layer base {
   html {
     background-color: var(--color-bg);

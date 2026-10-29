@@ -23,7 +23,8 @@ export function contentSecurityPolicy(supabaseUrl?: string): string {
   const supabase = supabaseHost(supabaseUrl);
   return [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://cloud.umami.is",
+    // telegram.org: the Mini App script, loaded only when the page is opened from Telegram (D-128).
+    "script-src 'self' 'unsafe-inline' https://cloud.umami.is https://telegram.org",
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: https://i.ytimg.com https://${supabase}`,
     "font-src 'self' data:",

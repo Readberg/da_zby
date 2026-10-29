@@ -133,3 +133,10 @@ Railway после базовой разработки: сборка `pnpm build
 ## Производительность: что измерено (D-096, D-111…D-113)
 
 Мобильный Lighthouse, локальная сборка и стенд, медиана 5 прогонов. Не помогли: заставка короче (D-112), `content-visibility` для нижних секций (D-113), предзагрузка шрифта на стенде (D-111: на локальной сборке плюс, на Railway нет). Узкое место — размер страницы (HTML ≈ 368 КБ, дубль страницы в потоке данных ≈ 170 КБ) и работа главного потока (скрипты ≈ 0,6 с, раскладка ≈ 0,56 с без замедления). Дубль лендинга убран (D-114, DAZBY-125): ответ главной 353 → 234 КБ. Остаток потока — повтор статичной оболочки в докачке PPR (≈ 55 КБ), поведение Next, не трогаем.
+
+## Telegram Mini App (D-128)
+
+- `src/components/layout/telegram-mini-app.tsx` (клиентский, в layout): включается, только если страница открыта из Telegram (`#tgWebAppData=…` в адресе, признак живёт в `sessionStorage` вкладки); тогда подгружает `telegram-web-app.js` (CSP: `script-src … https://telegram.org`), красит панели цветом `--color-bg`, делает `expand()`, показывает BackButton, перехватывает внешние ссылки, один раз пробует войти и один раз берёт язык Telegram. Каждый шаг делается не больше одного раза за вкладку, чтобы отказ не превратился в цикл перезагрузок.
+- Сервер: `POST /api/v1/auth/telegram/miniapp` → `verifyInitData` (HMAC-SHA256 с ключом `HMAC("WebAppData", токен бота)`, сравнение за постоянное время, свежесть ≤ 1 час) → `prepareTelegramSession` → `verifyOtp`. Токена бота в браузер не попадает.
+- Типы и мелкие помощники: `src/lib/telegram-miniapp.ts` (`getWebApp`, `tmaHaptic`, `externalLink`, список `startapp`); CSS безопасных зон в `globals.css` под `html.tma`.
+- Telegram Web (iframe) не поддержан: нужны `frame-ancestors` для доменов Telegram и cookie `SameSite=None`.

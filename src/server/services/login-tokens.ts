@@ -1,6 +1,7 @@
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
+import { localeFromTelegram } from "@/lib/telegram-locale";
 import type { Database } from "@/types/database";
 import type { TelegramBot } from "./telegram-bot";
 
@@ -163,11 +164,7 @@ export const botTexts: Record<Locale, BotTexts> = {
   },
 };
 
-/** Telegram's own language setting, used only when the site language is not known (no live attempt). */
-export function localeFromTelegram(languageCode: string | undefined): Locale {
-  if (!languageCode) return DEFAULT_LOCALE;
-  return /^(ru|be|uk|kk)(-|$)/i.test(languageCode) ? "ru" : "en";
-}
+export { localeFromTelegram };
 
 function isSiteLocale(value: unknown): value is Locale {
   return value === "ru" || value === "en";

@@ -19,3 +19,15 @@ export const telegramLoginStatusSchema = z.object({
     .enum(["pending", "confirmed", "expired"])
     .describe("confirmed: continue to /auth/telegram?token=… to open the session."),
 });
+
+export const telegramMiniAppBodySchema = z.object({
+  initData: z
+    .string()
+    .min(20)
+    .max(4096)
+    .describe("The signed launch data of the Mini App (`Telegram.WebApp.initData`), unchanged."),
+});
+
+export const telegramMiniAppSchema = z.object({
+  signedIn: z.literal(true).describe("The session cookie is set; reload the page."),
+});
