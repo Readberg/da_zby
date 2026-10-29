@@ -33,7 +33,7 @@ test.describe("league table (guest, DAZBY-126)", () => {
     await expect(page.getByText(/Учтено матчей: \d+ из \d+/)).toBeVisible();
     // When the table was last recalculated, and how often it is.
     await expect(page.getByText(/Обновлено: .+\.|Результатов матчей пока нет\./)).toBeVisible();
-    await expect(page.getByText(/не реже раза в 30 минут/)).toBeVisible();
+    await expect(page.getByText(/через 20 минут после окончания матчей/)).toBeVisible();
   });
 
   test("unknown parameters do not break the page", async ({ page }) => {

@@ -37,6 +37,8 @@ export function fakeDb(
       "delete",
       "eq",
       "gt",
+      "gte",
+      "lte",
       "in",
       "or",
       "order",

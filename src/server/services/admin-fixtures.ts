@@ -37,7 +37,8 @@ function sourceSeason(seasonName: string, now: Date): string {
   return /^\d{4}$/.test(seasonName.trim()) ? seasonName.trim() : String(now.getUTCFullYear());
 }
 
-async function buildPlan(
+/** Reads the tour, the clubs and the source's round and compares them (shared with the results timer). */
+export async function buildPlan(
   db: Db,
   input: { tourId: string; round?: number },
   deps: FixturesDeps,
