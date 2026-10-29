@@ -284,7 +284,8 @@ export const en: MessagesShape<typeof ru> = {
     lead: "How the clubs stand in the championship, from the matches played. This is not the predictors' standings: those are on the Standings page.",
     updated: "Updated: {date}.",
     noResults: "No match results yet.",
-    refresh: "The table is recalculated when results are entered and at least every 30 minutes.",
+    refresh:
+      "The table updates automatically 20 minutes after the matches end, and at once when results are entered by hand.",
     noTournaments: "No tournaments yet. Check back later.",
     empty: "There are no clubs in this season yet.",
     caption: "Championship league table",
