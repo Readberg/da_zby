@@ -314,9 +314,11 @@ export const en: MessagesShape<typeof ru> = {
   },
   chat: {
     title: "Chat",
-    description: "A common chat for signed-in members. Messages are kept for 24 hours.",
-    lead: "A common chat for members. Messages live for 24 hours and then vanish for good.",
+    description: "A common chat for signed-in members. Messages are kept for 3 days.",
+    lead: "A common chat for members. Messages live for 3 days and then vanish for good.",
     empty: "Quiet so far. Write the first message.",
+    today: "Today",
+    yesterday: "Yesterday",
     listLabel: "Chat messages",
     inputLabel: "Your message",
     placeholder: "Write something…",
