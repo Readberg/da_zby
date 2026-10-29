@@ -105,9 +105,41 @@ describe("ChatView", () => {
     expect(screen.getByText("Пока тихо. Напишите первым.")).toBeInTheDocument();
   });
 
-  it("does not show a message older than a day", () => {
-    renderChat({ initial: { messages: [message(1, OTHER, 25 * 60)], banned: false } });
+  it("does not show a message older than 3 days, but still shows one of 2 days", () => {
+    renderChat({
+      initial: {
+        messages: [message(1, OTHER, 73 * 60), message(2, OTHER, 48 * 60)],
+        banned: false,
+      },
+    });
     expect(screen.queryByText("message 1")).toBeNull();
+    expect(screen.getByText("message 2")).toBeInTheDocument();
+  });
+
+  it("puts a separator with the day above the messages of each day", () => {
+    // Noon in Minsk (UTC+3), so "hours ago" never crosses a day boundary by chance.
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-29T09:00:00Z") });
+    try {
+      renderChat({
+        initial: {
+          messages: [
+            message(1, OTHER, 50 * 60),
+            message(2, OTHER, 49 * 60),
+            message(3, OTHER, 26 * 60),
+            message(4, USER, 1),
+          ],
+          banned: false,
+        },
+      });
+      const separators = screen.getAllByText(/^(Сегодня|Вчера|\d{1,2} [а-я]+)$/);
+      // Two days ago (two messages share one separator), yesterday, today.
+      expect(separators).toHaveLength(3);
+      expect(separators[0]).toHaveTextContent("27 октября");
+      expect(separators[1]).toHaveTextContent("Вчера");
+      expect(separators[2]).toHaveTextContent("Сегодня");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("sends a message with the send button and clears the field", async () => {

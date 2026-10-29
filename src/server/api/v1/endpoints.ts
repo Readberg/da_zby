@@ -517,9 +517,9 @@ export const endpoints = {
   chatList: defineEndpoint({
     method: "get",
     path: "/chat",
-    summary: "The common chat: messages of the last 24 hours",
+    summary: "The common chat: messages of the last 3 days",
     description:
-      "Signed-in users only. Messages older than 24 hours are not returned and are deleted for good (D-098). Live updates come through Supabase Realtime; this endpoint is the first load and the fallback.",
+      "Signed-in users only. Messages older than 3 days are not returned and are deleted for good (D-098). Live updates come through Supabase Realtime; this endpoint is the first load and the fallback.",
     tags: ["chat"],
     auth: "user",
     output: chatListSchema,
@@ -557,7 +557,7 @@ export const endpoints = {
     path: "/admin/chat/bans",
     summary: "Shut a user out of the chat or let them back",
     description:
-      "Idempotent. Messages the user already wrote stay until deleted or until 24 hours pass.",
+      "Idempotent. Messages the user already wrote stay until deleted or until 3 days pass.",
     tags: ["admin"],
     auth: "admin",
     body: chatBanBodySchema,
