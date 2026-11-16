@@ -21,14 +21,7 @@ describe("SiteHeader", () => {
     render(<SiteHeader />);
     const nav = screen.getByRole("navigation", { name: "Основная навигация" });
     const links = within(nav).getAllByRole("link");
-    expect(links.map((l) => l.textContent)).toEqual([
-      "Главная",
-      "Прогнозы",
-      "Рейтинг",
-      "Таблица",
-      "Чат",
-      "Менеджер",
-    ]);
+    expect(links.map((l) => l.textContent)).toEqual(["Главная", "Прогнозы", "Чат", "Менеджер"]);
     expect(links[0]).toHaveAttribute("aria-current", "page");
   });
 });

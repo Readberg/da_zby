@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClubView } from "@/features/manager/components/club-view";
 import { CreateClubForm } from "@/features/manager/components/create-club-form";
+import { HelpHint } from "@/features/manager/components/help-hint";
 import { ManagerShell } from "@/features/manager/components/manager-shell";
 import { loadMember } from "@/features/manager/load";
 import { serverEnv } from "@/lib/env.server";
@@ -34,14 +35,16 @@ async function ManagerContent() {
   // The scheduler plays the rounds; a visit after kickoff is the safety net.
   after(catchUpRounds);
 
-  if (view.club) return <ClubView view={view} offsetMinutes={offsetMinutes} />;
+  if (view.club) return <ClubView view={view} offsetMinutes={offsetMinutes} userId={user.id} />;
   return (
     <section aria-labelledby="create-title" className="flex flex-col gap-4">
-      <h2 id="create-title" className="text-h3">
-        {t.createTitle}
-      </h2>
-      <p className="max-w-prose text-muted">{t.createLead}</p>
-      <CreateClubForm t={t} />
+      <div className="flex items-center gap-3">
+        <h2 id="create-title" className="text-h3">
+          {t.createTitle}
+        </h2>
+        <HelpHint faq="start">{t.createLead}</HelpHint>
+      </div>
+      <CreateClubForm />
     </section>
   );
 }
@@ -50,10 +53,7 @@ export default async function ManagerPage(props: PageProps<"/[locale]/manager">)
   await initLocale(props.params);
   const t = getMessages().manager;
   return (
-    <ManagerShell title={t.title} lead={t.lead}>
-      <p className="max-w-prose rounded-lg border border-line bg-surface p-4 text-sm text-muted">
-        {t.scheduleNote}
-      </p>
+    <ManagerShell title={t.title} lead={t.lead} faq="start">
       <Suspense fallback={<Skeleton className="h-96" />}>
         <ManagerContent />
       </Suspense>

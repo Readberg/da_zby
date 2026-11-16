@@ -29,14 +29,14 @@ async function TrainingContent() {
   const notes = injuredNotes(view.players, (until) =>
     t.trainingPage.injured.replace("{date}", formatDateTime(until, offsetMinutes, getLocale())),
   );
-  return <TrainingForm t={t} players={view.players} locked={lineup.locked} injuredNotes={notes} />;
+  return <TrainingForm players={view.players} locked={lineup.locked} injuredNotes={notes} />;
 }
 
 export default async function ManagerTrainingPage(props: PageProps<"/[locale]/manager/training">) {
   await initLocale(props.params);
   const t = getMessages().manager.trainingPage;
   return (
-    <ManagerShell title={t.title} lead={t.lead}>
+    <ManagerShell title={t.title} lead={`${t.lead} ${t.rules}`} faq="training">
       <Suspense fallback={<Skeleton className="h-96" />}>
         <TrainingContent />
       </Suspense>

@@ -33,7 +33,7 @@ beforeEach(() => {
 });
 
 async function ready() {
-  render(<CreateClubForm t={t} />);
+  render(<CreateClubForm />);
   await waitFor(() => expect(screen.getByRole("option", { name: "Минск" })).toBeInTheDocument());
 }
 
@@ -85,7 +85,7 @@ describe("CreateClubForm", () => {
       if (path === "/manager/cities") return options;
       throw new ApiClientError({ status: 409, code: "manager.name_taken", detail: "taken" });
     });
-    render(<CreateClubForm t={t} />);
+    render(<CreateClubForm />);
     await waitFor(() => expect(screen.getByRole("option", { name: "Минск" })).toBeInTheDocument());
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(t.nameLabel), "Динамо");

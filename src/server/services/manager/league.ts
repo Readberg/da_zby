@@ -16,6 +16,8 @@ import {
 } from "@/lib/manager/formations";
 import { CLUB_COLORS, FALLBACK_COLORS } from "@/lib/manager/palette";
 import { buildSchedule, firstKickoff, ROUNDS } from "@/lib/manager/schedule";
+import { lineupDeadline } from "@/lib/manager/time-left";
+import { managerLogoUrl } from "@/lib/manager/logo-url";
 import { roundMoney } from "@/lib/manager/economy";
 import { computeTable } from "@/lib/manager/table";
 import { errorFields, log } from "@/lib/log";
@@ -45,17 +47,19 @@ type ClubBit = {
   name: string;
   primary_color: string;
   secondary_color: string;
+  logo_path: string | null;
 };
 type MatchRow = Tables<"mgr_matches"> & { home: ClubBit | null; away: ClubBit | null };
 
 const MATCH_SELECT =
-  "*, home:mgr_clubs!mgr_matches_home_club_id_fkey(id, name, primary_color, secondary_color), away:mgr_clubs!mgr_matches_away_club_id_fkey(id, name, primary_color, secondary_color)";
+  "*, home:mgr_clubs!mgr_matches_home_club_id_fkey(id, name, primary_color, secondary_color, logo_path), away:mgr_clubs!mgr_matches_away_club_id_fkey(id, name, primary_color, secondary_color, logo_path)";
 
 const toSide = (club: ClubBit | null, fallbackId: string) => ({
   clubId: club?.id ?? fallbackId,
   name: club?.name ?? "",
   primaryColor: club?.primary_color ?? FALLBACK_COLORS.primary,
   secondaryColor: club?.secondary_color ?? FALLBACK_COLORS.secondary,
+  logoUrl: managerLogoUrl(club?.logo_path),
 });
 
 export function toMatchSummary(row: MatchRow): MatchSummary {
@@ -155,7 +159,7 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
   const [clubs, matches] = await Promise.all([
     supabase
       .from("mgr_clubs")
-      .select("id, name, primary_color, secondary_color, is_bot")
+      .select("id, name, primary_color, secondary_color, is_bot, logo_path")
       .eq("league_id", club.leagueId),
     fetchAll((from, to) =>
       supabase
@@ -212,6 +216,7 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
         name: c?.name ?? "",
         primaryColor: c?.primary_color ?? FALLBACK_COLORS.primary,
         secondaryColor: c?.secondary_color ?? FALLBACK_COLORS.secondary,
+        logoUrl: managerLogoUrl(c?.logo_path),
         isBot: c?.is_bot ?? false,
         isMine: row.clubId === club.id,
       };
@@ -308,12 +313,14 @@ export async function getLineup(supabase: Db, userId: string): Promise<LineupVie
   const lineup = resolveLineup(toSquad(players.data ?? [], new Date()), saved.data);
   if (!lineup) throw new Error("the squad cannot field a lineup");
   const nextKickoff = next.data ? new Date(next.data.kickoff_at) : null;
+  const lockAt = nextKickoff ? lineupDeadline(nextKickoff.toISOString()) : null;
   return {
     formation: lineup.formation,
     mentality: lineup.mentality,
     playerIds: lineup.playerIds,
     saved: lineup.saved,
-    locked: nextKickoff !== null && nextKickoff.getTime() <= Date.now(),
+    locked: lockAt !== null && lockAt.getTime() <= Date.now(),
+    lockAt: lockAt ? lockAt.toISOString() : null,
     nextKickoffAt: nextKickoff ? nextKickoff.toISOString() : null,
   };
 }
@@ -423,6 +430,8 @@ export async function placeClub(admin: Db, clubId: string): Promise<string> {
 // ---- playing the rounds --------------------------------------------------------------------
 
 const BATCH = 40;
+/** At most this many passes in one call: 38 rounds and some room. */
+const MAX_PASSES = 120;
 
 function sideOf(
   clubId: string,
@@ -503,7 +512,18 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
   if (due.error) throw due.error;
   if (!due.data?.length) return 0;
 
-  const clubIds = [...new Set(due.data.flatMap((m) => [m.home_club_id, m.away_club_id]))];
+  // A club plays once in a batch: the state a round leaves (form, fitness, injuries, money) is the
+  // start of the next one, so the second match of a club waits for the next pass. This matters
+  // when several rounds are due at once (after a pause of the scheduler).
+  const busy = new Set<string>();
+  const batch = due.data.filter((m) => {
+    if (busy.has(m.home_club_id) || busy.has(m.away_club_id)) return false;
+    busy.add(m.home_club_id);
+    busy.add(m.away_club_id);
+    return true;
+  });
+
+  const clubIds = [...busy];
   const [players, lineups, clubs] = await Promise.all([
     fetchAll<PlayerRow>(
       (from, to) =>
@@ -531,7 +551,7 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
   const saved = new Map(lineups.map((l) => [l.club_id, l]));
 
   let written = 0;
-  for (const match of due.data) {
+  for (const match of batch) {
     const kickoff = new Date(match.kickoff_at);
     const rows = {
       home: rowsByClub.get(match.home_club_id) ?? [],
@@ -576,7 +596,7 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       return roundMoney({
         home: side === "home",
         outcome: outcomeOf(own, other),
-        squad: rows[side].map((row) => ({ ovr: row.ovr, age: row.age })),
+        squad: rows[side].map((row) => ({ ovr: row.ovr, age: row.age, wage: row.wage })),
       }).map((entry) => ({ club_id: clubId, reason: entry.reason, amount: entry.amount }));
     });
 
@@ -602,10 +622,11 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
 /** Plays everything that is due, batch after batch (the scheduler calls this). */
 export async function playAllDue(admin: Db, now: Date = new Date()): Promise<number> {
   let total = 0;
-  for (let i = 0; i < 20; i += 1) {
+  // Passes go on while they make progress: a long pause leaves many rounds, one per pass for a club.
+  for (let i = 0; i < MAX_PASSES; i += 1) {
     const written = await playDueMatches(admin, now);
     total += written;
-    if (written === 0 || written < BATCH) break;
+    if (written === 0) break;
   }
   return total;
 }

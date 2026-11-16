@@ -1,12 +1,17 @@
 import Link from "next/link";
-import { ClubColors } from "./club-colors";
+import { ClubBadge } from "./club-badge";
 import type { MatchSummary } from "@/server/api/v1/schemas/manager";
 
 /** The two clubs of a match with their colours; the score when it was played. */
 export function MatchTitle({ match, mineId }: { match: MatchSummary; mineId?: string }) {
   const side = (club: MatchSummary["home"]) => (
     <span className="flex min-w-0 items-center gap-2">
-      <ClubColors primary={club.primaryColor} secondary={club.secondaryColor} size="sm" />
+      <ClubBadge
+        logoUrl={club.logoUrl}
+        primary={club.primaryColor}
+        secondary={club.secondaryColor}
+        name={club.name}
+      />
       <span className={club.clubId === mineId ? "truncate font-bold" : "truncate"}>
         {club.name}
       </span>

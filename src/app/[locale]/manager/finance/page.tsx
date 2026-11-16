@@ -27,7 +27,7 @@ export default async function ManagerFinancePage(props: PageProps<"/[locale]/man
   await initLocale(props.params);
   const t = getMessages().manager.finance;
   return (
-    <ManagerShell title={t.title} lead={t.lead}>
+    <ManagerShell title={t.title} lead={t.rules} faq="money">
       <Suspense fallback={<Skeleton className="h-96" />}>
         <FinanceContent />
       </Suspense>

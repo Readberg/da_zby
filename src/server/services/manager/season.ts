@@ -7,9 +7,12 @@ import type { Database, Json } from "@/types/database";
 import { fetchAll } from "../paginate";
 import { computePreseasonDay } from "./effects";
 import { playAllDue, toState, type PlayerRow } from "./league";
+import { settleDueAuctions } from "./auction";
+import { releaseExpiredContracts } from "./contracts";
 import { runMarketPools } from "./market";
 import { makeRandom } from "./random";
 import { generateYouth } from "./squad";
+import { expireTrades } from "./trade";
 
 type Db = SupabaseClient<Database>;
 
@@ -193,13 +196,26 @@ export async function openReadySeasons(admin: Db): Promise<number> {
 export async function runRounds(
   admin: Db,
   now: Date = new Date(),
-): Promise<{ played: number; closed: number; days: number; opened: number; pools: number }> {
+): Promise<{
+  played: number;
+  closed: number;
+  days: number;
+  opened: number;
+  pools: number;
+  released: number;
+  settled: number;
+  expired: number;
+}> {
   const played = await playAllDue(admin, now);
   const closed = await closeFinishedSeasons(admin);
   const days = await runPreseasonDays(admin, now);
   const opened = await openReadySeasons(admin);
   const pools = await runMarketPools(admin, now);
-  return { played, closed, days, opened, pools };
+  // The market (D-136): contracts that are over, the lots whose tick has come, the offers out of time.
+  const released = await releaseExpiredContracts(admin);
+  const settled = await settleDueAuctions(admin);
+  const expired = await expireTrades(admin);
+  return { played, closed, days, opened, pools, released, settled, expired };
 }
 
 /** A friendly match with a random club of the league, at the next 10:00 Moscow time. */

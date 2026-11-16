@@ -239,6 +239,7 @@ export type Database = {
       mgr_clubs: {
         Row: {
           budget: number;
+          logo_path: string | null;
           city_id: number;
           country: string;
           created_at: string;
@@ -253,6 +254,7 @@ export type Database = {
         };
         Insert: {
           budget?: number;
+          logo_path?: string | null;
           city_id: number;
           country?: string;
           created_at?: string;
@@ -267,6 +269,7 @@ export type Database = {
         };
         Update: {
           budget?: number;
+          logo_path?: string | null;
           city_id?: number;
           country?: string;
           created_at?: string;
@@ -496,6 +499,142 @@ export type Database = {
           },
         ];
       };
+      mgr_auctions: {
+        Row: {
+          id: string;
+          league_id: string;
+          player_id: string;
+          seller_club_id: string;
+          start_price: number;
+          step_percent: number;
+          nominal: number;
+          status: string;
+          created_at: string;
+          ends_at: string;
+          bid_count: number;
+          best_bid: number | null;
+          best_club_id: string | null;
+          buyer_club_id: string | null;
+          final_price: number | null;
+          closed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          league_id: string;
+          player_id: string;
+          seller_club_id: string;
+          start_price: number;
+          step_percent: number;
+          nominal: number;
+          status?: string;
+          created_at?: string;
+          ends_at: string;
+          bid_count?: number;
+          best_bid?: number | null;
+          best_club_id?: string | null;
+          buyer_club_id?: string | null;
+          final_price?: number | null;
+          closed_at?: string | null;
+        };
+        Update: {
+          status?: string;
+          bid_count?: number;
+          best_bid?: number | null;
+          best_club_id?: string | null;
+          buyer_club_id?: string | null;
+          final_price?: number | null;
+          closed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_auctions_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_players";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_auctions_seller_club_id_fkey";
+            columns: ["seller_club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_bids: {
+        Row: {
+          id: number;
+          auction_id: string;
+          club_id: string;
+          amount: number;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: never;
+          auction_id: string;
+          club_id: string;
+          amount: number;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          status?: string;
+        };
+        Relationships: [];
+      };
+      mgr_trades: {
+        Row: {
+          id: string;
+          league_id: string;
+          from_club_id: string;
+          to_club_id: string;
+          give_ids: string[];
+          take_ids: string[];
+          cash: number;
+          status: string;
+          created_at: string;
+          expires_at: string;
+          resolved_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          league_id: string;
+          from_club_id: string;
+          to_club_id: string;
+          give_ids: string[];
+          take_ids: string[];
+          cash?: number;
+        };
+        Update: {
+          status?: string;
+          resolved_at?: string | null;
+        };
+        Relationships: [];
+      };
+      mgr_deals: {
+        Row: {
+          club_a: string;
+          club_b: string;
+          season: number;
+          kind: string;
+          ref: string;
+          created_at: string;
+        };
+        Insert: {
+          club_a: string;
+          club_b: string;
+          season: number;
+          kind: string;
+          ref: string;
+          created_at?: string;
+        };
+        Update: {
+          kind?: string;
+        };
+        Relationships: [];
+      };
       mgr_transactions: {
         Row: {
           amount: number;
@@ -554,6 +693,10 @@ export type Database = {
           position: string;
           retire_after_season: boolean;
           training_focus: string | null;
+          tradable_after: string | null;
+          wage: number;
+          contract_until: number | null;
+          contract_offer_season: number | null;
         };
         Insert: {
           academy_club_id?: string | null;
@@ -574,6 +717,10 @@ export type Database = {
           position: string;
           retire_after_season?: boolean;
           training_focus?: string | null;
+          tradable_after?: string | null;
+          wage?: number;
+          contract_until?: number | null;
+          contract_offer_season?: number | null;
         };
         Update: {
           academy_club_id?: string | null;
@@ -594,6 +741,10 @@ export type Database = {
           position?: string;
           retire_after_season?: boolean;
           training_focus?: string | null;
+          tradable_after?: string | null;
+          wage?: number;
+          contract_until?: number | null;
+          contract_offer_season?: number | null;
         };
         Relationships: [
           {
@@ -1049,6 +1200,41 @@ export type Database = {
         Returns: boolean;
       };
       mgr_buy_free_agent: { Args: { p_player: string; p_user: string }; Returns: number };
+      mgr_list_player: {
+        Args: { p_player: string; p_price: number; p_step: number; p_user: string };
+        Returns: string;
+      };
+      mgr_cancel_auction: { Args: { p_auction: string; p_user: string }; Returns: boolean };
+      mgr_place_bid: {
+        Args: { p_amount: number; p_auction: string; p_user: string };
+        Returns: string;
+      };
+      mgr_due_auctions: { Args: never; Returns: string[] };
+      mgr_settle_auction: { Args: { p_auction: string }; Returns: string | null };
+      mgr_propose_trade: {
+        Args: {
+          p_cash: number;
+          p_give: string[];
+          p_take: string[];
+          p_to_club: string;
+          p_user: string;
+        };
+        Returns: string;
+      };
+      mgr_accept_trade: { Args: { p_trade: string; p_user: string }; Returns: undefined };
+      mgr_close_trade: {
+        Args: { p_action: string; p_trade: string; p_user: string };
+        Returns: boolean;
+      };
+      mgr_expire_trades: { Args: never; Returns: number };
+      mgr_extend_contract: {
+        Args: { p_player: string; p_seasons: number; p_user: string };
+        Returns: string;
+      };
+      mgr_terminate_contract: { Args: { p_player: string; p_user: string }; Returns: number };
+      mgr_release_expired: { Args: { p_league: string }; Returns: number };
+      mgr_contract_rounds: { Args: { p_player: string }; Returns: number };
+
       mgr_nominal: { Args: { p_age: number; p_ovr: number }; Returns: number };
       mgr_pay: {
         Args: { p_amount: number; p_club: string; p_ref: string; p_reason: string };
@@ -1067,6 +1253,7 @@ export type Database = {
         };
         Returns: boolean;
       };
+      mgr_set_logo: { Args: { p_path: string; p_user: string }; Returns: undefined };
       mgr_create_club: {
         Args: {
           p_city: number;

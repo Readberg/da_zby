@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { errorFields, log } from "@/lib/log";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CLUB_COLORS } from "@/lib/manager/palette";
+import { managerLogoUrl } from "@/lib/manager/logo-url";
 import { realRating } from "@/lib/manager/attributes";
 import { nominalValue } from "@/lib/manager/economy";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
@@ -34,6 +35,7 @@ function toClub(row: ClubRow): Club {
     primaryColor: row.primary_color,
     secondaryColor: row.secondary_color,
     budget: Number(row.budget),
+    logoUrl: managerLogoUrl(row.logo_path),
     createdAt: new Date(row.created_at).toISOString(),
   };
 }
@@ -227,4 +229,29 @@ export async function placeClubQuietly(admin: Db, clubId: string): Promise<boole
     log("error", "manager.place_failed", { clubId, ...errorFields(error) });
     return false;
   }
+}
+
+/** Sets or removes the logo of the caller's club: the database checks that the file is in his folder. */
+export async function setClubLogo(
+  admin: Db,
+  userId: string,
+  path: string | null,
+): Promise<{ logoUrl: string | null }> {
+  const { error } = await admin.rpc("mgr_set_logo", { p_user: userId, p_path: path as string });
+  if (error) {
+    if (error.message.includes("manager.logo_invalid")) {
+      throw new ApiError(
+        422,
+        ERROR_CODES.validationFailed,
+        "Unprocessable Content",
+        "The logo path is not valid.",
+        [{ field: "path", message: "Upload the picture to your own folder first." }],
+      );
+    }
+    if (error.message.includes("manager.club_unknown")) {
+      throw new ApiError(404, ERROR_CODES.notFound, "Not Found", "You have no club yet.");
+    }
+    throw error;
+  }
+  return { logoUrl: managerLogoUrl(path) };
 }

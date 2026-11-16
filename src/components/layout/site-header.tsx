@@ -67,6 +67,7 @@ function NavList({ link: Link, stacked = false }: { link: typeof NavLink; stacke
           <Link
             href={item.href}
             prefetch={"prefetch" in item ? item.prefetch : undefined}
+            also={"also" in item ? item.also : undefined}
             className={stacked ? "w-full min-h-12 text-base" : undefined}
           >
             {t.nav[item.id]}
