@@ -80,6 +80,8 @@ import {
   managerCitiesSchema,
   managerClubViewSchema,
   playerQuerySchema,
+  trainingBodySchema,
+  trainingSavedSchema,
   playerSchema,
 } from "./schemas/manager";
 import { listMetaSchema, videoListSchema, videosQuerySchema } from "./schemas/videos";
@@ -703,6 +705,19 @@ export const endpoints = {
     auth: "user",
     body: lineupBodySchema,
     output: lineupSavedSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 404, 409, 422],
+  }),
+  managerSaveTraining: defineEndpoint({
+    method: "put",
+    path: "/manager/training",
+    summary: "Football manager: choose what the players train",
+    description:
+      "For each player an attribute of his own or null (rest). A round of training costs 3 fitness; a fit player may grow by a point, never above his hidden potential, and slower with age. 409 manager.training_locked from the kickoff of a due round; 422 for a player of another club or an attribute the player does not have.",
+    tags: ["manager"],
+    auth: "user",
+    body: trainingBodySchema,
+    output: trainingSavedSchema,
     cacheControl: "private, no-store",
     errors: [400, 401, 404, 409, 422],
   }),

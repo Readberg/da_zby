@@ -24,6 +24,7 @@ export function ManagerShell({
         tabs={[
           { href: "/manager", label: t.hub.club },
           { href: "/manager/lineup", label: t.hub.lineup },
+          { href: "/manager/training", label: t.hub.training },
           { href: "/manager/matches", label: t.hub.matches },
           { href: "/manager/table", label: t.hub.table },
         ]}

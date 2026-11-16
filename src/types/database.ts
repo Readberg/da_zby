@@ -486,10 +486,13 @@ export type Database = {
           fitness: number;
           form: number;
           id: string;
+          idle_rounds: number;
+          injured_until: string | null;
           last_name: string;
           morale: number;
           ovr: number;
           position: string;
+          training_focus: string | null;
         };
         Insert: {
           academy_club_id?: string | null;
@@ -501,10 +504,13 @@ export type Database = {
           fitness?: number;
           form?: number;
           id?: string;
+          idle_rounds?: number;
+          injured_until?: string | null;
           last_name: string;
           morale?: number;
           ovr: number;
           position: string;
+          training_focus?: string | null;
         };
         Update: {
           academy_club_id?: string | null;
@@ -516,10 +522,13 @@ export type Database = {
           fitness?: number;
           form?: number;
           id?: string;
+          idle_rounds?: number;
+          injured_until?: string | null;
           last_name?: string;
           morale?: number;
           ovr?: number;
           position?: string;
+          training_focus?: string | null;
         };
         Relationships: [
           {
@@ -925,6 +934,18 @@ export type Database = {
         Args: { p_bots: Json; p_club: string; p_first_kickoff: string; p_matches: Json };
         Returns: string;
       };
+      mgr_play_match: {
+        Args: {
+          p_away_goals: number;
+          p_away_lineup: Json;
+          p_effects: Json;
+          p_events: Json;
+          p_home_goals: number;
+          p_home_lineup: Json;
+          p_match: string;
+        };
+        Returns: boolean;
+      };
       mgr_record_match: {
         Args: {
           p_away_goals: number;
@@ -940,6 +961,7 @@ export type Database = {
         Args: { p_formation: string; p_mentality: string; p_players: string[]; p_user: string };
         Returns: undefined;
       };
+      mgr_set_training: { Args: { p_plans: Json; p_user: string }; Returns: undefined };
       mgr_take_bot_place: { Args: { p_bot: string; p_club: string }; Returns: string };
       mgr_create_club: {
         Args: {

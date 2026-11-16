@@ -1,7 +1,12 @@
 import { randomBytes } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Position } from "@/lib/manager/attributes";
-import { realRating } from "@/lib/manager/attributes";
+import {
+  attributesOf,
+  realRating,
+  weightOf,
+  type Attribute,
+  type Position,
+} from "@/lib/manager/attributes";
 import {
   autoLineup,
   lineupFits,
@@ -19,6 +24,7 @@ import type {
   LineupBody,
   LineupPlayerSnapshot,
   LineupView,
+  TrainingBody,
   MatchDetail,
   MatchEventData,
   MatchList,
@@ -26,6 +32,7 @@ import type {
 } from "@/server/api/v1/schemas/manager";
 import type { Database, Json, Tables } from "@/types/database";
 import { simulateMatch, type Side, type SidePlayer } from "./engine";
+import { computeEffects, outcomeOf, type PlayerState } from "./effects";
 import { generateSquad } from "./squad";
 import { fetchAll } from "../paginate";
 import { makeRandom } from "./random";
@@ -191,14 +198,15 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
 
 // ---- lineups -------------------------------------------------------------------------------
 
-type SquadPlayer = RatedPlayer & { name: string };
+type SquadPlayer = RatedPlayer & { name: string; injured: boolean };
 
-function toSquad(rows: Tables<"mgr_players">[]): SquadPlayer[] {
+function toSquad(rows: Tables<"mgr_players">[], at: Date): SquadPlayer[] {
   return rows.map((p) => ({
     id: p.id,
     name: `${p.first_name} ${p.last_name}`,
     position: p.position as Position,
     real: realRating(p.ovr, { form: p.form, fitness: p.fitness, morale: p.morale }),
+    injured: p.injured_until !== null && new Date(p.injured_until).getTime() > at.getTime(),
   }));
 }
 
@@ -209,25 +217,49 @@ type ChosenLineup = {
   saved: boolean;
 };
 
-/** The saved lineup when it still fits the squad, otherwise the best one (no penalty). */
+/**
+ * The saved lineup when it still fits the squad, otherwise the best one (no penalty). An injured
+ * player of the saved lineup is replaced by the best fit player of the same position, so one
+ * injury does not throw away the whole choice.
+ */
 export function resolveLineup(
   squad: SquadPlayer[],
   saved: Pick<Tables<"mgr_lineups">, "formation" | "mentality" | "player_ids"> | null | undefined,
 ): ChosenLineup | null {
+  const fit = squad.filter((p) => !p.injured);
   if (saved) {
     const byId = new Map(squad.map((p) => [p.id, p]));
     const chosen = saved.player_ids.map((id) => byId.get(id));
-    const complete = chosen.every((p): p is SquadPlayer => Boolean(p));
-    if (complete && lineupFits(saved.formation as Formation, chosen as SquadPlayer[])) {
-      return {
-        formation: saved.formation as Formation,
-        mentality: saved.mentality as Mentality,
-        playerIds: saved.player_ids,
-        saved: true,
-      };
+    if (chosen.every((p): p is SquadPlayer => Boolean(p))) {
+      const taken = new Set(chosen.map((p) => p.id));
+      const lineup: SquadPlayer[] = [];
+      let replaced = true;
+      for (const player of chosen) {
+        if (!player.injured) {
+          lineup.push(player);
+          continue;
+        }
+        const substitute = fit
+          .filter((p) => p.position === player.position && !taken.has(p.id))
+          .sort((a, b) => b.real - a.real || a.id.localeCompare(b.id))[0];
+        if (!substitute) {
+          replaced = false;
+          break;
+        }
+        taken.add(substitute.id);
+        lineup.push(substitute);
+      }
+      if (replaced && lineupFits(saved.formation as Formation, lineup)) {
+        return {
+          formation: saved.formation as Formation,
+          mentality: saved.mentality as Mentality,
+          playerIds: lineup.map((p) => p.id),
+          saved: true,
+        };
+      }
     }
   }
-  const auto = autoLineup(squad);
+  const auto = autoLineup(fit);
   return auto ? { ...auto, saved: false } : null;
 }
 
@@ -249,7 +281,7 @@ export async function getLineup(supabase: Db, userId: string): Promise<LineupVie
   if (saved.error) throw saved.error;
   if (next.error) throw next.error;
 
-  const lineup = resolveLineup(toSquad(players.data ?? []), saved.data);
+  const lineup = resolveLineup(toSquad(players.data ?? [], new Date()), saved.data);
   if (!lineup) throw new Error("the squad cannot field a lineup");
   const nextKickoff = next.data ? new Date(next.data.kickoff_at) : null;
   return {
@@ -390,16 +422,55 @@ function sideOf(
   };
 }
 
+type PlayerRow = Tables<"mgr_players"> & {
+  hidden: { potential: number } | null;
+  attrs: { attribute: string; value: number }[] | null;
+};
+
+/** What a bot trains: the attribute that matters most for its position and is lowest. */
+function botFocus(
+  position: Position,
+  attributes: Partial<Record<Attribute, number>>,
+): Attribute | null {
+  const candidates = attributesOf(position).filter((key) => weightOf(position, key) >= 2);
+  const lowest = candidates
+    .filter((key) => attributes[key] !== undefined)
+    .sort((a, b) => attributes[a]! - attributes[b]! || a.localeCompare(b))[0];
+  return lowest ?? null;
+}
+
+function toState(row: PlayerRow, isBot: boolean): PlayerState {
+  const attributes: Partial<Record<Attribute, number>> = {};
+  for (const a of row.attrs ?? []) attributes[a.attribute as Attribute] = a.value;
+  const position = row.position as Position;
+  const chosen = row.training_focus as Attribute | null;
+  return {
+    id: row.id,
+    position,
+    age: row.age,
+    ovr: row.ovr,
+    form: row.form,
+    fitness: row.fitness,
+    morale: row.morale,
+    idleRounds: row.idle_rounds,
+    injuredUntil: row.injured_until ? new Date(row.injured_until) : null,
+    // Without a known potential nobody grows.
+    potential: row.hidden?.potential ?? row.ovr,
+    trainingFocus: isBot ? botFocus(position, attributes) : chosen,
+    attributes,
+  };
+}
+
 /**
  * Plays the matches whose kickoff has passed. Safe to call from several places at once (the
- * scheduler and a visit): the result of a match is written once, and the same match always comes
- * out the same, because the lineups are locked from kickoff and the draw is seeded by the match.
- * Returns how many matches this call wrote.
+ * scheduler and a visit): the result of a match and its effects on the players are written once,
+ * in one transaction, and the same match always comes out the same, because the lineups are
+ * locked from kickoff and the draw is seeded by the match. Returns how many matches this call wrote.
  */
 export async function playDueMatches(admin: Db, now: Date = new Date()): Promise<number> {
   const due = await admin
     .from("mgr_matches")
-    .select("id, home_club_id, away_club_id")
+    .select("id, kickoff_at, home_club_id, away_club_id")
     .eq("status", "scheduled")
     .lte("kickoff_at", now.toISOString())
     .order("kickoff_at")
@@ -409,25 +480,42 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
   if (!due.data?.length) return 0;
 
   const clubIds = [...new Set(due.data.flatMap((m) => [m.home_club_id, m.away_club_id]))];
-  const [players, lineups] = await Promise.all([
-    fetchAll((from, to) =>
-      admin.from("mgr_players").select("*").in("club_id", clubIds).order("id").range(from, to),
+  const [players, lineups, clubs] = await Promise.all([
+    fetchAll<PlayerRow>(
+      (from, to) =>
+        admin
+          .from("mgr_players")
+          .select(
+            "*, hidden:mgr_player_hidden(potential), attrs:mgr_player_attributes(attribute, value)",
+          )
+          .in("club_id", clubIds)
+          .order("id")
+          .range(from, to) as never,
     ),
     fetchAll((from, to) =>
       admin.from("mgr_lineups").select("*").in("club_id", clubIds).order("club_id").range(from, to),
     ),
+    admin.from("mgr_clubs").select("id, is_bot").in("id", clubIds),
   ]);
-  const rowsByClub = new Map<string, Tables<"mgr_players">[]>();
+  if (clubs.error) throw clubs.error;
+  const bots = new Set((clubs.data ?? []).filter((c) => c.is_bot).map((c) => c.id));
+  const rowsByClub = new Map<string, PlayerRow[]>();
   for (const player of players) {
     rowsByClub.set(player.club_id, [...(rowsByClub.get(player.club_id) ?? []), player]);
   }
-  const squads = new Map<string, SquadPlayer[]>(
-    [...rowsByClub].map(([clubId, rows]) => [clubId, toSquad(rows)]),
-  );
   const saved = new Map(lineups.map((l) => [l.club_id, l]));
 
   let written = 0;
   for (const match of due.data) {
+    const kickoff = new Date(match.kickoff_at);
+    const rows = {
+      home: rowsByClub.get(match.home_club_id) ?? [],
+      away: rowsByClub.get(match.away_club_id) ?? [],
+    };
+    const squads = new Map<string, SquadPlayer[]>([
+      [match.home_club_id, toSquad(rows.home, kickoff)],
+      [match.away_club_id, toSquad(rows.away, kickoff)],
+    ]);
     const home = sideOf(match.home_club_id, squads, saved);
     const away = sideOf(match.away_club_id, squads, saved);
     if (!home || !away) {
@@ -435,13 +523,32 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       continue;
     }
     const result = simulateMatch(match.id, home.side, away.side);
-    const { data, error } = await admin.rpc("mgr_record_match", {
+
+    const effects = (["home", "away"] as const).flatMap((side) => {
+      const clubId = side === "home" ? match.home_club_id : match.away_club_id;
+      const own = side === "home" ? result.homeGoals : result.awayGoals;
+      const other = side === "home" ? result.awayGoals : result.homeGoals;
+      const lineup = side === "home" ? home : away;
+      return computeEffects({
+        seed: `${match.id}:${side}`,
+        kickoff,
+        players: rows[side].map((row) => toState(row, bots.has(clubId))),
+        played: new Set(lineup.snapshot.map((p) => p.id)),
+        outcome: outcomeOf(own, other),
+        injuries: new Map(
+          result.injuries.filter((i) => i.side === side).map((i) => [i.playerId, i.days]),
+        ),
+      });
+    });
+
+    const { data, error } = await admin.rpc("mgr_play_match", {
       p_match: match.id,
       p_home_goals: result.homeGoals,
       p_away_goals: result.awayGoals,
       p_events: result.events as unknown as Json,
       p_home_lineup: home.snapshot as unknown as Json,
       p_away_lineup: away.snapshot as unknown as Json,
+      p_effects: effects as unknown as Json,
     });
     if (error) {
       log("error", "manager.match_failed", { match: match.id, ...errorFields(error) });
@@ -461,4 +568,34 @@ export async function playAllDue(admin: Db, now: Date = new Date()): Promise<num
     if (written === 0 || written < BATCH) break;
   }
   return total;
+}
+
+/** Sets what the players train; the database checks the club, the attributes and that no round is due. */
+export async function saveTraining(admin: Db, userId: string, body: TrainingBody): Promise<void> {
+  const { error } = await admin.rpc("mgr_set_training", {
+    p_user: userId,
+    p_plans: body.plans.map((p) => ({ player_id: p.playerId, focus: p.focus })) as unknown as Json,
+  });
+  if (!error) return;
+  if (error.message.includes("manager.training_locked")) {
+    throw new ApiError(
+      409,
+      ERROR_CODES.managerTrainingLocked,
+      "Conflict",
+      "The round has started: training can no longer be changed.",
+    );
+  }
+  if (error.message.includes("manager.training_invalid")) {
+    throw new ApiError(
+      422,
+      ERROR_CODES.validationFailed,
+      "Unprocessable Content",
+      "The training plan is not valid.",
+      [{ field: "plans", message: "Choose players of your club and attributes they have." }],
+    );
+  }
+  if (error.message.includes("manager.club_unknown")) {
+    throw new ApiError(404, ERROR_CODES.notFound, "Not Found", "You have no club yet.");
+  }
+  throw error;
 }

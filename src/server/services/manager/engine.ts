@@ -11,13 +11,33 @@ export type Side = { players: SidePlayer[]; mentality: Mentality };
  */
 export type MatchEvent = {
   m: number;
-  t: "kickoff" | "goal" | "save" | "miss" | "half_time" | "full_time";
+  t: "kickoff" | "goal" | "save" | "miss" | "injury" | "half_time" | "full_time";
   s?: "home" | "away";
   p?: string;
   a?: string;
 };
 
-export type MatchResult = { homeGoals: number; awayGoals: number; events: MatchEvent[] };
+export type MatchResult = {
+  homeGoals: number;
+  awayGoals: number;
+  events: MatchEvent[];
+  /** Players hurt in the match and for how many days (they also appear in the chronicle). */
+  injuries: { playerId: string; side: "home" | "away"; days: number }[];
+};
+
+/** A starter is hurt in a match with this chance. */
+const INJURY_CHANCE = 0.012;
+/** Days out and how likely each is: most injuries are short. */
+const INJURY_DAYS: [days: number, weight: number][] = [
+  [1, 25],
+  [2, 20],
+  [3, 18],
+  [5, 14],
+  [7, 10],
+  [10, 7],
+  [14, 4],
+  [21, 2],
+];
 
 /** What a team has in each line, from the real ratings of the eleven on the pitch. */
 function strength(side: Side) {
@@ -134,7 +154,28 @@ export function simulateMatch(seed: string, home: Side, away: Side): MatchResult
   play("home", h, a, home);
   play("away", a, h, away);
 
+  // Injuries come after the play, so the score of a match does not depend on them.
+  const injuries: MatchResult["injuries"] = [];
+  const hurt = (side: "home" | "away", team: Side) => {
+    for (const player of team.players) {
+      if (random() >= INJURY_CHANCE) continue;
+      let roll = random() * INJURY_DAYS.reduce((sum, [, weight]) => sum + weight, 0);
+      let days = INJURY_DAYS[0]![0];
+      for (const [candidate, weight] of INJURY_DAYS) {
+        roll -= weight;
+        if (roll <= 0) {
+          days = candidate;
+          break;
+        }
+      }
+      injuries.push({ playerId: player.id, side, days });
+      events.push({ m: 1 + Math.floor(random() * 90), t: "injury", s: side, p: surname(player) });
+    }
+  };
+  hurt("home", home);
+  hurt("away", away);
+
   events.push({ m: 45, t: "half_time" }, { m: 90, t: "full_time" });
   events.sort((x, y) => x.m - y.m);
-  return { homeGoals, awayGoals, events };
+  return { homeGoals, awayGoals, events, injuries };
 }
