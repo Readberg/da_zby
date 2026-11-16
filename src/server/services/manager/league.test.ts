@@ -36,6 +36,7 @@ function playerRows(clubId: string, seed: string) {
     form: 80,
     fitness: 80,
     morale: 80,
+    retire_after_season: false,
     idle_rounds: 0,
     injured_until: null,
     training_focus: null,
@@ -59,7 +60,7 @@ function fakeAdmin(options: { due: unknown[]; recorded?: boolean }) {
   return { rpc, from } as never as Parameters<typeof playDueMatches>[0] & { rpc: typeof rpc };
 }
 
-const due = [{ id: "match-1", home_club_id: "a", away_club_id: "b" }];
+const due = [{ id: "match-1", kind: "league", home_club_id: "a", away_club_id: "b" }];
 
 describe("playDueMatches", () => {
   it("plays a due match and writes the score, the chronicle and both lineups once", async () => {
@@ -171,6 +172,14 @@ describe("resolveLineup", () => {
     expect(squad.find((p) => p.id === replacement)?.position).toBe(
       squad.find((p) => p.id === hurt)?.position,
     );
+  });
+
+  it("does not let the league stall when every goalkeeper is hurt: the hurt play", () => {
+    const hurtKeepers = squad.map((p) => (p.position === "GK" ? { ...p, injured: true } : p));
+    const lineup = resolveLineup(hurtKeepers, null);
+    expect(lineup?.playerIds).toHaveLength(11);
+    const keepers = hurtKeepers.filter((p) => p.position === "GK").map((p) => p.id);
+    expect(lineup?.playerIds.filter((id) => keepers.includes(id))).toHaveLength(1);
   });
 
   it("never picks an injured player for the best lineup", () => {

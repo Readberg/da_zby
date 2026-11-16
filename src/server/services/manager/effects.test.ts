@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { overallRating, type Attribute } from "@/lib/manager/attributes";
 import { simulateMatch, type Side } from "./engine";
-import { ageGrowth, computeEffects, growthChance, outcomeOf, type PlayerState } from "./effects";
+import {
+  ageGrowth,
+  computeEffects,
+  computePreseasonDay,
+  growthChance,
+  outcomeOf,
+  type PlayerState,
+} from "./effects";
 
 const KICKOFF = new Date("2026-11-18T07:00:00Z");
 
@@ -196,5 +203,82 @@ describe("outcomeOf", () => {
     expect(outcomeOf(2, 1)).toBe("win");
     expect(outcomeOf(1, 1)).toBe("draw");
     expect(outcomeOf(0, 3)).toBe("loss");
+  });
+});
+
+describe("a friendly", () => {
+  const friendly = (
+    players: PlayerState[],
+    options: { played?: string[]; outcome?: "win" | "draw" | "loss" } = {},
+  ) =>
+    computeEffects({
+      seed: "f1",
+      kickoff: KICKOFF,
+      players,
+      played: new Set(options.played ?? []),
+      outcome: options.outcome ?? "draw",
+      injuries: new Map(),
+      mode: "friendly",
+    });
+
+  it("changes form, fitness and morale half as much as a match of the league", () => {
+    const [played] = friendly([midfielder()], { played: ["p1"], outcome: "win" });
+    expect(played).toMatchObject({ form: 81, fitness: 77, morale: 81 });
+    const [bench] = friendly([midfielder()]);
+    expect(bench).toMatchObject({ form: 80, fitness: 82 });
+  });
+
+  it("does not count as a round without play and does not train", () => {
+    const [bench] = friendly([midfielder({ idleRounds: 2 })]);
+    expect(bench!.idle_rounds).toBe(2);
+    expect(bench!.morale).toBe(80);
+    const [trainer] = friendly([midfielder({ trainingFocus: "passing", potential: 99, age: 19 })], {
+      played: ["p1"],
+    });
+    expect(trainer!.attributes).toBeUndefined();
+    expect(trainer!.fitness).toBe(77);
+  });
+});
+
+describe("a day of the preseason", () => {
+  const day = new Date("2026-11-21T07:00:00Z");
+
+  it("lets everybody rest: +5 fitness", () => {
+    const [effect] = computePreseasonDay({ seed: "s", day, players: [midfielder()] });
+    expect(effect).toMatchObject({ fitness: 85, ovr: midfielder().ovr });
+  });
+
+  it("trains at half strength: half the cost and half the chance to grow", () => {
+    const trainer = midfielder({ trainingFocus: "passing", potential: 99, age: 19 });
+    expect(computePreseasonDay({ seed: "s", day, players: [trainer] })[0]!.fitness).toBe(84);
+    let preseason = 0;
+    let season = 0;
+    for (let i = 0; i < 1500; i += 1) {
+      if (computePreseasonDay({ seed: `d${i}`, day, players: [trainer] })[0]!.attributes)
+        preseason += 1;
+      if (
+        computeEffects({
+          seed: `d${i}`,
+          kickoff: KICKOFF,
+          players: [trainer],
+          played: new Set(),
+          outcome: "draw",
+          injuries: new Map(),
+        })[0]!.attributes
+      )
+        season += 1;
+    }
+    expect(preseason).toBeGreaterThan(season * 0.35);
+    expect(preseason).toBeLessThan(season * 0.7);
+  });
+
+  it("does not train the injured or the exhausted", () => {
+    const hurt = midfielder({
+      trainingFocus: "passing",
+      injuredUntil: new Date("2026-11-22T00:00:00Z"),
+    });
+    expect(computePreseasonDay({ seed: "s", day, players: [hurt] })[0]!.fitness).toBe(85);
+    const tired = midfielder({ trainingFocus: "passing", fitness: 20 });
+    expect(computePreseasonDay({ seed: "s", day, players: [tired] })[0]!.fitness).toBe(25);
   });
 });

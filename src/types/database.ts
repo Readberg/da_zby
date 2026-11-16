@@ -305,21 +305,30 @@ export type Database = {
           created_at: string;
           first_kickoff_at: string;
           id: string;
+          last_tick_at: string | null;
           number: number;
+          phase: string;
+          preseason_ends_at: string | null;
           season: number;
         };
         Insert: {
           created_at?: string;
           first_kickoff_at: string;
           id?: string;
+          last_tick_at?: string | null;
           number?: never;
+          phase?: string;
+          preseason_ends_at?: string | null;
           season?: number;
         };
         Update: {
           created_at?: string;
           first_kickoff_at?: string;
           id?: string;
+          last_tick_at?: string | null;
           number?: never;
+          phase?: string;
+          preseason_ends_at?: string | null;
           season?: number;
         };
         Relationships: [];
@@ -367,9 +376,11 @@ export type Database = {
           home_lineup: Json | null;
           id: string;
           kickoff_at: string;
+          kind: string;
           league_id: string;
           played_at: string | null;
           round: number;
+          season: number;
           status: string;
         };
         Insert: {
@@ -382,9 +393,11 @@ export type Database = {
           home_lineup?: Json | null;
           id?: string;
           kickoff_at: string;
+          kind?: string;
           league_id: string;
           played_at?: string | null;
           round: number;
+          season?: number;
           status?: string;
         };
         Update: {
@@ -397,9 +410,11 @@ export type Database = {
           home_lineup?: Json | null;
           id?: string;
           kickoff_at?: string;
+          kind?: string;
           league_id?: string;
           played_at?: string | null;
           round?: number;
+          season?: number;
           status?: string;
         };
         Relationships: [
@@ -492,6 +507,7 @@ export type Database = {
           morale: number;
           ovr: number;
           position: string;
+          retire_after_season: boolean;
           training_focus: string | null;
         };
         Insert: {
@@ -510,6 +526,7 @@ export type Database = {
           morale?: number;
           ovr: number;
           position: string;
+          retire_after_season?: boolean;
           training_focus?: string | null;
         };
         Update: {
@@ -528,6 +545,7 @@ export type Database = {
           morale?: number;
           ovr?: number;
           position?: string;
+          retire_after_season?: boolean;
           training_focus?: string | null;
         };
         Relationships: [
@@ -963,6 +981,15 @@ export type Database = {
       };
       mgr_set_training: { Args: { p_plans: Json; p_user: string }; Returns: undefined };
       mgr_take_bot_place: { Args: { p_bot: string; p_club: string }; Returns: string };
+      mgr_apply_preseason_day: {
+        Args: { p_day: string; p_effects: Json; p_league: string };
+        Returns: boolean;
+      };
+      mgr_close_season: { Args: { p_league: string; p_replacements: Json }; Returns: boolean };
+      mgr_leagues_to_close: { Args: never; Returns: string[] };
+      mgr_leagues_to_open: { Args: never; Returns: string[] };
+      mgr_open_season: { Args: { p_league: string; p_matches: Json }; Returns: boolean };
+      mgr_request_friendly: { Args: { p_opponent?: string; p_user: string }; Returns: string };
       mgr_create_club: {
         Args: {
           p_city: number;

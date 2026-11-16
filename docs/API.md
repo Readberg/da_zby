@@ -121,6 +121,8 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 
 Этап 3 (DAZBY-145): `PUT /manager/training` — что тренирует каждый игрок (характеристика его позиции или `null` — отдых), `409 manager.training_locked` после начала тура. У игроков в `GET /manager/club` появились `injuredUntil` и `trainingFocus`; в хронике матча — событие `injury`.
 
+Этап 3, часть 2 (DAZBY-146): `POST /manager/friendly` — товарищеский матч со случайным соперником лиги (только предсезонка; `409 manager.friendly_unavailable`, `409 manager.friendly_busy`). Матчи получили поле `kind` (`league`/`friendly`), таблица и список матчей относятся к текущему сезону; у лиги и клуба есть `season`, `phase`, `preseasonEndsAt`; у игроков `retiring`. `POST /api/cron/manager` теперь ещё закрывает сезон, ведёт дни предсезонки и открывает новый сезон.
+
 ### Админка: сезоны, туры, матчи (DAZBY-63, 64)
 Все эндпоинты — только админ; изменение и удаление идут по `id` в теле.
 - `GET|POST /admin/seasons`: список (с числом клубов и туров) и создание `{ tournamentId, name, copyFromSeasonId? }` (состав можно скопировать с другого сезона). Занятое название — 409 `admin.duplicate`.

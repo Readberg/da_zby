@@ -53,7 +53,9 @@ export function MatchReport({ match }: { match: MatchDetail }) {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-1">
         <p className="text-sm text-muted">
-          {getMessages().manager.hub.round.replace("{n}", String(match.round))}
+          {match.kind === "friendly"
+            ? getMessages().manager.season.friendlyBadge
+            : getMessages().manager.hub.round.replace("{n}", String(match.round))}
         </p>
         <div className="text-lg">
           <MatchTitle match={match} />

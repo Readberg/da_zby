@@ -7599,6 +7599,10 @@
                                   "null"
                                 ]
                               },
+                              "retiring": {
+                                "type": "boolean",
+                                "description": "Retires at the end of the coming season (the owner is warned)."
+                              },
                               "trainingFocus": {
                                 "description": "The attribute the player trains; null = rests.",
                                 "type": [
@@ -7620,6 +7624,7 @@
                               "fitness",
                               "morale",
                               "injuredUntil",
+                              "retiring",
                               "trainingFocus"
                             ],
                             "additionalProperties": false
@@ -7637,6 +7642,38 @@
                             }
                           ],
                           "description": "Null while the club waits for a league."
+                        },
+                        "season": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "phase": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "season",
+                                "preseason"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "preseasonEndsAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         },
                         "nextMatch": {
                           "anyOf": [
@@ -7664,6 +7701,14 @@
                                     "scheduled",
                                     "finished"
                                   ]
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "league",
+                                    "friendly"
+                                  ],
+                                  "description": "A friendly does not count for the table."
                                 },
                                 "home": {
                                   "type": "object",
@@ -7747,6 +7792,7 @@
                                 "round",
                                 "kickoffAt",
                                 "status",
+                                "kind",
                                 "home",
                                 "away",
                                 "homeGoals",
@@ -7765,6 +7811,9 @@
                         "club",
                         "players",
                         "leagueNumber",
+                        "season",
+                        "phase",
+                        "preseasonEndsAt",
                         "nextMatch"
                       ],
                       "additionalProperties": false
@@ -8130,6 +8179,10 @@
                             "null"
                           ]
                         },
+                        "retiring": {
+                          "type": "boolean",
+                          "description": "Retires at the end of the coming season (the owner is warned)."
+                        },
                         "trainingFocus": {
                           "description": "The attribute the player trains; null = rests.",
                           "type": [
@@ -8179,6 +8232,7 @@
                         "fitness",
                         "morale",
                         "injuredUntil",
+                        "retiring",
                         "trainingFocus",
                         "academyClubName",
                         "attributes"
@@ -8306,6 +8360,20 @@
                                   "type": "integer",
                                   "minimum": -9007199254740991,
                                   "maximum": 9007199254740991
+                                },
+                                "phase": {
+                                  "type": "string",
+                                  "enum": [
+                                    "season",
+                                    "preseason"
+                                  ]
+                                },
+                                "preseasonEndsAt": {
+                                  "description": "When the next season starts (preseason only).",
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
                                 }
                               },
                               "required": [
@@ -8314,7 +8382,9 @@
                                 "season",
                                 "firstKickoffAt",
                                 "roundsPlayed",
-                                "rounds"
+                                "rounds",
+                                "phase",
+                                "preseasonEndsAt"
                               ],
                               "additionalProperties": false
                             },
@@ -8521,6 +8591,14 @@
                                   "finished"
                                 ]
                               },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "league",
+                                  "friendly"
+                                ],
+                                "description": "A friendly does not count for the table."
+                              },
                               "home": {
                                 "type": "object",
                                 "properties": {
@@ -8603,6 +8681,7 @@
                               "round",
                               "kickoffAt",
                               "status",
+                              "kind",
                               "home",
                               "away",
                               "homeGoals",
@@ -8729,6 +8808,14 @@
                             "scheduled",
                             "finished"
                           ]
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "league",
+                            "friendly"
+                          ],
+                          "description": "A friendly does not count for the table."
                         },
                         "home": {
                           "type": "object",
@@ -8939,6 +9026,7 @@
                         "round",
                         "kickoffAt",
                         "status",
+                        "kind",
                         "home",
                         "away",
                         "homeGoals",
@@ -9440,6 +9528,105 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/friendly": {
+      "post": {
+        "operationId": "managerRequestFriendly",
+        "summary": "Football manager: ask for a friendly match with a random club of my league",
+        "description": "Only in the preseason, and the match must fall before the next season starts. The match is at the next 10:00 Moscow time, one a day for each club; it does not count for the table and changes the form, fitness and morale of the players half as much. 409 manager.friendly_unavailable outside the preseason, 409 manager.friendly_busy when no club is free that day.",
+        "tags": [
+          "manager"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "matchId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "matchId"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/problem+json": {
                 "schema": {

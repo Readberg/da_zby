@@ -6,7 +6,7 @@ import {
   overallRating,
   realRating,
 } from "@/lib/manager/attributes";
-import { generateSquad, SQUAD_SIZE, SQUAD_TOTAL_OVR } from "./squad";
+import { generateSquad, generateYouth, SQUAD_SIZE, SQUAD_TOTAL_OVR } from "./squad";
 
 const seeds = Array.from({ length: 50 }, (_, i) => `seed-${i}`);
 
@@ -100,5 +100,26 @@ describe("overallRating and realRating", () => {
   it("is never above the overall rating and drops to 0.85³ at the bottom", () => {
     expect(realRating(70, { form: 100, fitness: 100, morale: 100 })).toBe(70);
     expect(realRating(100, { form: 0, fitness: 0, morale: 0 })).toBeCloseTo(61.4, 1);
+  });
+});
+
+describe("generateYouth", () => {
+  it("makes a 17–19 year old of the asked position with a low rating and room to grow", () => {
+    for (const position of ["GK", "DEF", "MID", "FWD"] as const) {
+      for (let i = 0; i < 20; i += 1) {
+        const youth = generateYouth(`y${i}`, position, "BY");
+        expect(youth.position).toBe(position);
+        expect(youth.age).toBeGreaterThanOrEqual(17);
+        expect(youth.age).toBeLessThanOrEqual(19);
+        expect(youth.ovr).toBeGreaterThanOrEqual(44);
+        expect(youth.ovr).toBeLessThanOrEqual(52);
+        expect(youth.potential).toBeGreaterThan(youth.ovr + 10);
+        expect(overallRating(position, youth.attributes)).toBe(youth.ovr);
+      }
+    }
+  });
+
+  it("is the same for the same seed", () => {
+    expect(generateYouth("same", "MID", "BY")).toEqual(generateYouth("same", "MID", "BY"));
   });
 });
