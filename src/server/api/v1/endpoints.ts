@@ -98,6 +98,7 @@ import {
   buyBodySchema,
   financeSchema,
   friendlyCreatedSchema,
+  returnConfirmedSchema,
   logoBodySchema,
   logoSavedSchema,
   marketSchema,
@@ -803,7 +804,7 @@ export const endpoints = {
     body: lineupBodySchema,
     output: lineupSavedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
   }),
   managerSaveTraining: defineEndpoint({
     method: "put",
@@ -816,7 +817,19 @@ export const endpoints = {
     body: trainingBodySchema,
     output: trainingSavedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
+  }),
+  managerConfirmReturn: defineEndpoint({
+    method: "post",
+    path: "/manager/club/return",
+    summary: "Football manager: confirm that I am back (a resting club plays again)",
+    description:
+      "A club that played more than 40% of the season's league matches with a lineup the server picked rests from the end of the season: it plays like a bot, earns nothing and cannot trade, and keeps its place. This brings it back from the next match that is calculated. `returned` is false when the club was not resting.",
+    tags: ["manager"],
+    auth: "user",
+    output: returnConfirmedSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404, 429],
   }),
   managerRequestFriendly: defineEndpoint({
     method: "post",
@@ -828,7 +841,7 @@ export const endpoints = {
     auth: "user",
     output: friendlyCreatedSchema,
     cacheControl: "private, no-store",
-    errors: [401, 404, 409],
+    errors: [401, 404, 409, 429],
   }),
   managerFinance: defineEndpoint({
     method: "get",
@@ -865,7 +878,7 @@ export const endpoints = {
     body: buyBodySchema,
     output: boughtSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
   }),
   managerSetLogo: defineEndpoint({
     method: "put",
@@ -878,6 +891,6 @@ export const endpoints = {
     body: logoBodySchema,
     output: logoSavedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 422],
+    errors: [400, 401, 404, 422, 429],
   }),
 };

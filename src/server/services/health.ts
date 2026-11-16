@@ -4,7 +4,7 @@ import type { WebhookState } from "./webhook-health";
 
 export type Health = {
   status: "ok";
-  checks: { database: "ok" | "error"; telegramWebhook: WebhookState };
+  checks: { database: "ok" | "error"; telegramWebhook: WebhookState; manager: WebhookState };
 };
 
 /** True when any check failed (a skipped check is not a failure). */
@@ -17,6 +17,7 @@ export async function getHealth(
   supabase: SupabaseClient<Database>,
   timeoutMs = 2000,
   webhook: () => Promise<WebhookState> = async () => "skipped",
+  manager: () => Promise<WebhookState> = async () => "skipped",
 ): Promise<Health> {
   let database: Health["checks"]["database"] = "error";
   try {
@@ -31,5 +32,6 @@ export async function getHealth(
     database = "error";
   }
   const telegramWebhook = await webhook().catch((): WebhookState => "error");
-  return { status: "ok", checks: { database, telegramWebhook } };
+  const managerState = await manager().catch((): WebhookState => "skipped");
+  return { status: "ok", checks: { database, telegramWebhook, manager: managerState } };
 }

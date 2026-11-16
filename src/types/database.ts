@@ -244,6 +244,8 @@ export type Database = {
           country: string;
           created_at: string;
           id: string;
+          dormant: boolean;
+          dormant_since: string | null;
           is_bot: boolean;
           league_id: string | null;
           name: string;
@@ -259,6 +261,8 @@ export type Database = {
           country?: string;
           created_at?: string;
           id?: string;
+          dormant?: boolean;
+          dormant_since?: string | null;
           is_bot?: boolean;
           league_id?: string | null;
           name: string;
@@ -274,6 +278,8 @@ export type Database = {
           country?: string;
           created_at?: string;
           id?: string;
+          dormant?: boolean;
+          dormant_since?: string | null;
           is_bot?: boolean;
           league_id?: string | null;
           name?: string;
@@ -314,6 +320,7 @@ export type Database = {
           last_tick_at: string | null;
           number: number;
           phase: string;
+          play_delay_seconds: number;
           pool_month: string | null;
           preseason_ends_at: string | null;
           season: number;
@@ -325,6 +332,7 @@ export type Database = {
           last_tick_at?: string | null;
           number?: never;
           phase?: string;
+          play_delay_seconds?: never;
           pool_month?: string | null;
           preseason_ends_at?: string | null;
           season?: number;
@@ -336,6 +344,7 @@ export type Database = {
           last_tick_at?: string | null;
           number?: never;
           phase?: string;
+          play_delay_seconds?: never;
           pool_month?: string | null;
           preseason_ends_at?: string | null;
           season?: number;
@@ -376,10 +385,12 @@ export type Database = {
       };
       mgr_matches: {
         Row: {
+          away_auto: boolean;
           away_club_id: string;
           away_goals: number | null;
           away_lineup: Json | null;
           events: Json | null;
+          home_auto: boolean;
           home_club_id: string;
           home_goals: number | null;
           home_lineup: Json | null;
@@ -393,10 +404,12 @@ export type Database = {
           status: string;
         };
         Insert: {
+          away_auto: boolean;
           away_club_id: string;
           away_goals?: number | null;
           away_lineup?: Json | null;
           events?: Json | null;
+          home_auto: boolean;
           home_club_id: string;
           home_goals?: number | null;
           home_lineup?: Json | null;
@@ -410,10 +423,12 @@ export type Database = {
           status?: string;
         };
         Update: {
+          away_auto?: boolean;
           away_club_id?: string;
           away_goals?: number | null;
           away_lineup?: Json | null;
           events?: Json | null;
+          home_auto?: boolean;
           home_club_id?: string;
           home_goals?: number | null;
           home_lineup?: Json | null;
@@ -1251,6 +1266,43 @@ export type Database = {
           p_match: string;
           p_money: Json;
         };
+        Returns: boolean;
+      };
+      mgr_play_match_v3: {
+        Args: {
+          p_away_auto: boolean;
+          p_away_goals: number;
+          p_away_lineup: Json;
+          p_effects: Json;
+          p_events: Json;
+          p_home_auto: boolean;
+          p_home_goals: number;
+          p_home_lineup: Json;
+          p_match: string;
+          p_money: Json;
+        };
+        Returns: boolean;
+      };
+      mgr_confirm_return: { Args: { p_user: string }; Returns: boolean };
+      mgr_try_lease: {
+        Args: { p_holder: string; p_name: string; p_seconds: number };
+        Returns: boolean;
+      };
+      mgr_release_lease: { Args: { p_holder: string; p_name: string }; Returns: undefined };
+      mgr_due_matches: {
+        Args: { p_limit: number; p_now: string };
+        Returns: {
+          away_club_id: string;
+          home_club_id: string;
+          id: string;
+          kickoff_at: string;
+          kind: string;
+        }[];
+      };
+      mgr_work_due: { Args: { p_now?: string }; Returns: boolean };
+      mgr_overdue_count: { Args: { p_minutes: number }; Returns: number };
+      mgr_alert_change: {
+        Args: { p_min_seconds: number; p_name: string; p_state: string };
         Returns: boolean;
       };
       mgr_set_logo: { Args: { p_path: string; p_user: string }; Returns: undefined };

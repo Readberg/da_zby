@@ -50,9 +50,17 @@ function playerRows(clubId: string, seed: string) {
 
 function fakeAdmin(options: { due: unknown[]; recorded?: boolean }) {
   const rpc = vi.fn(async (name: string) =>
-    name === "mgr_play_match_v2"
+    name === "mgr_play_match_v3"
       ? { data: options.recorded ?? true, error: null }
       : { data: null, error: null },
+  );
+  // The query of the due matches is not a write: it is answered without being recorded.
+  const dispatch = Object.assign(
+    async (name: string, args?: unknown) =>
+      name === "mgr_due_matches"
+        ? { data: options.due, error: null }
+        : (rpc as unknown as (n: string, a?: unknown) => unknown)(name, args),
+    { mock: rpc.mock },
   );
   const from = (table: string) => {
     if (table === "mgr_matches") return chain(options.due);
@@ -61,7 +69,9 @@ function fakeAdmin(options: { due: unknown[]; recorded?: boolean }) {
     if (table === "mgr_lineups") return chain([]);
     return chain([]);
   };
-  return { rpc, from } as never as Parameters<typeof playDueMatches>[0] & { rpc: typeof rpc };
+  return { rpc: dispatch, from } as never as Parameters<typeof playDueMatches>[0] & {
+    rpc: typeof rpc;
+  };
 }
 
 const due = [{ id: "match-1", kind: "league", home_club_id: "a", away_club_id: "b" }];
@@ -73,7 +83,7 @@ describe("playDueMatches", () => {
     expect(written).toBe(1);
     const [name, args] = (admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock
       .calls[0] as [string, Record<string, unknown>];
-    expect(name).toBe("mgr_play_match_v2");
+    expect(name).toBe("mgr_play_match_v3");
     expect(args.p_match).toBe("match-1");
     expect(args.p_home_lineup).toHaveLength(11);
     expect(args.p_away_lineup).toHaveLength(11);
@@ -170,25 +180,28 @@ describe("playDueMatches", () => {
 
   it("goes on pass after pass while there is something to play (a pause of the scheduler leaves many rounds)", async () => {
     let passes = 0;
-    const rpc = vi.fn(async () => ({ data: true, error: null }));
+    const rpc = vi.fn(async (name: string) =>
+      name === "mgr_due_matches"
+        ? { data: passes++ < 5 ? due : [], error: null }
+        : { data: true, error: null },
+    );
     const admin = {
       rpc,
       from: (table: string) => {
-        if (table === "mgr_matches") return chain(passes++ < 5 ? due : []);
         if (table === "mgr_players")
           return chain([...playerRows("a", "seed-a"), ...playerRows("b", "seed-b")]);
         return chain([]);
       },
     } as never;
     expect(await playAllDue(admin)).toBe(5);
-    expect(rpc).toHaveBeenCalledTimes(5);
+    expect(rpc.mock.calls.filter(([name]) => name === "mgr_play_match_v3")).toHaveLength(5);
   });
 
   it("does nothing when no match is due", async () => {
     const admin = fakeAdmin({ due: [] });
     expect(await playDueMatches(admin)).toBe(0);
     expect(await playAllDue(admin)).toBe(0);
-    expect((admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc).not.toHaveBeenCalled();
+    expect((admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock.calls).toHaveLength(0);
   });
 });
 

@@ -424,6 +424,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -557,6 +567,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -676,6 +696,16 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1078,6 +1108,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -1199,6 +1239,16 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1739,6 +1789,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -2039,6 +2099,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -2147,6 +2217,16 @@
           },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2271,6 +2351,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -2341,11 +2431,21 @@
                                 "skipped"
                               ],
                               "description": "Whether the sign-in bot's webhook points at this site and delivers; skipped where the bot is not configured."
+                            },
+                            "manager": {
+                              "type": "string",
+                              "enum": [
+                                "ok",
+                                "error",
+                                "skipped"
+                              ],
+                              "description": "The football manager's rounds: error when a match has waited more than 30 minutes after its time (the scheduler is not working)."
                             }
                           },
                           "required": [
                             "database",
-                            "telegramWebhook"
+                            "telegramWebhook",
+                            "manager"
                           ],
                           "additionalProperties": false
                         }
@@ -2439,11 +2539,21 @@
                                 "skipped"
                               ],
                               "description": "Whether the sign-in bot's webhook points at this site and delivers; skipped where the bot is not configured."
+                            },
+                            "manager": {
+                              "type": "string",
+                              "enum": [
+                                "ok",
+                                "error",
+                                "skipped"
+                              ],
+                              "description": "The football manager's rounds: error when a match has waited more than 30 minutes after its time (the scheduler is not working)."
                             }
                           },
                           "required": [
                             "database",
-                            "telegramWebhook"
+                            "telegramWebhook",
+                            "manager"
                           ],
                           "additionalProperties": false
                         }
@@ -10823,6 +10933,10 @@
                                     "null"
                                   ]
                                 },
+                                "dormant": {
+                                  "type": "boolean",
+                                  "description": "The club rests (plays like a bot) until its owner confirms the return."
+                                },
                                 "createdAt": {
                                   "type": "string",
                                   "description": "ISO 8601, UTC."
@@ -10837,6 +10951,7 @@
                                 "secondaryColor",
                                 "budget",
                                 "logoUrl",
+                                "dormant",
                                 "createdAt"
                               ],
                               "additionalProperties": false
@@ -11330,6 +11445,10 @@
                             "null"
                           ]
                         },
+                        "dormant": {
+                          "type": "boolean",
+                          "description": "The club rests (plays like a bot) until its owner confirms the return."
+                        },
                         "createdAt": {
                           "type": "string",
                           "description": "ISO 8601, UTC."
@@ -11344,6 +11463,7 @@
                         "secondaryColor",
                         "budget",
                         "logoUrl",
+                        "dormant",
                         "createdAt"
                       ],
                       "additionalProperties": false
@@ -12770,6 +12890,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -12935,6 +13065,114 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/club/return": {
+      "post": {
+        "operationId": "managerConfirmReturn",
+        "summary": "Football manager: confirm that I am back (a resting club plays again)",
+        "description": "A club that played more than 40% of the season's league matches with a lineup the server picked rests from the end of the season: it plays like a bot, earns nothing and cannot trade, and keeps its place. This brings it back from the next match that is calculated. `returned` is false when the club was not resting.",
+        "tags": [
+          "manager"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "returned": {
+                          "type": "boolean",
+                          "description": "False when the club was not resting."
+                        }
+                      },
+                      "required": [
+                        "returned"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -13026,6 +13264,16 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -13501,6 +13749,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -13630,6 +13888,16 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
             "content": {
               "application/problem+json": {
                 "schema": {
