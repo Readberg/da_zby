@@ -123,6 +123,8 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 
 Этап 3, часть 2 (DAZBY-146): `POST /manager/friendly` — товарищеский матч со случайным соперником лиги (только предсезонка; `409 manager.friendly_unavailable`, `409 manager.friendly_busy`). Матчи получили поле `kind` (`league`/`friendly`), таблица и список матчей относятся к текущему сезону; у лиги и клуба есть `season`, `phase`, `preseasonEndsAt`; у игроков `retiring`. `POST /api/cron/manager` теперь ещё закрывает сезон, ведёт дни предсезонки и открывает новый сезон.
 
+Этап 4, часть 1 (DAZBY-147): `GET /manager/finance` — бюджет, стоимость состава, зарплата за тур и журнал операций (60 последних); `GET /manager/market` — свободные игроки лиги и открыт ли рынок; `POST /manager/market/buy` (`playerId`) — купить по номиналу (`409 manager.market_closed`, `manager.player_unavailable`, `manager.squad_full`, `manager.no_money`). У клуба есть `budget`, у игрока `nominal`. `POST /api/cron/manager` ещё раз в месяц добавляет пулы свободных игроков.
+
 ### Админка: сезоны, туры, матчи (DAZBY-63, 64)
 Все эндпоинты — только админ; изменение и удаление идут по `id` в теле.
 - `GET|POST /admin/seasons`: список (с числом клубов и туров) и создание `{ tournamentId, name, copyFromSeasonId? }` (состав можно скопировать с другого сезона). Занятое название — 409 `admin.duplicate`.

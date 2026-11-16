@@ -94,6 +94,7 @@ describe("toPlayerSummary", () => {
       injured_until: null,
       training_focus: null,
       retire_after_season: false,
+      pool_league_id: null,
       created_at: "2026-11-16T10:00:00Z",
     });
     expect(summary.overall).toBe(60);

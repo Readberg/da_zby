@@ -1,5 +1,6 @@
 import { getLocale, getMessages } from "@/i18n/server";
 import { formatDateTime } from "@/lib/local-time";
+import { formatMoney } from "@/lib/manager/money-format";
 import { isInjuredNow } from "../injuries";
 import type { Player } from "@/server/api/v1/schemas/manager";
 
@@ -53,6 +54,9 @@ export function PlayerCard({ player, offsetMinutes }: { player: Player; offsetMi
         {player.retiring && (
           <p className="mt-1 font-semibold text-accent">{t.season.retiringBadge}</p>
         )}
+        <p className="mt-1 text-sm text-muted">
+          {t.money.nominal}: {formatMoney(player.nominal, getLocale(), t.money.format)}
+        </p>
         <p className="mt-1 text-sm text-muted">
           {t.trainsLabel}:{" "}
           {player.trainingFocus

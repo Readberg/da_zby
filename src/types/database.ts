@@ -238,6 +238,7 @@ export type Database = {
       };
       mgr_clubs: {
         Row: {
+          budget: number;
           city_id: number;
           country: string;
           created_at: string;
@@ -251,6 +252,7 @@ export type Database = {
           user_id: string | null;
         };
         Insert: {
+          budget?: number;
           city_id: number;
           country?: string;
           created_at?: string;
@@ -264,6 +266,7 @@ export type Database = {
           user_id?: string | null;
         };
         Update: {
+          budget?: number;
           city_id?: number;
           country?: string;
           created_at?: string;
@@ -308,6 +311,7 @@ export type Database = {
           last_tick_at: string | null;
           number: number;
           phase: string;
+          pool_month: string | null;
           preseason_ends_at: string | null;
           season: number;
         };
@@ -318,6 +322,7 @@ export type Database = {
           last_tick_at?: string | null;
           number?: never;
           phase?: string;
+          pool_month?: string | null;
           preseason_ends_at?: string | null;
           season?: number;
         };
@@ -328,6 +333,7 @@ export type Database = {
           last_tick_at?: string | null;
           number?: never;
           phase?: string;
+          pool_month?: string | null;
           preseason_ends_at?: string | null;
           season?: number;
         };
@@ -490,12 +496,50 @@ export type Database = {
           },
         ];
       };
+      mgr_transactions: {
+        Row: {
+          amount: number;
+          balance_after: number;
+          club_id: string;
+          created_at: string;
+          id: number;
+          reason: string;
+          ref: string | null;
+        };
+        Insert: {
+          amount: number;
+          balance_after: number;
+          club_id: string;
+          created_at?: string;
+          id?: never;
+          reason: string;
+          ref?: string | null;
+        };
+        Update: {
+          amount?: number;
+          balance_after?: number;
+          club_id?: string;
+          created_at?: string;
+          id?: never;
+          reason?: string;
+          ref?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_transactions_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       mgr_players: {
         Row: {
           academy_club_id: string | null;
           age: number;
           citizenship: string;
-          club_id: string;
+          club_id: string | null;
           created_at: string;
           first_name: string;
           fitness: number;
@@ -506,6 +550,7 @@ export type Database = {
           last_name: string;
           morale: number;
           ovr: number;
+          pool_league_id: string | null;
           position: string;
           retire_after_season: boolean;
           training_focus: string | null;
@@ -514,7 +559,7 @@ export type Database = {
           academy_club_id?: string | null;
           age: number;
           citizenship: string;
-          club_id: string;
+          club_id?: string | null;
           created_at?: string;
           first_name: string;
           fitness?: number;
@@ -525,6 +570,7 @@ export type Database = {
           last_name: string;
           morale?: number;
           ovr: number;
+          pool_league_id?: string | null;
           position: string;
           retire_after_season?: boolean;
           training_focus?: string | null;
@@ -533,7 +579,7 @@ export type Database = {
           academy_club_id?: string | null;
           age?: number;
           citizenship?: string;
-          club_id?: string;
+          club_id?: string | null;
           created_at?: string;
           first_name?: string;
           fitness?: number;
@@ -544,6 +590,7 @@ export type Database = {
           last_name?: string;
           morale?: number;
           ovr?: number;
+          pool_league_id?: string | null;
           position?: string;
           retire_after_season?: boolean;
           training_focus?: string | null;
@@ -554,6 +601,13 @@ export type Database = {
             columns: ["academy_club_id"];
             isOneToOne: false;
             referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_players_pool_league_id_fkey";
+            columns: ["pool_league_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_leagues";
             referencedColumns: ["id"];
           },
           {
@@ -990,6 +1044,29 @@ export type Database = {
       mgr_leagues_to_open: { Args: never; Returns: string[] };
       mgr_open_season: { Args: { p_league: string; p_matches: Json }; Returns: boolean };
       mgr_request_friendly: { Args: { p_opponent?: string; p_user: string }; Returns: string };
+      mgr_add_pool: {
+        Args: { p_league: string; p_month: string; p_players: Json };
+        Returns: boolean;
+      };
+      mgr_buy_free_agent: { Args: { p_player: string; p_user: string }; Returns: number };
+      mgr_nominal: { Args: { p_age: number; p_ovr: number }; Returns: number };
+      mgr_pay: {
+        Args: { p_amount: number; p_club: string; p_ref: string; p_reason: string };
+        Returns: number;
+      };
+      mgr_play_match_v2: {
+        Args: {
+          p_away_goals: number;
+          p_away_lineup: Json;
+          p_effects: Json;
+          p_events: Json;
+          p_home_goals: number;
+          p_home_lineup: Json;
+          p_match: string;
+          p_money: Json;
+        };
+        Returns: boolean;
+      };
       mgr_create_club: {
         Args: {
           p_city: number;

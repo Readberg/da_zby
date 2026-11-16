@@ -7512,6 +7512,12 @@
                                 "secondaryColor": {
                                   "type": "string"
                                 },
+                                "budget": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991,
+                                  "description": "Game dollars; negative = in debt (no purchases)."
+                                },
                                 "createdAt": {
                                   "type": "string",
                                   "description": "ISO 8601, UTC."
@@ -7524,6 +7530,7 @@
                                 "city",
                                 "primaryColor",
                                 "secondaryColor",
+                                "budget",
                                 "createdAt"
                               ],
                               "additionalProperties": false
@@ -7599,6 +7606,12 @@
                                   "null"
                                 ]
                               },
+                              "nominal": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991,
+                                "description": "The nominal value, in game dollars."
+                              },
                               "retiring": {
                                 "type": "boolean",
                                 "description": "Retires at the end of the coming season (the owner is warned)."
@@ -7624,6 +7637,7 @@
                               "fitness",
                               "morale",
                               "injuredUntil",
+                              "nominal",
                               "retiring",
                               "trainingFocus"
                             ],
@@ -7983,6 +7997,12 @@
                         "secondaryColor": {
                           "type": "string"
                         },
+                        "budget": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Game dollars; negative = in debt (no purchases)."
+                        },
                         "createdAt": {
                           "type": "string",
                           "description": "ISO 8601, UTC."
@@ -7995,6 +8015,7 @@
                         "city",
                         "primaryColor",
                         "secondaryColor",
+                        "budget",
                         "createdAt"
                       ],
                       "additionalProperties": false
@@ -8179,6 +8200,12 @@
                             "null"
                           ]
                         },
+                        "nominal": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "The nominal value, in game dollars."
+                        },
                         "retiring": {
                           "type": "boolean",
                           "description": "Retires at the end of the coming season (the owner is warned)."
@@ -8232,6 +8259,7 @@
                         "fitness",
                         "morale",
                         "injuredUntil",
+                        "nominal",
                         "retiring",
                         "trainingFocus",
                         "academyClubName",
@@ -9627,6 +9655,471 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/finance": {
+      "get": {
+        "operationId": "managerFinance",
+        "summary": "Football manager: the money of my club",
+        "description": "The budget in game dollars (negative = in debt), what the squad is worth and costs a round, and the last 60 operations of the ledger, newest first.",
+        "tags": [
+          "manager"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "budget": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "squadNominal": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "The sum of the nominal values of the squad."
+                        },
+                        "wagePerRound": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "What the squad costs in a round of the league."
+                        },
+                        "transactions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "amount": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "reason": {
+                                "type": "string",
+                                "enum": [
+                                  "base",
+                                  "tickets",
+                                  "premium",
+                                  "wages",
+                                  "prize",
+                                  "purchase",
+                                  "sale",
+                                  "tax"
+                                ]
+                              },
+                              "balanceAfter": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "amount",
+                              "reason",
+                              "balanceAfter",
+                              "createdAt"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "The last operations, newest first."
+                        }
+                      },
+                      "required": [
+                        "budget",
+                        "squadNominal",
+                        "wagePerRound",
+                        "transactions"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/market": {
+      "get": {
+        "operationId": "managerMarket",
+        "summary": "Football manager: the free players of my league",
+        "description": "30 free players a month for every league; the unsold ones are replaced next month. open is true after 10 played matches. A free player costs his nominal value, 1000 · 1.12^(rating − 60) · a factor of the age.",
+        "tags": [
+          "manager"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "open": {
+                          "type": "boolean",
+                          "description": "The market opens after 10 played matches."
+                        },
+                        "matchesPlayed": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "matchesNeeded": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "budget": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "squadSize": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "squadMax": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "players": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "position": {
+                                "type": "string",
+                                "enum": [
+                                  "GK",
+                                  "DEF",
+                                  "MID",
+                                  "FWD"
+                                ]
+                              },
+                              "age": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "overall": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "price": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991,
+                                "description": "The nominal value: what the club pays."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "firstName",
+                              "lastName",
+                              "position",
+                              "age",
+                              "overall",
+                              "price"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "The free players of the league this month."
+                        }
+                      },
+                      "required": [
+                        "open",
+                        "matchesPlayed",
+                        "matchesNeeded",
+                        "budget",
+                        "squadSize",
+                        "squadMax",
+                        "players"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/market/buy": {
+      "post": {
+        "operationId": "managerBuy",
+        "summary": "Football manager: buy a free player at his nominal value",
+        "description": "409 manager.market_closed before 10 played matches, 409 manager.player_unavailable when the player is gone or from another league, 409 manager.squad_full with 23 players, 409 manager.no_money when the budget is below the price or negative. The price is paid out of the game (it goes to nobody).",
+        "tags": [
+          "manager"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "playerId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  }
+                },
+                "required": [
+                  "playerId"
+                ]
+              }
+            }
+          }
+        },
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "budget": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "budget"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
             "content": {
               "application/problem+json": {
                 "schema": {
