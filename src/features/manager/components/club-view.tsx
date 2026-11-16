@@ -4,7 +4,61 @@ import { getLocale, getMessages } from "@/i18n/server";
 import { formatDateTime } from "@/lib/local-time";
 import type { ManagerClubView } from "@/server/api/v1/schemas/manager";
 import { ClubColors } from "./club-colors";
+import { FriendlyButton } from "./friendly-button";
 import { MatchTitle } from "./match-link";
+
+/** The preseason: no matches of the league, a friendly instead, and the end date. */
+function Preseason({ view, offsetMinutes }: { view: ManagerClubView; offsetMinutes: number }) {
+  const t = getMessages().manager;
+  if (view.phase !== "preseason" || !view.preseasonEndsAt) return null;
+  return (
+    <section
+      aria-labelledby="preseason-title"
+      className="flex flex-col gap-3 rounded-lg border border-accent bg-surface p-5"
+    >
+      <h3 id="preseason-title" className="text-lg">
+        {t.season.preseasonTitle}
+      </h3>
+      <p className="max-w-prose text-muted">
+        {t.season.preseasonText.replace(
+          "{date}",
+          formatDateTime(view.preseasonEndsAt, offsetMinutes, getLocale()),
+        )}
+      </p>
+      <FriendlyButton t={t} />
+    </section>
+  );
+}
+
+/** Players who retire at the end of the season: the owner is told in advance. */
+function Retiring({ view }: { view: ManagerClubView }) {
+  const t = getMessages().manager;
+  const retiring = view.players.filter((p) => p.retiring);
+  if (retiring.length === 0) return null;
+  return (
+    <section
+      aria-labelledby="retiring-title"
+      className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-5"
+    >
+      <h3 id="retiring-title" className="text-lg">
+        {t.season.retiringTitle}
+      </h3>
+      <p className="text-sm text-muted">{t.season.retiringText}</p>
+      <ul className="flex flex-col gap-1">
+        {retiring.map((player) => (
+          <li key={player.id}>
+            <Link href={`/manager/players/${player.id}`} className="font-semibold underline">
+              {player.firstName} {player.lastName}
+            </Link>{" "}
+            <span className="text-sm text-muted">
+              ({t.positionShort[player.position]}, {t.ageYears.replace("{n}", String(player.age))})
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 /** The next match of my club with its date and a way to the lineup. */
 function NextMatch({ view, offsetMinutes }: { view: ManagerClubView; offsetMinutes: number }) {
@@ -67,12 +121,16 @@ export function ClubView({
           <p className="text-muted">
             {t.clubFrom.replace("{city}", club.city.name).replace("{country}", country)}
             {view.leagueNumber !== null &&
-              ` · ${t.hub.leagueLine.replace("{n}", String(view.leagueNumber))}`}
+              ` · ${t.hub.leagueLine.replace("{n}", String(view.leagueNumber))}${
+                view.season ? ` · ${t.season.label.replace("{n}", String(view.season))}` : ""
+              }`}
           </p>
         </div>
       </div>
 
+      <Preseason view={view} offsetMinutes={offsetMinutes} />
       <NextMatch view={view} offsetMinutes={offsetMinutes} />
+      <Retiring view={view} />
 
       <section aria-labelledby="squad-title" className="flex flex-col gap-3">
         <h3 id="squad-title" className="text-lg">

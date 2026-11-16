@@ -41,6 +41,7 @@ export const playerSummarySchema = z.object({
   fitness: z.number().int(),
   morale: z.number().int(),
   injuredUntil: z.string().nullable().describe("ISO 8601, UTC; null or past = fit."),
+  retiring: z.boolean().describe("Retires at the end of the coming season (the owner is warned)."),
   trainingFocus: z.string().nullable().describe("The attribute the player trains; null = rests."),
 });
 export type PlayerSummary = z.infer<typeof playerSummarySchema>;
@@ -87,6 +88,7 @@ export const matchSummarySchema = z.object({
   round: z.number().int().describe("1–38."),
   kickoffAt: z.string().describe("ISO 8601, UTC. Matches are played at 10:00 Moscow time."),
   status: matchStatusSchema,
+  kind: z.enum(["league", "friendly"]).describe("A friendly does not count for the table."),
   home: matchSideSchema,
   away: matchSideSchema,
   homeGoals: z.number().int().nullable(),
@@ -152,6 +154,11 @@ export const leagueViewSchema = z.object({
       firstKickoffAt: z.string(),
       roundsPlayed: z.number().int().describe("Rounds with every match finished."),
       rounds: z.number().int(),
+      phase: z.enum(["season", "preseason"]),
+      preseasonEndsAt: z
+        .string()
+        .nullable()
+        .describe("When the next season starts (preseason only)."),
     })
     .nullable()
     .describe("Null while the club has no league yet."),
@@ -184,6 +191,9 @@ export const managerClubViewSchema = z.object({
   club: managerClubSchema.nullable().describe("Null until the caller has made a club."),
   players: z.array(playerSummarySchema),
   leagueNumber: z.number().int().nullable().describe("Null while the club waits for a league."),
+  season: z.number().int().nullable(),
+  phase: z.enum(["season", "preseason"]).nullable(),
+  preseasonEndsAt: z.string().nullable(),
   nextMatch: matchSummarySchema.nullable().describe("The next match of the club, if any is left."),
 });
 export type ManagerClubView = z.infer<typeof managerClubViewSchema>;
@@ -206,3 +216,5 @@ export const trainingBodySchema = z.object({
 });
 export type TrainingBody = z.infer<typeof trainingBodySchema>;
 export const trainingSavedSchema = z.object({ saved: z.literal(true) });
+
+export const friendlyCreatedSchema = z.object({ matchId: z.uuid() });

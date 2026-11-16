@@ -50,6 +50,9 @@ export function PlayerCard({ player, offsetMinutes }: { player: Player; offsetMi
             )}
           </p>
         )}
+        {player.retiring && (
+          <p className="mt-1 font-semibold text-accent">{t.season.retiringBadge}</p>
+        )}
         <p className="mt-1 text-sm text-muted">
           {t.trainsLabel}:{" "}
           {player.trainingFocus

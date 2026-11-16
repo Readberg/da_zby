@@ -79,6 +79,7 @@ import {
   managerClubSchema,
   managerCitiesSchema,
   managerClubViewSchema,
+  friendlyCreatedSchema,
   playerQuerySchema,
   trainingBodySchema,
   trainingSavedSchema,
@@ -720,5 +721,17 @@ export const endpoints = {
     output: trainingSavedSchema,
     cacheControl: "private, no-store",
     errors: [400, 401, 404, 409, 422],
+  }),
+  managerRequestFriendly: defineEndpoint({
+    method: "post",
+    path: "/manager/friendly",
+    summary: "Football manager: ask for a friendly match with a random club of my league",
+    description:
+      "Only in the preseason, and the match must fall before the next season starts. The match is at the next 10:00 Moscow time, one a day for each club; it does not count for the table and changes the form, fitness and morale of the players half as much. 409 manager.friendly_unavailable outside the preseason, 409 manager.friendly_busy when no club is free that day.",
+    tags: ["manager"],
+    auth: "user",
+    output: friendlyCreatedSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404, 409],
   }),
 };

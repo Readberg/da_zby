@@ -44,6 +44,11 @@ const TRAINING_MIN_FITNESS = 30;
 
 const GROWTH_BASE = 0.12;
 
+/** A friendly changes form, fitness and morale half as much as a match of the league (the brief). */
+const FRIENDLY_SCALE = 0.5;
+/** Training in the preseason works at half strength (the brief). */
+const PRESEASON_TRAINING_SCALE = 0.5;
+
 /** Younger players grow faster; after 33 hardly at all. */
 export function ageGrowth(age: number): number {
   if (age <= 21) return 1.5;
@@ -64,10 +69,30 @@ export function isInjured(player: Pick<PlayerState, "injuredUntil">, at: Date): 
   return player.injuredUntil !== null && player.injuredUntil.getTime() > at.getTime();
 }
 
+/** One training session: maybe a point more, never above the potential. */
+function tryGrow(
+  player: PlayerState,
+  random: () => number,
+  scale: number,
+): { attributes: Partial<Record<Attribute, number>>; ovr: number } | null {
+  const focus = player.trainingFocus;
+  if (!focus) return null;
+  const value = player.attributes[focus];
+  if (value === undefined || value >= 99) return null;
+  if (random() >= growthChance(player, value) * scale) return null;
+  const ovr = overallRating(player.position, { ...player.attributes, [focus]: value + 1 });
+  // Growth stops at the potential: a point that would lift the rating above it is not given.
+  return ovr <= player.potential ? { attributes: { [focus]: value + 1 }, ovr } : null;
+}
+
+/** Halves a change of the state, towards zero (+5 becomes +2, -1 becomes 0). */
+const scaled = (delta: number, scale: number) => Math.trunc(delta * scale);
+
 /**
  * What a match does to the squad of one club: the players who played tire and gain form, the
- * others rest and lose form, morale follows the result, injuries start, and the players who
- * train may grow (never above their potential). The same seed always gives the same effects.
+ * others rest and lose form, morale follows the result, injuries start, and (in a match of the
+ * league) the players who train may grow, never above their potential. A friendly changes the
+ * state half as much and does not train. The same seed always gives the same effects.
  */
 export function computeEffects(input: {
   seed: string;
@@ -77,7 +102,10 @@ export function computeEffects(input: {
   outcome: Outcome;
   /** Players injured in this match and for how many days. */
   injuries: ReadonlyMap<string, number>;
+  mode?: "league" | "friendly";
 }): PlayerEffect[] {
+  const friendly = input.mode === "friendly";
+  const scale = friendly ? FRIENDLY_SCALE : 1;
   const random = makeRandom(`${input.seed}:effects`);
   const ordered = [...input.players].sort((a, b) => a.id.localeCompare(b.id));
 
@@ -92,14 +120,15 @@ export function computeEffects(input: {
     let idleRounds = 0;
 
     if (played) {
-      form += PLAYED.form;
-      fitness += PLAYED.fitness;
-      morale += MORALE[input.outcome];
+      form += scaled(PLAYED.form, scale);
+      fitness += scaled(PLAYED.fitness, scale);
+      morale += scaled(MORALE[input.outcome], scale);
     } else {
-      form += IDLE.form;
-      fitness += IDLE.fitness;
-      idleRounds = player.idleRounds + 1;
-      if (idleRounds % IDLE.moraleEvery === 0) morale -= 1;
+      form += scaled(IDLE.form, scale);
+      fitness += scaled(IDLE.fitness, scale);
+      // A friendly is not a round of the league: it does not count as one without play.
+      idleRounds = friendly ? player.idleRounds : player.idleRounds + 1;
+      if (!friendly && idleRounds % IDLE.moraleEvery === 0) morale -= 1;
     }
 
     const effect: PlayerEffect = {
@@ -107,7 +136,7 @@ export function computeEffects(input: {
       form: clamp(form),
       fitness: clamp(fitness),
       morale: clamp(morale),
-      idle_rounds: idleRounds,
+      idle_rounds: friendly && played ? player.idleRounds : idleRounds,
       ovr: player.ovr,
     };
 
@@ -117,24 +146,60 @@ export function computeEffects(input: {
       ).toISOString();
     }
 
-    // Training: a fit player with a plan who is not too tired to train.
-    const focus = player.trainingFocus;
+    // Training: a fit player with a plan who is not too tired (league matches only).
     const canTrain =
-      focus !== null &&
+      !friendly &&
+      player.trainingFocus !== null &&
       !wasInjured &&
       injuryDays === undefined &&
       player.fitness >= TRAINING_MIN_FITNESS;
-    if (canTrain && focus) {
+    if (canTrain) {
       effect.fitness = clamp(effect.fitness + TRAINING_FITNESS);
-      const value = player.attributes[focus];
-      if (value !== undefined && value < 99 && random() < growthChance(player, value)) {
-        const grown = { ...player.attributes, [focus]: value + 1 };
-        const ovr = overallRating(player.position, grown);
-        // Growth stops at the potential: a point that would lift the rating above it is not given.
-        if (ovr <= player.potential) {
-          effect.attributes = { [focus]: value + 1 };
-          effect.ovr = ovr;
-        }
+      const grown = tryGrow(player, random, 1);
+      if (grown) {
+        effect.attributes = grown.attributes;
+        effect.ovr = grown.ovr;
+      }
+    }
+    return effect;
+  });
+}
+
+/** What the database writes for a player after a day of the preseason (see mgr_apply_preseason_day). */
+export type PreseasonEffect = {
+  id: string;
+  fitness: number;
+  ovr: number;
+  attributes?: Partial<Record<Attribute, number>>;
+};
+
+/**
+ * One day of the preseason: everybody rests, those with a plan train at half strength (the brief):
+ * half the growth chance and half the fitness cost. The same seed gives the same day.
+ */
+export function computePreseasonDay(input: {
+  seed: string;
+  day: Date;
+  players: PlayerState[];
+}): PreseasonEffect[] {
+  const random = makeRandom(`${input.seed}:preseason`);
+  const ordered = [...input.players].sort((a, b) => a.id.localeCompare(b.id));
+  return ordered.map((player) => {
+    const effect: PreseasonEffect = {
+      id: player.id,
+      fitness: clamp(player.fitness + IDLE.fitness),
+      ovr: player.ovr,
+    };
+    const canTrain =
+      player.trainingFocus !== null &&
+      !isInjured(player, input.day) &&
+      player.fitness >= TRAINING_MIN_FITNESS;
+    if (canTrain) {
+      effect.fitness = clamp(effect.fitness + scaled(TRAINING_FITNESS, PRESEASON_TRAINING_SCALE));
+      const grown = tryGrow(player, random, PRESEASON_TRAINING_SCALE);
+      if (grown) {
+        effect.attributes = grown.attributes;
+        effect.ovr = grown.ovr;
       }
     }
     return effect;

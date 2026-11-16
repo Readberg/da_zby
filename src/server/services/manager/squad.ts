@@ -137,3 +137,26 @@ export function generateSquad(seed: string, country: CountryCode): GeneratedPlay
     };
   });
 }
+
+/**
+ * A young player from the academy who takes the place of one who retired: 17–19 years old, a low
+ * rating and a high potential. Depends only on the seed.
+ */
+export function generateYouth(
+  seed: string,
+  position: Position,
+  country: CountryCode,
+): GeneratedPlayer {
+  const random = makeRandom(seed);
+  const bank = NAME_BANKS[country];
+  const ovr = 44 + Math.floor(random() * 9);
+  return {
+    firstName: pick(random, bank.first),
+    lastName: pick(random, bank.last),
+    position,
+    age: 17 + Math.floor(random() * 3),
+    potential: Math.min(ATTRIBUTE_MAX, ovr + 12 + Math.floor(random() * 28)),
+    ovr,
+    attributes: makeAttributes(random, position, ovr),
+  };
+}

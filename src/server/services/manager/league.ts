@@ -63,6 +63,7 @@ export function toMatchSummary(row: MatchRow): MatchSummary {
     round: row.round,
     kickoffAt: new Date(row.kickoff_at).toISOString(),
     status: row.status as MatchSummary["status"],
+    kind: row.kind as MatchSummary["kind"],
     home: toSide(row.home, row.home_club_id),
     away: toSide(row.away, row.away_club_id),
     homeGoals: row.home_goals,
@@ -91,7 +92,7 @@ export async function getNextMatch(supabase: Db, clubId: string): Promise<MatchS
     .select(MATCH_SELECT)
     .or(`home_club_id.eq.${clubId},away_club_id.eq.${clubId}`)
     .eq("status", "scheduled")
-    .order("round")
+    .order("kickoff_at")
     .limit(1)
     .maybeSingle();
   if (error) throw error;
@@ -100,10 +101,19 @@ export async function getNextMatch(supabase: Db, clubId: string): Promise<MatchS
 
 export async function listMyMatches(supabase: Db, userId: string): Promise<MatchList> {
   const club = await myClubId(supabase, userId);
+  if (!club.leagueId) return { matches: [] };
+  const league = await supabase
+    .from("mgr_leagues")
+    .select("season")
+    .eq("id", club.leagueId)
+    .maybeSingle();
+  if (league.error) throw league.error;
   const { data, error } = await supabase
     .from("mgr_matches")
     .select(MATCH_SELECT)
     .or(`home_club_id.eq.${club.id},away_club_id.eq.${club.id}`)
+    .eq("season", league.data?.season ?? 1)
+    .order("kickoff_at")
     .order("round");
   if (error) throw error;
   return { matches: (data ?? []).map((row) => toMatchSummary(row as unknown as MatchRow)) };
@@ -132,8 +142,16 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
   const club = await myClubId(supabase, userId);
   if (!club.leagueId) return { league: null, table: [] };
 
-  const [league, clubs, matches] = await Promise.all([
-    supabase.from("mgr_leagues").select("*").eq("id", club.leagueId).maybeSingle(),
+  const league = await supabase
+    .from("mgr_leagues")
+    .select("*")
+    .eq("id", club.leagueId)
+    .maybeSingle();
+  if (league.error) throw league.error;
+  if (!league.data) return { league: null, table: [] };
+  const season = league.data.season;
+
+  const [clubs, matches] = await Promise.all([
     supabase
       .from("mgr_clubs")
       .select("id, name, primary_color, secondary_color, is_bot")
@@ -143,13 +161,13 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
         .from("mgr_matches")
         .select("id, round, status, home_club_id, away_club_id, home_goals, away_goals")
         .eq("league_id", club.leagueId!)
+        .eq("season", season)
+        .eq("kind", "league")
         .order("id")
         .range(from, to),
     ),
   ]);
-  if (league.error) throw league.error;
   if (clubs.error) throw clubs.error;
-  if (!league.data) return { league: null, table: [] };
 
   const finished = matches.filter((m) => m.status === "finished");
   const rows = computeTable(
@@ -181,6 +199,10 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
       firstKickoffAt: new Date(league.data.first_kickoff_at).toISOString(),
       roundsPlayed,
       rounds: ROUNDS,
+      phase: league.data.phase as "season" | "preseason",
+      preseasonEndsAt: league.data.preseason_ends_at
+        ? new Date(league.data.preseason_ends_at).toISOString()
+        : null,
     },
     table: rows.map((row) => {
       const c = info.get(row.clubId);
@@ -259,7 +281,8 @@ export function resolveLineup(
       }
     }
   }
-  const auto = autoLineup(fit);
+  // A league must never stall: when too many are hurt for any formation, the hurt play too.
+  const auto = autoLineup(fit) ?? autoLineup(squad);
   return auto ? { ...auto, saved: false } : null;
 }
 
@@ -422,7 +445,7 @@ function sideOf(
   };
 }
 
-type PlayerRow = Tables<"mgr_players"> & {
+export type PlayerRow = Tables<"mgr_players"> & {
   hidden: { potential: number } | null;
   attrs: { attribute: string; value: number }[] | null;
 };
@@ -439,7 +462,7 @@ function botFocus(
   return lowest ?? null;
 }
 
-function toState(row: PlayerRow, isBot: boolean): PlayerState {
+export function toState(row: PlayerRow, isBot: boolean): PlayerState {
   const attributes: Partial<Record<Attribute, number>> = {};
   for (const a of row.attrs ?? []) attributes[a.attribute as Attribute] = a.value;
   const position = row.position as Position;
@@ -470,7 +493,7 @@ function toState(row: PlayerRow, isBot: boolean): PlayerState {
 export async function playDueMatches(admin: Db, now: Date = new Date()): Promise<number> {
   const due = await admin
     .from("mgr_matches")
-    .select("id, kickoff_at, home_club_id, away_club_id")
+    .select("id, kickoff_at, kind, home_club_id, away_club_id")
     .eq("status", "scheduled")
     .lte("kickoff_at", now.toISOString())
     .order("kickoff_at")
@@ -530,6 +553,7 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       const other = side === "home" ? result.awayGoals : result.homeGoals;
       const lineup = side === "home" ? home : away;
       return computeEffects({
+        mode: match.kind === "friendly" ? "friendly" : "league",
         seed: `${match.id}:${side}`,
         kickoff,
         players: rows[side].map((row) => toState(row, bots.has(clubId))),

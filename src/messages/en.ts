@@ -317,6 +317,26 @@ export const en: MessagesShape<typeof ru> = {
     injuredUntil: "Injured until {date}",
     trainsLabel: "Trains",
     restLabel: "Rest",
+    season: {
+      label: "Season {n}",
+      preseasonTitle: "Preseason",
+      preseasonText:
+        "There are no league matches. Form, fitness and morale are back to 80, the players are a year older, training works at half strength. The new season starts {date}.",
+      friendly: "Friendly match",
+      friendlyHint:
+        "A random club of your league at the next 10:00 Moscow time. One a day at most, it does not count for the table, and form, fitness and morale change half as much.",
+      friendlyAsk: "Play a friendly",
+      friendlySending: "Looking for an opponent…",
+      friendlyOk: "A friendly is set for the next 10:00 Moscow time.",
+      friendlyBusy: "No club is free on that date.",
+      friendlyUnavailable: "Friendlies are played in the preseason only.",
+      friendlyGeneric: "Could not set up the match. Please try again.",
+      friendlyBadge: "Friendly",
+      retiringTitle: "Will retire",
+      retiringText:
+        "These players retire at the end of the season. Young players from the club's academy take their places.",
+      retiringBadge: "retires at the end of the season",
+    },
     scheduleNote:
       "A season is 38 rounds, one a day at 10:00 Moscow time. You can change the lineup until the round starts; if you do not choose, the best lineup plays.",
     hub: {
@@ -358,6 +378,7 @@ export const en: MessagesShape<typeof ru> = {
       lead: "All 38 rounds of the season.",
       columns: { round: "Round", date: "Date", match: "Match", result: "Score" },
       notPlayed: "—",
+      friendly: "Friendly",
       noMatches: "The schedule appears when the club gets into a league.",
     },
     matchPage: {

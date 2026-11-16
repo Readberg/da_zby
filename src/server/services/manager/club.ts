@@ -51,6 +51,7 @@ export function toPlayerSummary(row: Tables<"mgr_players">): PlayerSummary {
     morale: row.morale,
     injuredUntil: row.injured_until ? new Date(row.injured_until).toISOString() : null,
     trainingFocus: row.training_focus,
+    retiring: row.retire_after_season,
   };
 }
 
@@ -74,7 +75,17 @@ export async function getMyClub(supabase: Db, userId: string): Promise<ManagerCl
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw error;
-  if (!club) return { club: null, players: [], leagueNumber: null, nextMatch: null };
+  if (!club) {
+    return {
+      club: null,
+      players: [],
+      leagueNumber: null,
+      season: null,
+      phase: null,
+      preseasonEndsAt: null,
+      nextMatch: null,
+    };
+  }
 
   const { data: players, error: playersError } = await supabase
     .from("mgr_players")
@@ -92,7 +103,11 @@ export async function getMyClub(supabase: Db, userId: string): Promise<ManagerCl
     );
   const [league, nextMatch] = await Promise.all([
     club.league_id
-      ? supabase.from("mgr_leagues").select("number").eq("id", club.league_id).maybeSingle()
+      ? supabase
+          .from("mgr_leagues")
+          .select("number, season, phase, preseason_ends_at")
+          .eq("id", club.league_id)
+          .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     club.league_id ? getNextMatch(supabase, club.id) : Promise.resolve(null),
   ]);
@@ -101,6 +116,11 @@ export async function getMyClub(supabase: Db, userId: string): Promise<ManagerCl
     club: toClub(club as ClubRow),
     players: squad,
     leagueNumber: league.data?.number ?? null,
+    season: league.data?.season ?? null,
+    phase: (league.data?.phase as "season" | "preseason" | undefined) ?? null,
+    preseasonEndsAt: league.data?.preseason_ends_at
+      ? new Date(league.data.preseason_ends_at).toISOString()
+      : null,
     nextMatch,
   };
 }

@@ -27,6 +27,8 @@ export const ERROR_CODES = {
   managerNameTaken: "manager.name_taken",
   managerLineupLocked: "manager.lineup_locked",
   managerTrainingLocked: "manager.training_locked",
+  managerFriendlyUnavailable: "manager.friendly_unavailable",
+  managerFriendlyBusy: "manager.friendly_busy",
   degraded: "system.degraded",
   fixturesUnavailable: "fixtures.unavailable",
 } as const;
