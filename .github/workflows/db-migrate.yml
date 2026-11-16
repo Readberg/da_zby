@@ -41,7 +41,7 @@ jobs:
       - run: supabase link --project-ref "$PROJECT_REF"
 
       - name: Pending migrations
-        run: supabase migration list
+        run: supabase migration list --linked
 
       - name: Apply migrations
         # --include-all: parallel branches can land a migration that sorts before one already applied
