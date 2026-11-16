@@ -5,9 +5,8 @@ import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlayerCard } from "@/features/manager/components/player-card";
-import { createClient } from "@/lib/supabase/server";
 import { ApiError } from "@/server/api/v1/problem";
-import { requireProfile } from "@/server/services/current-user";
+import { loadMember } from "@/features/manager/load";
 import { getMyPlayer } from "@/server/services/manager/club";
 import { getMessages, initLocale, messagesFor } from "@/i18n/server";
 
@@ -26,13 +25,13 @@ async function PlayerContent({
   params: PageProps<"/[locale]/manager/players/[id]">["params"];
 }) {
   const { id } = await params;
-  await requireProfile(`/manager/players/${id}`);
+  const { supabase, offsetMinutes } = await loadMember(`/manager/players/${id}`);
   if (!UUID.test(id)) notFound();
-  const player = await getMyPlayer(await createClient(), id).catch((cause: unknown) => {
+  const player = await getMyPlayer(supabase, id).catch((cause: unknown) => {
     if (cause instanceof ApiError && cause.status === 404) notFound();
     throw cause;
   });
-  return <PlayerCard player={player} />;
+  return <PlayerCard player={player} offsetMinutes={offsetMinutes} />;
 }
 
 export default async function PlayerPage(props: PageProps<"/[locale]/manager/players/[id]">) {

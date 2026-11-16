@@ -90,6 +90,9 @@ describe("toPlayerSummary", () => {
       form: 80,
       fitness: 80,
       morale: 80,
+      idle_rounds: 0,
+      injured_until: null,
+      training_focus: null,
       created_at: "2026-11-16T10:00:00Z",
     });
     expect(summary.overall).toBe(60);

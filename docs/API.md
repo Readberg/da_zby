@@ -119,6 +119,8 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 
 Этап 2 (DAZBY-144): `GET /manager/league` — таблица моей лиги по сыгранным матчам; `GET /manager/matches` — 38 матчей моего клуба; `GET /manager/match?id=` — матч лиги с хроникой и составами (после игры); `GET`/`PUT /manager/lineup` — состав, которым играет клуб (`saved: false` — выбран автосостав), сохранение: 11 игроков по линиям расстановки, `409 manager.lineup_locked` после начала тура. `GET /manager/club` дополнен полями `leagueNumber` и `nextMatch`. Туры играет `POST /api/cron/manager` (не часть v1, секрет `CRON_SECRET`); без него тур играется при первом заходе в раздел после 10:00 МСК.
 
+Этап 3 (DAZBY-145): `PUT /manager/training` — что тренирует каждый игрок (характеристика его позиции или `null` — отдых), `409 manager.training_locked` после начала тура. У игроков в `GET /manager/club` появились `injuredUntil` и `trainingFocus`; в хронике матча — событие `injury`.
+
 ### Админка: сезоны, туры, матчи (DAZBY-63, 64)
 Все эндпоинты — только админ; изменение и удаление идут по `id` в теле.
 - `GET|POST /admin/seasons`: список (с числом клубов и туров) и создание `{ tournamentId, name, copyFromSeasonId? }` (состав можно скопировать с другого сезона). Занятое название — 409 `admin.duplicate`.

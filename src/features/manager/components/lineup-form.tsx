@@ -14,6 +14,7 @@ import {
   type Mentality,
 } from "@/lib/manager/formations";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { isInjuredNow } from "../injuries";
 import type { LineupView, PlayerSummary } from "@/server/api/v1/schemas/manager";
 
 const GROUPS: Position[] = ["GK", "DEF", "MID", "FWD"];
@@ -27,11 +28,13 @@ export function LineupForm({
   players,
   lineup,
   until,
+  injuredNotes = {},
 }: {
   t: Dictionary["manager"];
   players: PlayerSummary[];
   lineup: LineupView;
   until: string | null;
+  injuredNotes?: Record<string, string>;
 }) {
   const router = useRouter();
   const [formation, setFormation] = useState<Formation>(lineup.formation);
@@ -163,8 +166,10 @@ export function LineupForm({
             {players
               .filter((p) => p.position === position)
               .map((player) => {
+                const injured = isInjuredNow(player.injuredUntil);
                 const checked = selected.has(player.id);
-                const full = !checked && countOf(position) >= need[position];
+                const full =
+                  (!checked && countOf(position) >= need[position]) || (injured && !checked);
                 return (
                   <label
                     key={player.id}
@@ -181,6 +186,9 @@ export function LineupForm({
                     />
                     <span className="flex-1">
                       {player.firstName} {player.lastName}
+                      {injured && injuredNotes[player.id] && (
+                        <span className="block text-xs text-danger">{injuredNotes[player.id]}</span>
+                      )}
                     </span>
                     <span className="text-sm text-muted">{player.real.toFixed(1)}</span>
                   </label>
