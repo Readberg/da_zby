@@ -42,7 +42,6 @@ export function FinanceView({
           {t.money.debt}
         </p>
       )}
-      <p className="max-w-prose text-sm text-muted">{t.finance.rules}</p>
 
       {finance.transactions.length === 0 ? (
         <p className="text-muted">{t.finance.empty}</p>

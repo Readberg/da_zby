@@ -10,6 +10,7 @@ const listCities = vi.fn();
 const getMyClub = vi.fn();
 const getMyPlayer = vi.fn();
 const createClub = vi.fn();
+const setClubLogo = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
@@ -18,11 +19,13 @@ vi.mock("@/server/services/manager/club", () => ({
   getMyClub,
   getMyPlayer,
   createClub,
+  setClubLogo,
 }));
 
 const cities = await import("@/app/api/v1/manager/cities/route");
 const club = await import("@/app/api/v1/manager/club/route");
 const player = await import("@/app/api/v1/manager/player/route");
+const logo = await import("@/app/api/v1/manager/club/logo/route");
 
 const USER = "99999999-9999-4999-8999-999999999999";
 const CLUB = "11111111-1111-4111-8111-111111111111";
@@ -36,6 +39,7 @@ const myClub = {
   primaryColor: "#d32f2f",
   secondaryColor: "#f5f5f5",
   budget: 10000,
+  logoUrl: null,
   createdAt: "2026-11-16T10:00:00.000Z",
 };
 
@@ -81,6 +85,7 @@ beforeEach(() => {
   });
   getMyPlayer.mockReset();
   createClub.mockReset().mockResolvedValue(myClub);
+  setClubLogo.mockReset().mockResolvedValue({ logoUrl: null });
 });
 
 describe("the football manager API is for signed-in users", () => {
@@ -171,6 +176,52 @@ describe("GET /api/v1/manager/player", () => {
       await player.GET(apiRequest(`/api/v1/manager/player?id=${PLAYER}`)),
       404,
       "api.not_found",
+    );
+  });
+});
+
+describe("PUT /api/v1/manager/club/logo", () => {
+  const put = (body: unknown) =>
+    apiRequest("/api/v1/manager/club/logo", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  const path = `${USER}/club-1.webp`;
+
+  it("is for signed-in users", async () => {
+    signedIn("guest");
+    await expectProblem(await logo.PUT(put({ path })), 401, "auth.required");
+    expect(setClubLogo).not.toHaveBeenCalled();
+  });
+
+  it("sets and removes the logo of the club of the caller", async () => {
+    setClubLogo.mockResolvedValueOnce({ logoUrl: "https://x/avatars/" + path });
+    const set = await logo.PUT(put({ path }));
+    expect(set.status).toBe(200);
+    expect((await set.json()).data.logoUrl).toContain(path);
+    expect(setClubLogo).toHaveBeenCalledWith({}, USER, path);
+    expect((await logo.PUT(put({ path: null }))).status).toBe(200);
+    expect(setClubLogo).toHaveBeenLastCalledWith({}, USER, null);
+  });
+
+  it("asks for a path (or null)", async () => {
+    await expectProblem(await logo.PUT(put({})), 422, "api.validation_failed");
+    await expectProblem(
+      await logo.PUT(put({ path: "x".repeat(200) })),
+      422,
+      "api.validation_failed",
+    );
+  });
+
+  it("answers 422 for a path that is not in the folder of the user", async () => {
+    setClubLogo.mockRejectedValueOnce(
+      new ApiError(422, ERROR_CODES.validationFailed, "Unprocessable Content", "bad path"),
+    );
+    await expectProblem(
+      await logo.PUT(put({ path: "someone-else/club-1.webp" })),
+      422,
+      "api.validation_failed",
     );
   });
 });

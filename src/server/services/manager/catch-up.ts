@@ -13,7 +13,7 @@ export async function catchUpRounds(): Promise<void> {
   if (!serverEnv.SUPABASE_SECRET_KEY) return;
   try {
     const done = await runRounds(createAdminClient());
-    if (done.played + done.closed + done.days + done.opened + done.pools > 0) {
+    if (Object.values(done).some((n) => n > 0)) {
       log("info", "manager.catch_up", done);
     }
   } catch (error) {

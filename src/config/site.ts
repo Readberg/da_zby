@@ -19,12 +19,11 @@ export const siteConfig = {
         ...new Set([new URL(siteUrl).hostname, "dazby.com", "dazby-production.up.railway.app"]),
       ].join(","),
   },
-  /** Header navigation: only pages that already exist. */
+  /** Header navigation: only pages that already exist. The rating and the table live in the predictions tabs. */
   nav: [
     { id: "home", href: "/" },
-    { id: "predictions", href: "/predictions" },
-    { id: "rating", href: "/rating" },
-    { id: "standings", href: "/standings" },
+    // Rating and the table are tabs of the predictions section: the item stays marked on them too.
+    { id: "predictions", href: "/predictions", also: ["/rating", "/standings"] },
     // Not prefetched: the chat page brings the Supabase Realtime client (~200 KB) that no other page needs.
     { id: "chat", href: "/chat", prefetch: false },
     { id: "manager", href: "/manager", prefetch: false },
@@ -32,4 +31,4 @@ export const siteConfig = {
 } as const;
 
 export type SocialId = (typeof siteConfig.social)[number]["id"];
-export type NavId = (typeof siteConfig.nav)[number]["id"];
+export type NavId = (typeof siteConfig.nav)[number]["id"] | "rating" | "standings";

@@ -62,6 +62,7 @@ const side = {
   name: "Сокол Минск",
   primaryColor: "#d32f2f",
   secondaryColor: "#f5f5f5",
+  logoUrl: null,
 };
 const summary = {
   id: MATCH,
@@ -108,6 +109,7 @@ beforeEach(() => {
     playerIds: PLAYERS,
     saved: false,
     locked: false,
+    lockAt: "2026-11-18T06:55:00.000Z",
     nextKickoffAt: "2026-11-18T07:00:00.000Z",
   });
   saveLineup.mockReset().mockResolvedValue(undefined);

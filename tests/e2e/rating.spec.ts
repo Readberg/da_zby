@@ -4,8 +4,16 @@ test.describe("rating (guest)", () => {
   test("the page opens, is in the header and has no horizontal scroll", async ({ page }) => {
     await page.goto("/rating");
     await expect(page.getByRole("heading", { level: 1, name: "Рейтинг" })).toBeVisible();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Разделы прогнозов" })
+        .getByRole("link", { name: "Рейтинг" }),
+    ).toHaveAttribute("aria-current", "page");
     await openMenu(page);
-    await expect(page.getByRole("banner").getByRole("link", { name: "Рейтинг" })).toBeVisible();
+    await expect(page.getByRole("banner").getByRole("link", { name: "Прогнозы" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     // Either the pickers (a tournament exists) or the empty state: both are valid content.
     await expect(page.getByLabel("Турнир").or(page.getByText("Турниров пока нет"))).toBeVisible({
       timeout: 15_000,

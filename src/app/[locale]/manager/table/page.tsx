@@ -27,7 +27,7 @@ export default async function ManagerTablePage(props: PageProps<"/[locale]/manag
   await initLocale(props.params);
   const t = getMessages().manager.table;
   return (
-    <ManagerShell title={t.title} lead={t.lead}>
+    <ManagerShell title={t.title} lead={t.lead} faq="matches">
       <Suspense fallback={<Skeleton className="h-96" />}>
         <TableContent />
       </Suspense>

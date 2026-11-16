@@ -32,10 +32,10 @@ test.describe("burger menu on a phone", () => {
     const burger = page.getByRole("button", { name: "Меню" });
     await expect(burger).toBeVisible();
     // Not a second row of links: until the burger is opened there is no link to a section.
-    await expect(page.getByRole("banner").getByRole("link", { name: "Рейтинг" })).toHaveCount(0);
+    await expect(page.getByRole("banner").getByRole("link", { name: "Чат" })).toHaveCount(0);
 
     await openMenu(page);
-    for (const name of ["Главная", "Прогнозы", "Рейтинг", "Таблица", "Чат", "Войти"]) {
+    for (const name of ["Главная", "Прогнозы", "Чат", "Менеджер", "Войти"]) {
       await expect(page.getByRole("banner").getByRole("link", { name })).toBeVisible();
     }
     const overflow = await page.evaluate(
@@ -43,8 +43,8 @@ test.describe("burger menu on a phone", () => {
     );
     expect(overflow).toBe(0);
 
-    await page.getByRole("banner").getByRole("link", { name: "Рейтинг" }).click();
-    await expect(page).toHaveURL(/\/rating$/);
+    await page.getByRole("banner").getByRole("link", { name: "Прогнозы" }).click();
+    await expect(page).toHaveURL(/\/predictions$/);
     await expect(burger).toHaveAttribute("aria-expanded", "false");
   });
 

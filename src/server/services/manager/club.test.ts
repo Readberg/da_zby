@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/server/api/v1/problem";
-import { createClub, toPlayerSummary } from "./club";
+import { createClub, setClubLogo, toPlayerSummary } from "./club";
 import { SQUAD_TOTAL_OVR } from "./squad";
 
 const body = {
@@ -94,10 +94,47 @@ describe("toPlayerSummary", () => {
       injured_until: null,
       training_focus: null,
       retire_after_season: false,
+      tradable_after: null,
+      wage: 0,
+      contract_until: null,
+      contract_offer_season: null,
       pool_league_id: null,
       created_at: "2026-11-16T10:00:00Z",
     });
     expect(summary.overall).toBe(60);
     expect(summary.real).toBeCloseTo(54.8, 1);
+  });
+});
+
+describe("setClubLogo", () => {
+  const USER = "99999999-9999-4999-8999-999999999999";
+
+  it("tells the database which file is the logo and returns its public address", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://x.supabase.co";
+    const rpc = vi.fn(async () => ({ error: null }));
+    const result = await setClubLogo({ rpc } as never, USER, `${USER}/club-1.webp`);
+    expect(rpc).toHaveBeenCalledWith("mgr_set_logo", {
+      p_user: USER,
+      p_path: `${USER}/club-1.webp`,
+    });
+    expect(result.logoUrl).toBe(
+      `https://x.supabase.co/storage/v1/object/public/avatars/${USER}/club-1.webp`,
+    );
+  });
+
+  it("removes the logo with null", async () => {
+    const rpc = vi.fn(async () => ({ error: null }));
+    expect(await setClubLogo({ rpc } as never, USER, null)).toEqual({ logoUrl: null });
+  });
+
+  it.each([
+    ["manager.logo_invalid", 422, "api.validation_failed"],
+    ["manager.club_unknown", 404, "api.not_found"],
+  ])("maps the database refusal %s to %i", async (message, status, code) => {
+    const rpc = vi.fn(async () => ({ error: { message } }));
+    await expect(setClubLogo({ rpc } as never, USER, "x/y.png")).rejects.toMatchObject({
+      status,
+      code,
+    });
   });
 });

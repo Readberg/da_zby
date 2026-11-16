@@ -37,6 +37,10 @@ function playerRows(clubId: string, seed: string) {
     fitness: 80,
     morale: 80,
     retire_after_season: false,
+    tradable_after: null,
+    wage: 0,
+    contract_until: null,
+    contract_offer_season: null,
     idle_rounds: 0,
     injured_until: null,
     training_focus: null,
@@ -149,6 +153,35 @@ describe("playDueMatches", () => {
 
   it("does not count a match that another runner wrote first", async () => {
     expect(await playDueMatches(fakeAdmin({ due, recorded: false }))).toBe(0);
+  });
+
+  it("plays one match of a club per pass: a second match of the same clubs waits for the next one", async () => {
+    const admin = fakeAdmin({
+      due: [
+        { id: "match-1", kind: "league", home_club_id: "a", away_club_id: "b" },
+        { id: "match-2", kind: "league", home_club_id: "b", away_club_id: "a" },
+      ],
+    });
+    expect(await playDueMatches(admin)).toBe(1);
+    const calls = (admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock.calls;
+    expect(calls).toHaveLength(1);
+    expect((calls[0] as [string, { p_match: string }])[1].p_match).toBe("match-1");
+  });
+
+  it("goes on pass after pass while there is something to play (a pause of the scheduler leaves many rounds)", async () => {
+    let passes = 0;
+    const rpc = vi.fn(async () => ({ data: true, error: null }));
+    const admin = {
+      rpc,
+      from: (table: string) => {
+        if (table === "mgr_matches") return chain(passes++ < 5 ? due : []);
+        if (table === "mgr_players")
+          return chain([...playerRows("a", "seed-a"), ...playerRows("b", "seed-b")]);
+        return chain([]);
+      },
+    } as never;
+    expect(await playAllDue(admin)).toBe(5);
+    expect(rpc).toHaveBeenCalledTimes(5);
   });
 
   it("does nothing when no match is due", async () => {

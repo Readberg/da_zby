@@ -32,7 +32,7 @@ export default async function ManagerMatchesPage(props: PageProps<"/[locale]/man
   await initLocale(props.params);
   const t = getMessages().manager.matchesPage;
   return (
-    <ManagerShell title={t.title} lead={t.lead}>
+    <ManagerShell title={t.title} lead={t.lead} faq="matches">
       <Suspense fallback={<Skeleton className="h-96" />}>
         <MatchesContent />
       </Suspense>

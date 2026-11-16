@@ -41,7 +41,7 @@ test.describe("English interface (D-088)", () => {
     await expect(page.getByRole("link", { name: "Sign in with Telegram" }).first()).toBeVisible();
     await expect(page).toHaveTitle("Da Zabey");
     await openMenu(page);
-    await expect(page.getByRole("link", { name: "Standings" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Predictions" }).first()).toBeVisible();
   });
 
   const pages = ["/", "/rating", "/predictions", "/login", "/this-page-does-not-exist"];

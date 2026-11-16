@@ -158,6 +158,10 @@ describe("runPreseasonDays", () => {
     injured_until: null,
     training_focus: null,
     retire_after_season: false,
+    tradable_after: null,
+    wage: 0,
+    contract_until: null,
+    contract_offer_season: null,
     hidden: { potential: 90 },
     attrs: Object.entries(p.attributes).map(([attribute, value]) => ({ attribute, value })),
   }));
