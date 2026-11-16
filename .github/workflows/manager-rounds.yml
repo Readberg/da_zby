@@ -1,0 +1,38 @@
+name: manager-rounds
+
+# Football manager (D-129): every day from 10:05 Moscow time the site plays the round whose kickoff
+# (10:00 Moscow = 07:00 UTC) has passed. GitHub starts scheduled runs late and sometimes skips them,
+# so it tries several times in the first two hours; a round already played is never played twice.
+# If no run happens at all, the first visit to the section plays the round (catch-up), only later.
+# GitHub runs scheduled workflows only from the default branch, so this one starts after a release.
+# Secret: CRON_SECRET (the same one as results-sync, docs/SETUP.md, section J).
+
+on:
+  schedule:
+    - cron: "5,20,35,50 7-8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manager-rounds
+  cancel-in-progress: false
+
+jobs:
+  rounds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      STAND_URL: https://dazby-production.up.railway.app
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Play the rounds that are due
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::warning::CRON_SECRET is not set: rounds are played by the first visit only. See docs/SETUP.md, section J."
+            exit 0
+          fi
+          curl -fsS --max-time 120 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$STAND_URL/api/cron/manager" | jq -c '{ok, played}'

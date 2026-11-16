@@ -1,23 +1,58 @@
 import Link from "next/link";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
-import { getMessages } from "@/i18n/server";
+import { getLocale, getMessages } from "@/i18n/server";
+import { formatDateTime } from "@/lib/local-time";
 import type { ManagerClubView } from "@/server/api/v1/schemas/manager";
+import { ClubColors } from "./club-colors";
+import { MatchTitle } from "./match-link";
 
-/** The colours of a club as two stripes; they are content of the club, so they come from the data. */
-export function ClubColors({ primary, secondary }: { primary: string; secondary: string }) {
+/** The next match of my club with its date and a way to the lineup. */
+function NextMatch({ view, offsetMinutes }: { view: ManagerClubView; offsetMinutes: number }) {
+  const t = getMessages().manager;
+  const match = view.nextMatch;
+  if (!view.club) return null;
+  if (view.leagueNumber === null) {
+    return (
+      <p role="status" className="rounded-lg border border-line bg-surface p-4 text-muted">
+        {t.hub.waitingLeague}
+      </p>
+    );
+  }
   return (
-    <span
-      aria-hidden="true"
-      className="flex h-10 w-10 overflow-hidden rounded-full border border-line"
+    <section
+      aria-labelledby="next-match-title"
+      className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-5"
     >
-      <span className="w-1/2" style={{ backgroundColor: primary }} />
-      <span className="w-1/2" style={{ backgroundColor: secondary }} />
-    </span>
+      <h3 id="next-match-title" className="text-sm uppercase tracking-widest text-muted">
+        {t.hub.nextMatch}
+      </h3>
+      {match ? (
+        <>
+          <p className="text-sm text-muted">
+            {t.hub.round.replace("{n}", String(match.round))} ·{" "}
+            {formatDateTime(match.kickoffAt, offsetMinutes, getLocale())} ·{" "}
+            {match.home.clubId === view.club.id ? t.hub.home : t.hub.away}
+          </p>
+          <MatchTitle match={match} mineId={view.club.id} />
+          <Link href="/manager/lineup" className="w-fit text-sm font-semibold underline">
+            {t.hub.lineup}
+          </Link>
+        </>
+      ) : (
+        <p className="text-muted">{t.hub.noNextMatch}</p>
+      )}
+    </section>
   );
 }
 
-/** My club: its name, city and the squad ordered by position and rating. */
-export function ClubView({ view }: { view: ManagerClubView }) {
+/** My club: its name, league, next match and the squad ordered by position and rating. */
+export function ClubView({
+  view,
+  offsetMinutes,
+}: {
+  view: ManagerClubView;
+  offsetMinutes: number;
+}) {
   const t = getMessages().manager;
   const { club, players } = view;
   if (!club) return null;
@@ -31,9 +66,13 @@ export function ClubView({ view }: { view: ManagerClubView }) {
           <h2 className="text-h3 sm:text-h2">{club.name}</h2>
           <p className="text-muted">
             {t.clubFrom.replace("{city}", club.city.name).replace("{country}", country)}
+            {view.leagueNumber !== null &&
+              ` · ${t.hub.leagueLine.replace("{n}", String(view.leagueNumber))}`}
           </p>
         </div>
       </div>
+
+      <NextMatch view={view} offsetMinutes={offsetMinutes} />
 
       <section aria-labelledby="squad-title" className="flex flex-col gap-3">
         <h3 id="squad-title" className="text-lg">

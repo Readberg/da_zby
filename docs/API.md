@@ -117,6 +117,8 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 ### Футбольный менеджер (DAZBY-143, D-129)
 Все эндпоинты — для вошедшего. `GET /manager/cities` — города страны клуба и палитра цветов. `GET /manager/club` — мой клуб и состав (`club: null`, пока клуба нет; потенциал игроков не отдаётся). `POST /manager/club` (`name`, `cityId`, `primaryColor`, `secondaryColor`) — создаёт клуб и один раз генерирует стартовый состав; `409 manager.club_exists`, `409 manager.name_taken`, 10 попыток за 10 минут. `GET /manager/player?id=` — игрок моего клуба со всеми характеристиками; чужой — `404`.
 
+Этап 2 (DAZBY-144): `GET /manager/league` — таблица моей лиги по сыгранным матчам; `GET /manager/matches` — 38 матчей моего клуба; `GET /manager/match?id=` — матч лиги с хроникой и составами (после игры); `GET`/`PUT /manager/lineup` — состав, которым играет клуб (`saved: false` — выбран автосостав), сохранение: 11 игроков по линиям расстановки, `409 manager.lineup_locked` после начала тура. `GET /manager/club` дополнен полями `leagueNumber` и `nextMatch`. Туры играет `POST /api/cron/manager` (не часть v1, секрет `CRON_SECRET`); без него тур играется при первом заходе в раздел после 10:00 МСК.
+
 ### Админка: сезоны, туры, матчи (DAZBY-63, 64)
 Все эндпоинты — только админ; изменение и удаление идут по `id` в теле.
 - `GET|POST /admin/seasons`: список (с числом клубов и туров) и создание `{ tournamentId, name, copyFromSeasonId? }` (состав можно скопировать с другого сезона). Занятое название — 409 `admin.duplicate`.

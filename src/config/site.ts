@@ -27,6 +27,7 @@ export const siteConfig = {
     { id: "standings", href: "/standings" },
     // Not prefetched: the chat page brings the Supabase Realtime client (~200 KB) that no other page needs.
     { id: "chat", href: "/chat", prefetch: false },
+    { id: "manager", href: "/manager", prefetch: false },
   ],
 } as const;
 

@@ -1,0 +1,464 @@
+import { randomBytes } from "node:crypto";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Position } from "@/lib/manager/attributes";
+import { realRating } from "@/lib/manager/attributes";
+import {
+  autoLineup,
+  lineupFits,
+  type Formation,
+  type Mentality,
+  type RatedPlayer,
+} from "@/lib/manager/formations";
+import { CLUB_COLORS, FALLBACK_COLORS } from "@/lib/manager/palette";
+import { buildSchedule, firstKickoff, ROUNDS } from "@/lib/manager/schedule";
+import { computeTable } from "@/lib/manager/table";
+import { errorFields, log } from "@/lib/log";
+import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
+import type {
+  LeagueView,
+  LineupBody,
+  LineupPlayerSnapshot,
+  LineupView,
+  MatchDetail,
+  MatchEventData,
+  MatchList,
+  MatchSummary,
+} from "@/server/api/v1/schemas/manager";
+import type { Database, Json, Tables } from "@/types/database";
+import { simulateMatch, type Side, type SidePlayer } from "./engine";
+import { generateSquad } from "./squad";
+import { fetchAll } from "../paginate";
+import { makeRandom } from "./random";
+
+type Db = SupabaseClient<Database>;
+
+type ClubBit = {
+  id: string;
+  name: string;
+  primary_color: string;
+  secondary_color: string;
+};
+type MatchRow = Tables<"mgr_matches"> & { home: ClubBit | null; away: ClubBit | null };
+
+const MATCH_SELECT =
+  "*, home:mgr_clubs!mgr_matches_home_club_id_fkey(id, name, primary_color, secondary_color), away:mgr_clubs!mgr_matches_away_club_id_fkey(id, name, primary_color, secondary_color)";
+
+const toSide = (club: ClubBit | null, fallbackId: string) => ({
+  clubId: club?.id ?? fallbackId,
+  name: club?.name ?? "",
+  primaryColor: club?.primary_color ?? FALLBACK_COLORS.primary,
+  secondaryColor: club?.secondary_color ?? FALLBACK_COLORS.secondary,
+});
+
+export function toMatchSummary(row: MatchRow): MatchSummary {
+  return {
+    id: row.id,
+    round: row.round,
+    kickoffAt: new Date(row.kickoff_at).toISOString(),
+    status: row.status as MatchSummary["status"],
+    home: toSide(row.home, row.home_club_id),
+    away: toSide(row.away, row.away_club_id),
+    homeGoals: row.home_goals,
+    awayGoals: row.away_goals,
+  };
+}
+
+async function myClubId(
+  supabase: Db,
+  userId: string,
+): Promise<{ id: string; leagueId: string | null }> {
+  const { data, error } = await supabase
+    .from("mgr_clubs")
+    .select("id, league_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new ApiError(404, ERROR_CODES.notFound, "Not Found", "You have no club yet.");
+  return { id: data.id, leagueId: data.league_id };
+}
+
+/** The next match of a club that has not been played yet, or null. */
+export async function getNextMatch(supabase: Db, clubId: string): Promise<MatchSummary | null> {
+  const { data, error } = await supabase
+    .from("mgr_matches")
+    .select(MATCH_SELECT)
+    .or(`home_club_id.eq.${clubId},away_club_id.eq.${clubId}`)
+    .eq("status", "scheduled")
+    .order("round")
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? toMatchSummary(data as unknown as MatchRow) : null;
+}
+
+export async function listMyMatches(supabase: Db, userId: string): Promise<MatchList> {
+  const club = await myClubId(supabase, userId);
+  const { data, error } = await supabase
+    .from("mgr_matches")
+    .select(MATCH_SELECT)
+    .or(`home_club_id.eq.${club.id},away_club_id.eq.${club.id}`)
+    .order("round");
+  if (error) throw error;
+  return { matches: (data ?? []).map((row) => toMatchSummary(row as unknown as MatchRow)) };
+}
+
+/** A match of my league with its chronicle (RLS lets a user see the matches of their league only). */
+export async function getMatch(supabase: Db, matchId: string): Promise<MatchDetail> {
+  const { data, error } = await supabase
+    .from("mgr_matches")
+    .select(MATCH_SELECT)
+    .eq("id", matchId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new ApiError(404, ERROR_CODES.notFound, "Not Found", "Match not found.");
+  const row = data as unknown as MatchRow;
+  return {
+    ...toMatchSummary(row),
+    events: (row.events as MatchEventData[] | null) ?? [],
+    homeLineup: (row.home_lineup as LineupPlayerSnapshot[] | null) ?? null,
+    awayLineup: (row.away_lineup as LineupPlayerSnapshot[] | null) ?? null,
+  };
+}
+
+/** The table of the league of the caller's club, from the matches played so far. */
+export async function getLeagueView(supabase: Db, userId: string): Promise<LeagueView> {
+  const club = await myClubId(supabase, userId);
+  if (!club.leagueId) return { league: null, table: [] };
+
+  const [league, clubs, matches] = await Promise.all([
+    supabase.from("mgr_leagues").select("*").eq("id", club.leagueId).maybeSingle(),
+    supabase
+      .from("mgr_clubs")
+      .select("id, name, primary_color, secondary_color, is_bot")
+      .eq("league_id", club.leagueId),
+    fetchAll((from, to) =>
+      supabase
+        .from("mgr_matches")
+        .select("id, round, status, home_club_id, away_club_id, home_goals, away_goals")
+        .eq("league_id", club.leagueId!)
+        .order("id")
+        .range(from, to),
+    ),
+  ]);
+  if (league.error) throw league.error;
+  if (clubs.error) throw clubs.error;
+  if (!league.data) return { league: null, table: [] };
+
+  const finished = matches.filter((m) => m.status === "finished");
+  const rows = computeTable(
+    (clubs.data ?? []).map((c) => ({ id: c.id, name: c.name })),
+    finished.map((m) => ({
+      homeClubId: m.home_club_id,
+      awayClubId: m.away_club_id,
+      homeGoals: m.home_goals ?? 0,
+      awayGoals: m.away_goals ?? 0,
+    })),
+  );
+  const info = new Map((clubs.data ?? []).map((c) => [c.id, c]));
+
+  // A round counts as played when all 10 of its matches are finished.
+  const perRound = new Map<number, { total: number; done: number }>();
+  for (const m of matches) {
+    const entry = perRound.get(m.round) ?? { total: 0, done: 0 };
+    entry.total += 1;
+    if (m.status === "finished") entry.done += 1;
+    perRound.set(m.round, entry);
+  }
+  const roundsPlayed = [...perRound.values()].filter((r) => r.done === r.total).length;
+
+  return {
+    league: {
+      id: league.data.id,
+      number: league.data.number,
+      season: league.data.season,
+      firstKickoffAt: new Date(league.data.first_kickoff_at).toISOString(),
+      roundsPlayed,
+      rounds: ROUNDS,
+    },
+    table: rows.map((row) => {
+      const c = info.get(row.clubId);
+      return {
+        ...row,
+        name: c?.name ?? "",
+        primaryColor: c?.primary_color ?? FALLBACK_COLORS.primary,
+        secondaryColor: c?.secondary_color ?? FALLBACK_COLORS.secondary,
+        isBot: c?.is_bot ?? false,
+        isMine: row.clubId === club.id,
+      };
+    }),
+  };
+}
+
+// ---- lineups -------------------------------------------------------------------------------
+
+type SquadPlayer = RatedPlayer & { name: string };
+
+function toSquad(rows: Tables<"mgr_players">[]): SquadPlayer[] {
+  return rows.map((p) => ({
+    id: p.id,
+    name: `${p.first_name} ${p.last_name}`,
+    position: p.position as Position,
+    real: realRating(p.ovr, { form: p.form, fitness: p.fitness, morale: p.morale }),
+  }));
+}
+
+type ChosenLineup = {
+  formation: Formation;
+  mentality: Mentality;
+  playerIds: string[];
+  saved: boolean;
+};
+
+/** The saved lineup when it still fits the squad, otherwise the best one (no penalty). */
+export function resolveLineup(
+  squad: SquadPlayer[],
+  saved: Pick<Tables<"mgr_lineups">, "formation" | "mentality" | "player_ids"> | null | undefined,
+): ChosenLineup | null {
+  if (saved) {
+    const byId = new Map(squad.map((p) => [p.id, p]));
+    const chosen = saved.player_ids.map((id) => byId.get(id));
+    const complete = chosen.every((p): p is SquadPlayer => Boolean(p));
+    if (complete && lineupFits(saved.formation as Formation, chosen as SquadPlayer[])) {
+      return {
+        formation: saved.formation as Formation,
+        mentality: saved.mentality as Mentality,
+        playerIds: saved.player_ids,
+        saved: true,
+      };
+    }
+  }
+  const auto = autoLineup(squad);
+  return auto ? { ...auto, saved: false } : null;
+}
+
+export async function getLineup(supabase: Db, userId: string): Promise<LineupView> {
+  const club = await myClubId(supabase, userId);
+  const [players, saved, next] = await Promise.all([
+    supabase.from("mgr_players").select("*").eq("club_id", club.id),
+    supabase.from("mgr_lineups").select("*").eq("club_id", club.id).maybeSingle(),
+    supabase
+      .from("mgr_matches")
+      .select("kickoff_at")
+      .or(`home_club_id.eq.${club.id},away_club_id.eq.${club.id}`)
+      .eq("status", "scheduled")
+      .order("round")
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  if (players.error) throw players.error;
+  if (saved.error) throw saved.error;
+  if (next.error) throw next.error;
+
+  const lineup = resolveLineup(toSquad(players.data ?? []), saved.data);
+  if (!lineup) throw new Error("the squad cannot field a lineup");
+  const nextKickoff = next.data ? new Date(next.data.kickoff_at) : null;
+  return {
+    formation: lineup.formation,
+    mentality: lineup.mentality,
+    playerIds: lineup.playerIds,
+    saved: lineup.saved,
+    locked: nextKickoff !== null && nextKickoff.getTime() <= Date.now(),
+    nextKickoffAt: nextKickoff ? nextKickoff.toISOString() : null,
+  };
+}
+
+/** Saves the lineup; the database checks the squad, the formation and that no round is due yet. */
+export async function saveLineup(admin: Db, userId: string, body: LineupBody): Promise<void> {
+  const { error } = await admin.rpc("mgr_save_lineup", {
+    p_user: userId,
+    p_formation: body.formation,
+    p_mentality: body.mentality,
+    p_players: body.playerIds,
+  });
+  if (!error) return;
+  if (error.message.includes("manager.lineup_locked")) {
+    throw new ApiError(
+      409,
+      ERROR_CODES.managerLineupLocked,
+      "Conflict",
+      "The round has started: the lineup can no longer be changed.",
+    );
+  }
+  if (error.message.includes("manager.lineup_invalid")) {
+    throw new ApiError(
+      422,
+      ERROR_CODES.validationFailed,
+      "Unprocessable Content",
+      "The lineup does not fit the formation.",
+      [{ field: "playerIds", message: "Choose 1 goalkeeper and the players the formation needs." }],
+    );
+  }
+  if (error.message.includes("manager.club_unknown")) {
+    throw new ApiError(404, ERROR_CODES.notFound, "Not Found", "You have no club yet.");
+  }
+  throw error;
+}
+
+// ---- leagues -------------------------------------------------------------------------------
+
+const BOT_SUFFIXES = [
+  "Сокол",
+  "Вымпел",
+  "Гранит",
+  "Метеор",
+  "Ураган",
+  "Маяк",
+  "Орбита",
+  "Прибой",
+  "Рассвет",
+  "Таран",
+  "Факел",
+  "Янтарь",
+  "Ястреб",
+  "Бастион",
+  "Атлант",
+  "Зубр",
+];
+
+/** 20 bot clubs with squads of the same kind as everyone's. */
+function makeBots(cities: { id: number; name: string }[]) {
+  const random = makeRandom(randomBytes(16).toString("hex"));
+  const pick = <T>(items: readonly T[]) => items[Math.floor(random() * items.length)]!;
+  return Array.from({ length: 20 }, () => {
+    const seed = randomBytes(16).toString("hex");
+    const city = pick(cities);
+    const primary = pick(CLUB_COLORS);
+    const secondary = pick(CLUB_COLORS.filter((c) => c !== primary));
+    return {
+      name: `${pick(BOT_SUFFIXES)} ${city.name}`,
+      city_id: city.id,
+      primary_color: primary,
+      secondary_color: secondary,
+      seed,
+      players: generateSquad(seed, "BY").map((p) => ({
+        first_name: p.firstName,
+        last_name: p.lastName,
+        position: p.position,
+        age: p.age,
+        potential: p.potential,
+        ovr: p.ovr,
+        attributes: p.attributes,
+      })),
+    };
+  });
+}
+
+/**
+ * Puts a club that has no league into one: the place of a bot of an existing league, or a new
+ * league of 20 bots (made in one transaction together with the club's place in it).
+ */
+export async function placeClub(admin: Db, clubId: string): Promise<string> {
+  const joined = await admin.rpc("mgr_join_league", { p_club: clubId });
+  if (joined.error) throw joined.error;
+  if (joined.data) return joined.data;
+
+  const { data: cities, error } = await admin.from("mgr_cities").select("id, name");
+  if (error) throw error;
+  const opened = await admin.rpc("mgr_open_league", {
+    p_club: clubId,
+    p_first_kickoff: firstKickoff(new Date()).toISOString(),
+    p_bots: makeBots(cities ?? []) as unknown as Json,
+    p_matches: buildSchedule() as unknown as Json,
+  });
+  if (opened.error) throw opened.error;
+  return opened.data;
+}
+
+// ---- playing the rounds --------------------------------------------------------------------
+
+const BATCH = 40;
+
+function sideOf(
+  clubId: string,
+  squads: Map<string, SquadPlayer[]>,
+  saved: Map<string, Tables<"mgr_lineups">>,
+): { side: Side; snapshot: LineupPlayerSnapshot[] } | null {
+  const squad = squads.get(clubId) ?? [];
+  const lineup = resolveLineup(squad, saved.get(clubId));
+  if (!lineup) return null;
+  const byId = new Map(squad.map((p) => [p.id, p]));
+  const chosen = lineup.playerIds.map((id) => byId.get(id)!);
+  const players: SidePlayer[] = chosen.map((p) => ({
+    id: p.id,
+    name: p.name,
+    position: p.position,
+    real: p.real,
+  }));
+  return {
+    side: { players, mentality: lineup.mentality },
+    snapshot: chosen.map((p) => ({ id: p.id, name: p.name, position: p.position, real: p.real })),
+  };
+}
+
+/**
+ * Plays the matches whose kickoff has passed. Safe to call from several places at once (the
+ * scheduler and a visit): the result of a match is written once, and the same match always comes
+ * out the same, because the lineups are locked from kickoff and the draw is seeded by the match.
+ * Returns how many matches this call wrote.
+ */
+export async function playDueMatches(admin: Db, now: Date = new Date()): Promise<number> {
+  const due = await admin
+    .from("mgr_matches")
+    .select("id, home_club_id, away_club_id")
+    .eq("status", "scheduled")
+    .lte("kickoff_at", now.toISOString())
+    .order("kickoff_at")
+    .order("id")
+    .limit(BATCH);
+  if (due.error) throw due.error;
+  if (!due.data?.length) return 0;
+
+  const clubIds = [...new Set(due.data.flatMap((m) => [m.home_club_id, m.away_club_id]))];
+  const [players, lineups] = await Promise.all([
+    fetchAll((from, to) =>
+      admin.from("mgr_players").select("*").in("club_id", clubIds).order("id").range(from, to),
+    ),
+    fetchAll((from, to) =>
+      admin.from("mgr_lineups").select("*").in("club_id", clubIds).order("club_id").range(from, to),
+    ),
+  ]);
+  const rowsByClub = new Map<string, Tables<"mgr_players">[]>();
+  for (const player of players) {
+    rowsByClub.set(player.club_id, [...(rowsByClub.get(player.club_id) ?? []), player]);
+  }
+  const squads = new Map<string, SquadPlayer[]>(
+    [...rowsByClub].map(([clubId, rows]) => [clubId, toSquad(rows)]),
+  );
+  const saved = new Map(lineups.map((l) => [l.club_id, l]));
+
+  let written = 0;
+  for (const match of due.data) {
+    const home = sideOf(match.home_club_id, squads, saved);
+    const away = sideOf(match.away_club_id, squads, saved);
+    if (!home || !away) {
+      log("warn", "manager.match_skipped", { match: match.id });
+      continue;
+    }
+    const result = simulateMatch(match.id, home.side, away.side);
+    const { data, error } = await admin.rpc("mgr_record_match", {
+      p_match: match.id,
+      p_home_goals: result.homeGoals,
+      p_away_goals: result.awayGoals,
+      p_events: result.events as unknown as Json,
+      p_home_lineup: home.snapshot as unknown as Json,
+      p_away_lineup: away.snapshot as unknown as Json,
+    });
+    if (error) {
+      log("error", "manager.match_failed", { match: match.id, ...errorFields(error) });
+      continue;
+    }
+    if (data) written += 1;
+  }
+  return written;
+}
+
+/** Plays everything that is due, batch after batch (the scheduler calls this). */
+export async function playAllDue(admin: Db, now: Date = new Date()): Promise<number> {
+  let total = 0;
+  for (let i = 0; i < 20; i += 1) {
+    const written = await playDueMatches(admin, now);
+    total += written;
+    if (written === 0 || written < BATCH) break;
+  }
+  return total;
+}

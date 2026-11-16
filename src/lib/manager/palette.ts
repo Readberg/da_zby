@@ -18,3 +18,6 @@ export const CLUB_COLORS = [
 ] as const;
 
 export type ClubColor = (typeof CLUB_COLORS)[number];
+
+/** Shown for a club that cannot be found (it left the league). */
+export const FALLBACK_COLORS = { primary: CLUB_COLORS[10], secondary: CLUB_COLORS[11] } as const;
