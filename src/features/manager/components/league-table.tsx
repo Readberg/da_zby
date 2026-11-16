@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getMessages } from "@/i18n/server";
 import type { LeagueView } from "@/server/api/v1/schemas/manager";
@@ -12,6 +13,9 @@ export function LeagueTable({ view }: { view: LeagueView }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <Link href="/manager/scorers" className="text-sm underline">
+        {getMessages().manager.stats.scorers.link} →
+      </Link>
       <p className="text-sm text-muted">
         {t.progress
           .replace("{n}", String(league.roundsPlayed))

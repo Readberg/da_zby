@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { api } from "@/lib/api-client";
 import { cx } from "@/lib/cx";
 import type { Player } from "@/server/api/v1/schemas/manager";
+import type { PlayerStats } from "@/server/api/v1/schemas/manager-stats";
 import { Modal } from "./modal";
 import { useManager } from "./manager-provider";
 import { PlayerCardBody } from "./player-card-body";
@@ -20,7 +21,7 @@ function visitorOffset(): Promise<number> {
 type State =
   | { status: "loading" }
   | { status: "failed" }
-  | { status: "ready"; player: Player; offsetMinutes: number };
+  | { status: "ready"; player: Player; stats: PlayerStats | null; offsetMinutes: number };
 
 function PlayerWindow({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {
   const { t, locale } = useManager();
@@ -28,9 +29,14 @@ function PlayerWindow({ id, name, onClose }: { id: string; name: string; onClose
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api<Player>(`/manager/player?id=${encodeURIComponent(id)}`), visitorOffset()])
-      .then(([player, offsetMinutes]) => {
-        if (!cancelled) setState({ status: "ready", player, offsetMinutes });
+    Promise.all([
+      api<Player>(`/manager/player?id=${encodeURIComponent(id)}`),
+      // The statistics are a bonus: the card opens without them when they fail.
+      api<PlayerStats>(`/manager/player/stats?id=${encodeURIComponent(id)}`).catch(() => null),
+      visitorOffset(),
+    ])
+      .then(([player, stats, offsetMinutes]) => {
+        if (!cancelled) setState({ status: "ready", player, stats, offsetMinutes });
       })
       .catch(() => {
         if (!cancelled) setState({ status: "failed" });
@@ -57,6 +63,7 @@ function PlayerWindow({ id, name, onClose }: { id: string; name: string; onClose
           t={t}
           locale={locale}
           offsetMinutes={state.offsetMinutes}
+          stats={state.stats}
           headingLevel={3}
         />
       )}

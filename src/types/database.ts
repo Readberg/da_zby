@@ -673,6 +673,63 @@ export type Database = {
           },
         ];
       };
+      mgr_player_stats: {
+        Row: {
+          club_id: string;
+          assists: number;
+          clean_sheets: number;
+          goals: number;
+          injuries: number;
+          matches: number;
+          shots: number;
+          shots_on_target: number;
+          league_id: string;
+          player_id: string;
+          season: number;
+        };
+        Insert: {
+          club_id: string;
+          assists?: number;
+          clean_sheets?: number;
+          goals?: number;
+          injuries?: number;
+          matches?: number;
+          shots?: number;
+          shots_on_target?: number;
+          league_id: string;
+          player_id: string;
+          season: number;
+        };
+        Update: {
+          club_id?: string;
+          assists?: number;
+          clean_sheets?: number;
+          goals?: number;
+          injuries?: number;
+          matches?: number;
+          shots?: number;
+          shots_on_target?: number;
+          league_id?: string;
+          player_id?: string;
+          season?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_player_stats_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_players";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_player_stats_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       mgr_players: {
         Row: {
           academy_club_id: string | null;
@@ -1081,6 +1138,20 @@ export type Database = {
       };
     };
     Views: {
+      mgr_player_career: {
+        Row: {
+          assists: number | null;
+          clean_sheets: number | null;
+          goals: number | null;
+          injuries: number | null;
+          matches: number | null;
+          shots: number | null;
+          shots_on_target: number | null;
+          player_id: string | null;
+          seasons: number | null;
+        };
+        Relationships: [];
+      };
       season_leaderboard: {
         Row: {
           current_rank: number | null;
@@ -1162,17 +1233,6 @@ export type Database = {
           p_away_goals: number;
           p_away_lineup: Json;
           p_effects: Json;
-          p_events: Json;
-          p_home_goals: number;
-          p_home_lineup: Json;
-          p_match: string;
-        };
-        Returns: boolean;
-      };
-      mgr_record_match: {
-        Args: {
-          p_away_goals: number;
-          p_away_lineup: Json;
           p_events: Json;
           p_home_goals: number;
           p_home_lineup: Json;

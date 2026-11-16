@@ -173,7 +173,13 @@ export function simulateMatch(seed: string, home: Side, away: Side): MatchResult
         }
       }
       injuries.push({ playerId: player.id, side, days });
-      events.push({ m: 1 + Math.floor(random() * 90), t: "injury", s: side, p: surname(player), pid: player.id });
+      events.push({
+        m: 1 + Math.floor(random() * 90),
+        t: "injury",
+        s: side,
+        p: surname(player),
+        pid: player.id,
+      });
     }
   };
   hurt("home", home);
