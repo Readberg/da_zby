@@ -45,6 +45,23 @@ const card: Player = {
 beforeEach(() => {
   api.mockReset().mockImplementation(async (path: string) => {
     if (path === "/me") return { utcOffsetMinutes: 180 };
+    if (path.startsWith("/manager/player/stats")) {
+      return {
+        playerId: card.id,
+        name: "Иван Новик",
+        position: "FWD",
+        seasons: [],
+        career: {
+          matches: 0,
+          goals: 0,
+          assists: 0,
+          shots: 0,
+          shotsOnTarget: 0,
+          injuries: 0,
+          cleanSheets: 0,
+        },
+      };
+    }
     if (path.startsWith("/manager/player")) return card;
     throw new Error("unexpected " + path);
   });

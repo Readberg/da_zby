@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { defineEndpoint } from "./endpoint";
+import { playerStatsSchema, scorersSchema } from "@/server/api/v1/schemas/manager-stats";
 import {
   consoleActionBodySchema,
   consoleActionResultSchema,
@@ -743,6 +744,31 @@ export const endpoints = {
     output: playerSchema,
     cacheControl: "private, no-store",
     errors: [401, 404, 422],
+  }),
+  managerPlayerStats: defineEndpoint({
+    method: "get",
+    path: "/manager/player/stats",
+    summary: "Football manager: statistics of a player of my league, by season and career",
+    description:
+      "Any player of my league, mine or of another club; a player of another league is 404. Only league matches count; a player counts the matches of the starting eleven.",
+    tags: ["manager"],
+    auth: "user",
+    query: playerQuerySchema,
+    output: playerStatsSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404, 422],
+  }),
+  managerScorers: defineEndpoint({
+    method: "get",
+    path: "/manager/league/scorers",
+    summary: "Football manager: top scorers of my league this season",
+    description:
+      "Up to 30 players with at least one goal: by goals, then assists, then fewer matches.",
+    tags: ["manager"],
+    auth: "user",
+    output: scorersSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404],
   }),
   managerLeague: defineEndpoint({
     method: "get",
