@@ -49,7 +49,7 @@ export const marketEndpoints = {
     body: listLotBodySchema,
     output: lotListedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
   }),
   managerBid: defineEndpoint({
     method: "post",
@@ -62,7 +62,7 @@ export const marketEndpoints = {
     body: bidBodySchema,
     output: bidPlacedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409],
+    errors: [400, 401, 404, 409, 429],
   }),
   managerCancelLot: defineEndpoint({
     method: "post",
@@ -74,7 +74,7 @@ export const marketEndpoints = {
     body: lotIdBodySchema,
     output: lotCancelledSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409],
+    errors: [400, 401, 404, 409, 429],
   }),
   managerContracts: defineEndpoint({
     method: "get",
@@ -99,7 +99,7 @@ export const marketEndpoints = {
     body: extendBodySchema,
     output: extendedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
   }),
   managerTerminateContract: defineEndpoint({
     method: "post",
@@ -112,7 +112,7 @@ export const marketEndpoints = {
     body: terminateBodySchema,
     output: terminatedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409],
+    errors: [400, 401, 404, 409, 429],
   }),
   managerTrades: defineEndpoint({
     method: "get",
@@ -149,7 +149,7 @@ export const marketEndpoints = {
     body: proposeTradeBodySchema,
     output: tradeProposedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
   }),
   managerAcceptTrade: defineEndpoint({
     method: "post",
@@ -162,7 +162,7 @@ export const marketEndpoints = {
     body: tradeIdBodySchema,
     output: tradeDoneSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409],
+    errors: [400, 401, 404, 409, 429],
   }),
   managerDeclineTrade: defineEndpoint({
     method: "post",
@@ -173,7 +173,7 @@ export const marketEndpoints = {
     body: tradeIdBodySchema,
     output: tradeDoneSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404],
+    errors: [400, 401, 404, 429],
   }),
   managerCancelTrade: defineEndpoint({
     method: "post",
@@ -184,6 +184,6 @@ export const marketEndpoints = {
     body: tradeIdBodySchema,
     output: tradeDoneSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404],
+    errors: [400, 401, 404, 429],
   }),
 };

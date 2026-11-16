@@ -19,11 +19,13 @@ type Db = SupabaseClient<Database>;
 const DAY_MS = 86_400_000;
 /** How many preseason days one call catches up on (a long outage must not run away). */
 const MAX_DAYS_PER_CALL = 8;
+/** How long one call of runRounds may work before it leaves the rest to the next call (D-138). */
+export const RUN_BUDGET_MS = 22_000;
 
 async function clubsOf(admin: Db, leagueId: string) {
   const { data, error } = await admin
     .from("mgr_clubs")
-    .select("id, is_bot")
+    .select("id, is_bot, dormant")
     .eq("league_id", leagueId);
   if (error) throw error;
   return data ?? [];
@@ -106,7 +108,7 @@ export async function runPreseasonDays(admin: Db, now: Date = new Date()): Promi
     const ends = new Date(league.preseason_ends_at).getTime();
     let day = new Date(new Date(league.last_tick_at).getTime() + DAY_MS);
     const clubs = await clubsOf(admin, league.id);
-    const bots = new Set(clubs.filter((c) => c.is_bot).map((c) => c.id));
+    const bots = new Set(clubs.filter((c) => c.is_bot || c.dormant).map((c) => c.id));
 
     for (
       let i = 0;
@@ -196,6 +198,7 @@ export async function openReadySeasons(admin: Db): Promise<number> {
 export async function runRounds(
   admin: Db,
   now: Date = new Date(),
+  budgetMs: number = RUN_BUDGET_MS,
 ): Promise<{
   played: number;
   closed: number;
@@ -205,8 +208,25 @@ export async function runRounds(
   released: number;
   settled: number;
   expired: number;
+  /** True when the time budget ran out: the next call goes on. */
+  partial: boolean;
 }> {
-  const played = await playAllDue(admin, now);
+  const deadline = Date.now() + budgetMs;
+  const played = await playAllDue(admin, now, deadline);
+  if (Date.now() > deadline) {
+    // Matches first: the steps after them wait for the next call (the order is kept).
+    return {
+      played,
+      closed: 0,
+      days: 0,
+      opened: 0,
+      pools: 0,
+      released: 0,
+      settled: 0,
+      expired: 0,
+      partial: true,
+    };
+  }
   const closed = await closeFinishedSeasons(admin);
   const days = await runPreseasonDays(admin, now);
   const opened = await openReadySeasons(admin);
@@ -215,7 +235,7 @@ export async function runRounds(
   const released = await releaseExpiredContracts(admin);
   const settled = await settleDueAuctions(admin);
   const expired = await expireTrades(admin);
-  return { played, closed, days, opened, pools, released, settled, expired };
+  return { played, closed, days, opened, pools, released, settled, expired, partial: false };
 }
 
 /** A friendly match with a random club of the league, at the next 10:00 Moscow time. */

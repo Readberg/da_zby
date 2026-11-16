@@ -20,6 +20,8 @@ const clubRow = {
   primary_color: "#d32f2f",
   secondary_color: "#f5f5f5",
   squad_seed: "x",
+  dormant: false,
+  dormant_since: null,
   created_at: "2026-11-16T10:00:00Z",
 };
 
