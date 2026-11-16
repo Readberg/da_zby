@@ -242,33 +242,39 @@ export type Database = {
           country: string;
           created_at: string;
           id: string;
+          is_bot: boolean;
+          league_id: string | null;
           name: string;
           primary_color: string;
           secondary_color: string;
           squad_seed: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           city_id: number;
           country?: string;
           created_at?: string;
           id?: string;
+          is_bot?: boolean;
+          league_id?: string | null;
           name: string;
           primary_color: string;
           secondary_color: string;
           squad_seed: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           city_id?: number;
           country?: string;
           created_at?: string;
           id?: string;
+          is_bot?: boolean;
+          league_id?: string | null;
           name?: string;
           primary_color?: string;
           secondary_color?: string;
           squad_seed?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -279,10 +285,143 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "mgr_clubs_league_id_fkey";
+            columns: ["league_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_leagues";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "mgr_clubs_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: true;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_leagues: {
+        Row: {
+          created_at: string;
+          first_kickoff_at: string;
+          id: string;
+          number: number;
+          season: number;
+        };
+        Insert: {
+          created_at?: string;
+          first_kickoff_at: string;
+          id?: string;
+          number?: never;
+          season?: number;
+        };
+        Update: {
+          created_at?: string;
+          first_kickoff_at?: string;
+          id?: string;
+          number?: never;
+          season?: number;
+        };
+        Relationships: [];
+      };
+      mgr_lineups: {
+        Row: {
+          club_id: string;
+          formation: string;
+          mentality: string;
+          player_ids: string[];
+          updated_at: string;
+        };
+        Insert: {
+          club_id: string;
+          formation: string;
+          mentality?: string;
+          player_ids: string[];
+          updated_at?: string;
+        };
+        Update: {
+          club_id?: string;
+          formation?: string;
+          mentality?: string;
+          player_ids?: string[];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_lineups_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: true;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_matches: {
+        Row: {
+          away_club_id: string;
+          away_goals: number | null;
+          away_lineup: Json | null;
+          events: Json | null;
+          home_club_id: string;
+          home_goals: number | null;
+          home_lineup: Json | null;
+          id: string;
+          kickoff_at: string;
+          league_id: string;
+          played_at: string | null;
+          round: number;
+          status: string;
+        };
+        Insert: {
+          away_club_id: string;
+          away_goals?: number | null;
+          away_lineup?: Json | null;
+          events?: Json | null;
+          home_club_id: string;
+          home_goals?: number | null;
+          home_lineup?: Json | null;
+          id?: string;
+          kickoff_at: string;
+          league_id: string;
+          played_at?: string | null;
+          round: number;
+          status?: string;
+        };
+        Update: {
+          away_club_id?: string;
+          away_goals?: number | null;
+          away_lineup?: Json | null;
+          events?: Json | null;
+          home_club_id?: string;
+          home_goals?: number | null;
+          home_lineup?: Json | null;
+          id?: string;
+          kickoff_at?: string;
+          league_id?: string;
+          played_at?: string | null;
+          round?: number;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_matches_away_club_id_fkey";
+            columns: ["away_club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_matches_home_club_id_fkey";
+            columns: ["home_club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_matches_league_id_fkey";
+            columns: ["league_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_leagues";
             referencedColumns: ["id"];
           },
         ];
@@ -780,6 +919,28 @@ export type Database = {
       chat_is_banned: { Args: { p_user: string }; Returns: boolean };
       close_season: { Args: { p_season_id: string }; Returns: undefined };
       is_admin: { Args: never; Returns: boolean };
+      mgr_join_league: { Args: { p_club: string }; Returns: string };
+      mgr_my_league: { Args: never; Returns: string };
+      mgr_open_league: {
+        Args: { p_bots: Json; p_club: string; p_first_kickoff: string; p_matches: Json };
+        Returns: string;
+      };
+      mgr_record_match: {
+        Args: {
+          p_away_goals: number;
+          p_away_lineup: Json;
+          p_events: Json;
+          p_home_goals: number;
+          p_home_lineup: Json;
+          p_match: string;
+        };
+        Returns: boolean;
+      };
+      mgr_save_lineup: {
+        Args: { p_formation: string; p_mentality: string; p_players: string[]; p_user: string };
+        Returns: undefined;
+      };
+      mgr_take_bot_place: { Args: { p_bot: string; p_club: string }; Returns: string };
       mgr_create_club: {
         Args: {
           p_city: number;

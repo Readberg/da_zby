@@ -27,6 +27,7 @@ describe("SiteHeader", () => {
       "Рейтинг",
       "Таблица",
       "Чат",
+      "Менеджер",
     ]);
     expect(links[0]).toHaveAttribute("aria-current", "page");
   });
