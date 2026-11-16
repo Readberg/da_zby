@@ -37,6 +37,8 @@ function toClub(row: ClubRow): Club {
     budget: Number(row.budget),
     logoUrl: managerLogoUrl(row.logo_path),
     dormant: row.dormant,
+    elo: row.elo,
+    eloPeak: row.elo_peak,
     createdAt: new Date(row.created_at).toISOString(),
   };
 }

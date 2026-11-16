@@ -134,7 +134,7 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
   const [clubs, matches] = await Promise.all([
     supabase
       .from("mgr_clubs")
-      .select("id, name, primary_color, secondary_color, is_bot, logo_path")
+      .select("id, name, primary_color, secondary_color, is_bot, logo_path, elo")
       .eq("league_id", club.leagueId),
     fetchAll((from, to) =>
       supabase
@@ -193,6 +193,7 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
         secondaryColor: c?.secondary_color ?? FALLBACK_COLORS.secondary,
         logoUrl: managerLogoUrl(c?.logo_path),
         isBot: c?.is_bot ?? false,
+        elo: c?.elo ?? 1000,
         isMine: row.clubId === club.id,
       };
     }),

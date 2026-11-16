@@ -22,6 +22,8 @@ const clubRow = {
   squad_seed: "x",
   dormant: false,
   dormant_since: null,
+  elo: 1000,
+  elo_peak: 1000,
   created_at: "2026-11-16T10:00:00Z",
 };
 
