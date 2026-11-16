@@ -90,9 +90,12 @@ Storage: бакеты `avatars` (2 МБ, jpeg/png/webp, пишет владел�
 |---|---|---|
 | `mgr_save_lineup` | `stage2` → `stage3` → `lineup_deadline` | `20261121000000_manager_lineup_deadline.sql` |
 | `mgr_set_training` | `stage3` → `lineup_deadline` | `20261121000000_manager_lineup_deadline.sql` |
-| `mgr_close_season` | `season` → `economy` (добавлены призовые) | `20261120000000_manager_economy.sql` |
+| `mgr_close_season` | `season` → `economy` (призовые) → `dormant` | `20261203000000_manager_dormant.sql` |
 | `mgr_buy_free_agent` | `economy` → `auction` | `20261125000000_manager_auction.sql` |
-| `mgr_play_match` → `mgr_play_match_v2` | `stage3` (`mgr_play_match`, результат и последствия) ← вызывается из `economy` (`mgr_play_match_v2`, плюс деньги тура) | обе актуальны: код зовёт `v2`, она вызывает `mgr_play_match` |
+| `mgr_market_open` | `auction` → `dormant` → `admin_console` | `20261210000000_admin_console.sql` |
+| `mgr_release_expired` | `auction` → `dormant` | `20261203000000_manager_dormant.sql` |
+| `mgr_make_bot` | `profile_delete` → `dormant` | `20261203000000_manager_dormant.sql` |
+| `mgr_play_match` → `_v2` → `_v3` | `stage3` (результат и последствия) ← `economy` (`_v2`, деньги тура) ← `dormant` (`_v3`, флаги автосостава) | код зовёт `mgr_play_match_v3`; она вызывает `_v2`, та — `mgr_play_match`: правки результата — в той функции, где лежит нужная часть |
 | `mgr_record_match` | `stage2` | удалена в `20261221000000` |
 
 Статистика игроков (`mgr_record_player_stats`) не зависит от версии функции матча: её вызывает триггер `mgr_matches_player_stats`.
