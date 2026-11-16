@@ -3,6 +3,7 @@ import { errorFields, log } from "@/lib/log";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CLUB_COLORS } from "@/lib/manager/palette";
 import { realRating } from "@/lib/manager/attributes";
+import { nominalValue } from "@/lib/manager/economy";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
 import type {
   Club,
@@ -32,6 +33,7 @@ function toClub(row: ClubRow): Club {
     city: { id: row.city?.id ?? row.city_id, name: row.city?.name ?? "" },
     primaryColor: row.primary_color,
     secondaryColor: row.secondary_color,
+    budget: Number(row.budget),
     createdAt: new Date(row.created_at).toISOString(),
   };
 }
@@ -51,6 +53,7 @@ export function toPlayerSummary(row: Tables<"mgr_players">): PlayerSummary {
     morale: row.morale,
     injuredUntil: row.injured_until ? new Date(row.injured_until).toISOString() : null,
     trainingFocus: row.training_focus,
+    nominal: nominalValue(row.ovr, row.age),
     retiring: row.retire_after_season,
   };
 }

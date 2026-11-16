@@ -27,6 +27,8 @@ export function ManagerShell({
           { href: "/manager/training", label: t.hub.training },
           { href: "/manager/matches", label: t.hub.matches },
           { href: "/manager/table", label: t.hub.table },
+          { href: "/manager/finance", label: t.hub.finance },
+          { href: "/manager/market", label: t.hub.market },
         ]}
       />
       {children}

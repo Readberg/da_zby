@@ -22,6 +22,7 @@ export const managerClubSchema = z.object({
   city: managerCitySchema,
   primaryColor: z.string(),
   secondaryColor: z.string(),
+  budget: z.number().int().describe("Game dollars; negative = in debt (no purchases)."),
   createdAt: z.string().describe("ISO 8601, UTC."),
 });
 export type Club = z.infer<typeof managerClubSchema>;
@@ -41,6 +42,7 @@ export const playerSummarySchema = z.object({
   fitness: z.number().int(),
   morale: z.number().int(),
   injuredUntil: z.string().nullable().describe("ISO 8601, UTC; null or past = fit."),
+  nominal: z.number().int().describe("The nominal value, in game dollars."),
   retiring: z.boolean().describe("Retires at the end of the coming season (the owner is warned)."),
   trainingFocus: z.string().nullable().describe("The attribute the player trains; null = rests."),
 });
@@ -218,3 +220,43 @@ export type TrainingBody = z.infer<typeof trainingBodySchema>;
 export const trainingSavedSchema = z.object({ saved: z.literal(true) });
 
 export const friendlyCreatedSchema = z.object({ matchId: z.uuid() });
+
+export const transactionSchema = z.object({
+  id: z.number().int(),
+  amount: z.number().int(),
+  reason: z.enum(["base", "tickets", "premium", "wages", "prize", "purchase", "sale", "tax"]),
+  balanceAfter: z.number().int(),
+  createdAt: z.string(),
+});
+
+export const financeSchema = z.object({
+  budget: z.number().int(),
+  squadNominal: z.number().int().describe("The sum of the nominal values of the squad."),
+  wagePerRound: z.number().int().describe("What the squad costs in a round of the league."),
+  transactions: z.array(transactionSchema).describe("The last operations, newest first."),
+});
+export type Finance = z.infer<typeof financeSchema>;
+
+export const marketPlayerSchema = z.object({
+  id: z.uuid(),
+  firstName: z.string(),
+  lastName: z.string(),
+  position: z.enum(["GK", "DEF", "MID", "FWD"]),
+  age: z.number().int(),
+  overall: z.number().int(),
+  price: z.number().int().describe("The nominal value: what the club pays."),
+});
+
+export const marketSchema = z.object({
+  open: z.boolean().describe("The market opens after 10 played matches."),
+  matchesPlayed: z.number().int(),
+  matchesNeeded: z.number().int(),
+  budget: z.number().int(),
+  squadSize: z.number().int(),
+  squadMax: z.number().int(),
+  players: z.array(marketPlayerSchema).describe("The free players of the league this month."),
+});
+export type Market = z.infer<typeof marketSchema>;
+
+export const buyBodySchema = z.object({ playerId: z.uuid() });
+export const boughtSchema = z.object({ budget: z.number().int() });

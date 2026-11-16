@@ -46,7 +46,7 @@ function playerRows(clubId: string, seed: string) {
 
 function fakeAdmin(options: { due: unknown[]; recorded?: boolean }) {
   const rpc = vi.fn(async (name: string) =>
-    name === "mgr_play_match"
+    name === "mgr_play_match_v2"
       ? { data: options.recorded ?? true, error: null }
       : { data: null, error: null },
   );
@@ -69,7 +69,7 @@ describe("playDueMatches", () => {
     expect(written).toBe(1);
     const [name, args] = (admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock
       .calls[0] as [string, Record<string, unknown>];
-    expect(name).toBe("mgr_play_match");
+    expect(name).toBe("mgr_play_match_v2");
     expect(args.p_match).toBe("match-1");
     expect(args.p_home_lineup).toHaveLength(11);
     expect(args.p_away_lineup).toHaveLength(11);
@@ -108,6 +108,43 @@ describe("playDueMatches", () => {
     const bench = effects.filter((e) => e.id.startsWith("a-") && !home.includes(e.id));
     console.log(JSON.stringify(bench.slice(0, 3)), bench.length);
     expect(bench.every((e) => e.fitness === 85 && e.idle_rounds === 1)).toBe(true);
+  });
+
+  it("pays the money of the round with the result: base, tickets at home, bonus, wages", async () => {
+    const admin = fakeAdmin({ due });
+    await playDueMatches(admin);
+    const [, args] = (admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock.calls[0] as [
+      string,
+      Record<string, unknown>,
+    ];
+    const money = args.p_money as { club_id: string; reason: string; amount: number }[];
+    const of = (club: string) => money.filter((m) => m.club_id === club);
+    expect(of("a").map((m) => m.reason)).toEqual(
+      expect.arrayContaining(["base", "tickets", "wages"]),
+    );
+    expect(of("b").map((m) => m.reason)).toEqual(expect.arrayContaining(["base", "wages"]));
+    expect(of("b").some((m) => m.reason === "tickets")).toBe(false);
+    expect(of("a").find((m) => m.reason === "base")?.amount).toBe(20);
+    expect(of("a").find((m) => m.reason === "tickets")?.amount).toBe(120);
+    for (const club of ["a", "b"]) {
+      const wages = of(club).find((m) => m.reason === "wages")!;
+      expect(wages.amount).toBeLessThan(-50);
+    }
+    const goals = [args.p_home_goals as number, args.p_away_goals as number];
+    const bonus = (club: string) => of(club).find((m) => m.reason === "premium")?.amount ?? 0;
+    if (goals[0]! > goals[1]!) expect([bonus("a"), bonus("b")]).toEqual([60, 0]);
+    else if (goals[0] === goals[1]) expect([bonus("a"), bonus("b")]).toEqual([20, 20]);
+    else expect([bonus("a"), bonus("b")]).toEqual([0, 60]);
+  });
+
+  it("pays nothing for a friendly", async () => {
+    const admin = fakeAdmin({ due: [{ ...due[0]!, kind: "friendly" }] });
+    await playDueMatches(admin);
+    const [, args] = (admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock.calls[0] as [
+      string,
+      Record<string, unknown>,
+    ];
+    expect(args.p_money).toEqual([]);
   });
 
   it("does not count a match that another runner wrote first", async () => {

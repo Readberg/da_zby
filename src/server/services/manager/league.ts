@@ -16,6 +16,7 @@ import {
 } from "@/lib/manager/formations";
 import { CLUB_COLORS, FALLBACK_COLORS } from "@/lib/manager/palette";
 import { buildSchedule, firstKickoff, ROUNDS } from "@/lib/manager/schedule";
+import { roundMoney } from "@/lib/manager/economy";
 import { computeTable } from "@/lib/manager/table";
 import { errorFields, log } from "@/lib/log";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
@@ -524,6 +525,7 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
   const bots = new Set((clubs.data ?? []).filter((c) => c.is_bot).map((c) => c.id));
   const rowsByClub = new Map<string, PlayerRow[]>();
   for (const player of players) {
+    if (!player.club_id) continue;
     rowsByClub.set(player.club_id, [...(rowsByClub.get(player.club_id) ?? []), player]);
   }
   const saved = new Map(lineups.map((l) => [l.club_id, l]));
@@ -565,7 +567,20 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       });
     });
 
-    const { data, error } = await admin.rpc("mgr_play_match", {
+    // The money of a round of the league (a friendly pays nothing); bots keep no purse.
+    const money = (["home", "away"] as const).flatMap((side) => {
+      const clubId = side === "home" ? match.home_club_id : match.away_club_id;
+      if (match.kind === "friendly" || bots.has(clubId)) return [];
+      const own = side === "home" ? result.homeGoals : result.awayGoals;
+      const other = side === "home" ? result.awayGoals : result.homeGoals;
+      return roundMoney({
+        home: side === "home",
+        outcome: outcomeOf(own, other),
+        squad: rows[side].map((row) => ({ ovr: row.ovr, age: row.age })),
+      }).map((entry) => ({ club_id: clubId, reason: entry.reason, amount: entry.amount }));
+    });
+
+    const { data, error } = await admin.rpc("mgr_play_match_v2", {
       p_match: match.id,
       p_home_goals: result.homeGoals,
       p_away_goals: result.awayGoals,
@@ -573,6 +588,7 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       p_home_lineup: home.snapshot as unknown as Json,
       p_away_lineup: away.snapshot as unknown as Json,
       p_effects: effects as unknown as Json,
+      p_money: money as unknown as Json,
     });
     if (error) {
       log("error", "manager.match_failed", { match: match.id, ...errorFields(error) });

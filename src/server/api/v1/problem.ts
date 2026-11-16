@@ -29,6 +29,10 @@ export const ERROR_CODES = {
   managerTrainingLocked: "manager.training_locked",
   managerFriendlyUnavailable: "manager.friendly_unavailable",
   managerFriendlyBusy: "manager.friendly_busy",
+  managerMarketClosed: "manager.market_closed",
+  managerPlayerUnavailable: "manager.player_unavailable",
+  managerSquadFull: "manager.squad_full",
+  managerNoMoney: "manager.no_money",
   degraded: "system.degraded",
   fixturesUnavailable: "fixtures.unavailable",
 } as const;

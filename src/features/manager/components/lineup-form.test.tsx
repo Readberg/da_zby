@@ -34,6 +34,7 @@ const players: PlayerSummary[] = (["GK", "DEF", "MID", "FWD"] as const).flatMap(
     injuredUntil: null,
     trainingFocus: null,
     retiring: false,
+    nominal: 1000,
   })),
 );
 
