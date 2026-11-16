@@ -2,7 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import type { Position } from "@/lib/manager/attributes";
 import { ApiError } from "@/server/api/v1/problem";
 import { generateSquad } from "./squad";
-import { placeClub, playAllDue, playDueMatches, resolveLineup, saveLineup } from "./league";
+import {
+  placeClub,
+  playAllDue,
+  playDueMatches,
+  resolveLineup,
+  saveLineup,
+  saveTraining,
+} from "./league";
 
 /** A query that answers with `data` whatever is chained on it (the fake of one table). */
 function chain(data: unknown): unknown {
@@ -29,13 +36,16 @@ function playerRows(clubId: string, seed: string) {
     form: 80,
     fitness: 80,
     morale: 80,
+    idle_rounds: 0,
+    injured_until: null,
+    training_focus: null,
     created_at: "2026-11-16T10:00:00Z",
   }));
 }
 
 function fakeAdmin(options: { due: unknown[]; recorded?: boolean }) {
   const rpc = vi.fn(async (name: string) =>
-    name === "mgr_record_match"
+    name === "mgr_play_match"
       ? { data: options.recorded ?? true, error: null }
       : { data: null, error: null },
   );
@@ -58,7 +68,7 @@ describe("playDueMatches", () => {
     expect(written).toBe(1);
     const [name, args] = (admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock
       .calls[0] as [string, Record<string, unknown>];
-    expect(name).toBe("mgr_record_match");
+    expect(name).toBe("mgr_play_match");
     expect(args.p_match).toBe("match-1");
     expect(args.p_home_lineup).toHaveLength(11);
     expect(args.p_away_lineup).toHaveLength(11);
@@ -81,6 +91,24 @@ describe("playDueMatches", () => {
     expect(callOf(first)).toEqual(callOf(second));
   });
 
+  it("writes the effects on the players together with the result", async () => {
+    const admin = fakeAdmin({ due });
+    await playDueMatches(admin);
+    const [, args] = (admin as unknown as { rpc: ReturnType<typeof vi.fn> }).rpc.mock.calls[0] as [
+      string,
+      Record<string, unknown>,
+    ];
+    const effects = args.p_effects as { id: string; fitness: number; idle_rounds: number }[];
+    expect(effects).toHaveLength(40);
+    const home = (args.p_home_lineup as { id: string }[]).map((p) => p.id);
+    const played = effects.filter((e) => home.includes(e.id));
+    expect(played).toHaveLength(11);
+    expect(played.every((e) => e.fitness === 74 && e.idle_rounds === 0)).toBe(true);
+    const bench = effects.filter((e) => e.id.startsWith("a-") && !home.includes(e.id));
+    console.log(JSON.stringify(bench.slice(0, 3)), bench.length);
+    expect(bench.every((e) => e.fitness === 85 && e.idle_rounds === 1)).toBe(true);
+  });
+
   it("does not count a match that another runner wrote first", async () => {
     expect(await playDueMatches(fakeAdmin({ due, recorded: false }))).toBe(0);
   });
@@ -100,6 +128,7 @@ describe("resolveLineup", () => {
     name: `${p.first_name} ${p.last_name}`,
     position: p.position as Position,
     real: p.ovr * 0.91,
+    injured: false,
   }));
   const pick = (position: Position, n: number) =>
     squad
@@ -124,6 +153,31 @@ describe("resolveLineup", () => {
     const lineup = resolveLineup(squad, null);
     expect(lineup?.saved).toBe(false);
     expect(lineup?.playerIds).toHaveLength(11);
+  });
+
+  it("replaces an injured player of the saved lineup by the best fit one of the same position", () => {
+    const ids = [...pick("GK", 1), ...pick("DEF", 4), ...pick("MID", 4), ...pick("FWD", 2)];
+    const hurt = ids[5]!;
+    const hurtSquad = squad.map((p) => (p.id === hurt ? { ...p, injured: true } : p));
+    const lineup = resolveLineup(hurtSquad, {
+      formation: "4-4-2",
+      mentality: "attack",
+      player_ids: ids,
+    });
+    expect(lineup?.saved).toBe(true);
+    expect(lineup?.playerIds).not.toContain(hurt);
+    expect(lineup?.playerIds).toHaveLength(11);
+    const replacement = lineup!.playerIds.find((id) => !ids.includes(id))!;
+    expect(squad.find((p) => p.id === replacement)?.position).toBe(
+      squad.find((p) => p.id === hurt)?.position,
+    );
+  });
+
+  it("never picks an injured player for the best lineup", () => {
+    const hurtSquad = squad.map((p, i) => (i % 3 === 0 ? { ...p, injured: true } : p));
+    const lineup = resolveLineup(hurtSquad, null);
+    const hurtIds = new Set(hurtSquad.filter((p) => p.injured).map((p) => p.id));
+    expect(lineup?.playerIds.some((id) => hurtIds.has(id))).toBe(false);
   });
 
   it("falls back when a saved player is no longer in the squad", () => {
@@ -163,6 +217,39 @@ describe("saveLineup", () => {
       p_formation: "4-4-2",
       p_mentality: "balanced",
       p_players: body.playerIds,
+    });
+  });
+});
+
+describe("saveTraining", () => {
+  const plans = {
+    plans: [
+      { playerId: "p1", focus: "passing" },
+      { playerId: "p2", focus: null },
+    ],
+  };
+
+  it("passes the plans to the database function", async () => {
+    const rpc = vi.fn(async () => ({ error: null }));
+    await saveTraining({ rpc } as never, "u1", plans);
+    expect(rpc).toHaveBeenCalledWith("mgr_set_training", {
+      p_user: "u1",
+      p_plans: [
+        { player_id: "p1", focus: "passing" },
+        { player_id: "p2", focus: null },
+      ],
+    });
+  });
+
+  it.each([
+    ["manager.training_locked", 409, "manager.training_locked"],
+    ["manager.training_invalid", 422, "api.validation_failed"],
+    ["manager.club_unknown", 404, "api.not_found"],
+  ])("maps the database refusal %s to %i", async (message, status, code) => {
+    const rpc = vi.fn(async () => ({ error: { message } }));
+    await expect(saveTraining({ rpc } as never, "u1", plans)).rejects.toMatchObject({
+      status,
+      code,
     });
   });
 });

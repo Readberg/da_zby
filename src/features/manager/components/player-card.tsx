@@ -1,4 +1,6 @@
-import { getMessages } from "@/i18n/server";
+import { getLocale, getMessages } from "@/i18n/server";
+import { formatDateTime } from "@/lib/local-time";
+import { isInjuredNow } from "../injuries";
 import type { Player } from "@/server/api/v1/schemas/manager";
 
 function Meter({ label, value }: { label: string; value: number }) {
@@ -23,9 +25,10 @@ function Meter({ label, value }: { label: string; value: number }) {
 }
 
 /** One player: the two ratings, his condition and every attribute. */
-export function PlayerCard({ player }: { player: Player }) {
+export function PlayerCard({ player, offsetMinutes }: { player: Player; offsetMinutes: number }) {
   const t = getMessages().manager;
   const attributeName = (key: string) => t.attributes[key as keyof typeof t.attributes] ?? key;
+  const injured = isInjuredNow(player.injuredUntil);
   const country = t.countries[player.citizenship as keyof typeof t.countries] ?? player.citizenship;
 
   return (
@@ -38,6 +41,21 @@ export function PlayerCard({ player }: { player: Player }) {
           {t.positions[player.position]} · {t.ageYears.replace("{n}", String(player.age))} ·{" "}
           {t.citizenship}: {country}
           {player.academyClubName && ` · ${t.academy}: ${player.academyClubName}`}
+        </p>
+        {injured && (
+          <p role="status" className="mt-1 font-semibold text-danger">
+            {t.injuredUntil.replace(
+              "{date}",
+              formatDateTime(player.injuredUntil!, offsetMinutes, getLocale()),
+            )}
+          </p>
+        )}
+        <p className="mt-1 text-sm text-muted">
+          {t.trainsLabel}:{" "}
+          {player.trainingFocus
+            ? (t.attributes[player.trainingFocus as keyof typeof t.attributes] ??
+              player.trainingFocus)
+            : t.restLabel}
         </p>
       </div>
 

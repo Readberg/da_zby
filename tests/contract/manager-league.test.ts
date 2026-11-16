@@ -15,6 +15,7 @@ const listMyMatches = vi.fn();
 const getMatch = vi.fn();
 const getLineup = vi.fn();
 const saveLineup = vi.fn();
+const saveTraining = vi.fn();
 const playAllDue = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
@@ -28,6 +29,7 @@ vi.mock("@/server/services/manager/league", () => ({
   getMatch,
   getLineup,
   saveLineup,
+  saveTraining,
   playAllDue,
 }));
 
@@ -35,6 +37,7 @@ const league = await import("@/app/api/v1/manager/league/route");
 const matches = await import("@/app/api/v1/manager/matches/route");
 const match = await import("@/app/api/v1/manager/match/route");
 const lineup = await import("@/app/api/v1/manager/lineup/route");
+const training = await import("@/app/api/v1/manager/training/route");
 const cron = await import("@/app/api/cron/manager/route");
 
 const USER = "99999999-9999-4999-8999-999999999999";
@@ -98,6 +101,7 @@ beforeEach(() => {
     nextKickoffAt: "2026-11-18T07:00:00.000Z",
   });
   saveLineup.mockReset().mockResolvedValue(undefined);
+  saveTraining.mockReset().mockResolvedValue(undefined);
   playAllDue.mockReset().mockResolvedValue(3);
 });
 
@@ -205,5 +209,51 @@ describe("POST /api/cron/manager", () => {
     expect((await call()).status).toBe(401);
     expect((await call("y".repeat(32))).status).toBe(401);
     expect(playAllDue).not.toHaveBeenCalled();
+  });
+});
+
+describe("PUT /api/v1/manager/training", () => {
+  const putTraining = (body: unknown) =>
+    apiRequest("/api/v1/manager/training", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  const plans = {
+    plans: [
+      { playerId: PLAYERS[0], focus: "passing" },
+      { playerId: PLAYERS[1], focus: null },
+    ],
+  };
+
+  it("is for signed-in users", async () => {
+    signedIn("guest");
+    await expectProblem(await training.PUT(putTraining(plans)), 401, "auth.required");
+    expect(saveTraining).not.toHaveBeenCalled();
+  });
+
+  it("saves the plans", async () => {
+    const response = await training.PUT(putTraining(plans));
+    expect(response.status).toBe(200);
+    expect(saveTraining).toHaveBeenCalledWith({}, USER, plans);
+  });
+
+  it.each([
+    ["no plans", { plans: [] }],
+    ["a player that is not an id", { plans: [{ playerId: "x", focus: null }] }],
+    [
+      "more than 30 plans",
+      { plans: Array.from({ length: 31 }, () => ({ playerId: PLAYERS[0], focus: null })) },
+    ],
+  ])("refuses %s with 422", async (_title, body) => {
+    await expectProblem(await training.PUT(putTraining(body)), 422, "api.validation_failed");
+    expect(saveTraining).not.toHaveBeenCalled();
+  });
+
+  it("answers 409 once the round has started", async () => {
+    saveTraining.mockRejectedValueOnce(
+      new ApiError(409, ERROR_CODES.managerTrainingLocked, "Conflict", "The round has started."),
+    );
+    await expectProblem(await training.PUT(putTraining(plans)), 409, "manager.training_locked");
   });
 });

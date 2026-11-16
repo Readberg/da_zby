@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LineupForm } from "@/features/manager/components/lineup-form";
 import { ManagerShell } from "@/features/manager/components/manager-shell";
+import { injuredNotes } from "@/features/manager/injuries";
 import { loadMember, orMakeClub } from "@/features/manager/load";
 import { formatDateTime } from "@/lib/local-time";
 import { catchUpRounds } from "@/server/services/manager/catch-up";
@@ -25,8 +26,12 @@ async function LineupContent() {
   const [view, lineup] = await orMakeClub(() =>
     Promise.all([getMyClub(supabase, user.id), getLineup(supabase, user.id)]),
   );
+  const notes = injuredNotes(view.players, (until) =>
+    t.lineupPage.injured.replace("{date}", formatDateTime(until, offsetMinutes, getLocale())),
+  );
   return (
     <LineupForm
+      injuredNotes={notes}
       // A new lineup of the same club after a save must not keep the old selection.
       key={`${lineup.formation}-${lineup.mentality}-${lineup.playerIds.join(",")}-${lineup.saved}`}
       t={t}

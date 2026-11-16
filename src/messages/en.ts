@@ -314,9 +314,13 @@ export const en: MessagesShape<typeof ru> = {
       "A win is 3 points, a draw 1. Places are split by points, goal difference and goals scored.",
   },
   manager: {
+    injuredUntil: "Injured until {date}",
+    trainsLabel: "Trains",
+    restLabel: "Rest",
     scheduleNote:
       "A season is 38 rounds, one a day at 10:00 Moscow time. You can change the lineup until the round starts; if you do not choose, the best lineup plays.",
     hub: {
+      training: "Training",
       club: "Club",
       nextMatch: "Next match",
       noNextMatch: "No more matches: the season is over.",
@@ -364,6 +368,7 @@ export const en: MessagesShape<typeof ru> = {
       lineups: "Lineups",
       minute: "{m}'",
       events: {
+        injury: "{p} is injured.",
         kickoff: "Kick-off.",
         half_time: "Half time.",
         full_time: "Full time.",
@@ -375,7 +380,25 @@ export const en: MessagesShape<typeof ru> = {
         missAnon: "A dangerous moment, wide of the goal.",
       },
     },
+    trainingPage: {
+      title: "Training",
+      lead: "Choose what each player trains. Training happens every round together with the match.",
+      rules:
+        "Training costs 3 fitness. Only fit players who are not too tired grow; growth is limited by the hidden potential and by age: the young grow faster, after 30 hardly at all. The higher an attribute, the slower it grows. A player who rests recovers fitness.",
+      columns: { player: "Player", position: "Pos.", fitness: "Fitness", focus: "Trains" },
+      rest: "Rest (no training)",
+      injured: "injured until {date}",
+      save: "Save training",
+      saving: "Saving…",
+      savedOk: "Training saved.",
+      locked: "The round has started: training cannot be changed until the match is over.",
+      errors: {
+        locked: "The round has already started, training cannot be changed.",
+        generic: "Could not save the training. Please try again.",
+      },
+    },
     lineupPage: {
+      injured: "injured until {date}",
       title: "Lineup",
       lead: "Choose the formation and eleven players, each on their own position.",
       formation: "Formation",

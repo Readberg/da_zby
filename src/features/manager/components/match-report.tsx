@@ -18,6 +18,8 @@ function eventText(event: MatchEventData): string {
       return fill(event.p ? t.save : t.saveAnon);
     case "miss":
       return fill(event.p ? t.miss : t.missAnon);
+    case "injury":
+      return fill(t.injury);
     default:
       return t[event.t];
   }

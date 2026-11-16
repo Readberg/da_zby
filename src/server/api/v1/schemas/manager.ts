@@ -40,6 +40,8 @@ export const playerSummarySchema = z.object({
   form: z.number().int(),
   fitness: z.number().int(),
   morale: z.number().int(),
+  injuredUntil: z.string().nullable().describe("ISO 8601, UTC; null or past = fit."),
+  trainingFocus: z.string().nullable().describe("The attribute the player trains; null = rests."),
 });
 export type PlayerSummary = z.infer<typeof playerSummarySchema>;
 
@@ -99,7 +101,7 @@ export type MatchList = z.infer<typeof matchListSchema>;
 
 export const matchEventSchema = z.object({
   m: z.number().int().describe("Minute."),
-  t: z.enum(["kickoff", "goal", "save", "miss", "half_time", "full_time"]),
+  t: z.enum(["kickoff", "goal", "save", "miss", "injury", "half_time", "full_time"]),
   s: z.enum(["home", "away"]).optional(),
   p: z.string().optional().describe("Surname of the player."),
   a: z.string().optional().describe("Surname of the player who gave the pass."),
@@ -185,3 +187,22 @@ export const managerClubViewSchema = z.object({
   nextMatch: matchSummarySchema.nullable().describe("The next match of the club, if any is left."),
 });
 export type ManagerClubView = z.infer<typeof managerClubViewSchema>;
+
+export const trainingBodySchema = z.object({
+  plans: z
+    .array(
+      z.object({
+        playerId: z.uuid(),
+        focus: z
+          .string()
+          .min(1)
+          .max(30)
+          .nullable()
+          .describe("An attribute of the player, or null to rest."),
+      }),
+    )
+    .min(1)
+    .max(30),
+});
+export type TrainingBody = z.infer<typeof trainingBodySchema>;
+export const trainingSavedSchema = z.object({ saved: z.literal(true) });

@@ -31,6 +31,8 @@ const players: PlayerSummary[] = (["GK", "DEF", "MID", "FWD"] as const).flatMap(
     form: 80,
     fitness: 80,
     morale: 80,
+    injuredUntil: null,
+    trainingFocus: null,
   })),
 );
 
@@ -104,6 +106,26 @@ describe("LineupForm", () => {
     form();
     await userEvent.setup().click(screen.getByRole("button", { name: t.lineupPage.save }));
     expect(await screen.findByRole("alert")).toHaveTextContent(t.lineupPage.errors.locked);
+  });
+
+  it("does not let an injured player be chosen", async () => {
+    const hurt = players.map((p) =>
+      p.id === "FWD-3"
+        ? { ...p, injuredUntil: new Date(Date.now() + 86_400_000).toISOString() }
+        : p,
+    );
+    render(
+      <LineupForm
+        t={t}
+        players={hurt}
+        lineup={{ ...base, playerIds: base.playerIds.filter((id) => id !== "FWD-1") }}
+        until={null}
+        injuredNotes={{ "FWD-3": "травма до 19.11" }}
+      />,
+    );
+    const forwards = screen.getByRole("group", { name: /Нападающий/ });
+    expect(within(forwards).getByRole("checkbox", { name: /Игрок3/ })).toBeDisabled();
+    expect(within(forwards).getByText("травма до 19.11")).toBeInTheDocument();
   });
 
   it("cannot be changed once the round is due", () => {

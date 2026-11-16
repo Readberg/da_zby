@@ -49,6 +49,8 @@ export function toPlayerSummary(row: Tables<"mgr_players">): PlayerSummary {
     form: row.form,
     fitness: row.fitness,
     morale: row.morale,
+    injuredUntil: row.injured_until ? new Date(row.injured_until).toISOString() : null,
+    trainingFocus: row.training_focus,
   };
 }
 
