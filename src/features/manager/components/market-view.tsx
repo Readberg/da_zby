@@ -3,6 +3,7 @@ import { getLocale, getMessages } from "@/i18n/server";
 import { formatMoney } from "@/lib/manager/money-format";
 import type { Market } from "@/server/api/v1/schemas/manager";
 import { BuyButton } from "./buy-button";
+import { PlayerLink } from "./player-link";
 
 /** The free players of the league with their prices; the market is shut before 10 played matches. */
 export function MarketView({ market }: { market: Market }) {
@@ -59,7 +60,9 @@ export function MarketView({ market }: { market: Market }) {
               return (
                 <TR key={player.id}>
                   <TD>
-                    {player.firstName} {player.lastName}
+                    <PlayerLink id={player.id} name={`${player.firstName} ${player.lastName}`}>
+                      {player.firstName} {player.lastName}
+                    </PlayerLink>
                   </TD>
                   <TD title={t.positions[player.position]}>{t.positionShort[player.position]}</TD>
                   <TD>{player.age}</TD>

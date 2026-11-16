@@ -239,6 +239,7 @@ export type Database = {
       mgr_clubs: {
         Row: {
           budget: number;
+          logo_path: string | null;
           city_id: number;
           country: string;
           created_at: string;
@@ -253,6 +254,7 @@ export type Database = {
         };
         Insert: {
           budget?: number;
+          logo_path?: string | null;
           city_id: number;
           country?: string;
           created_at?: string;
@@ -267,6 +269,7 @@ export type Database = {
         };
         Update: {
           budget?: number;
+          logo_path?: string | null;
           city_id?: number;
           country?: string;
           created_at?: string;
@@ -1067,6 +1070,7 @@ export type Database = {
         };
         Returns: boolean;
       };
+      mgr_set_logo: { Args: { p_path: string; p_user: string }; Returns: undefined };
       mgr_create_club: {
         Args: {
           p_city: number;

@@ -23,6 +23,7 @@ export const managerClubSchema = z.object({
   primaryColor: z.string(),
   secondaryColor: z.string(),
   budget: z.number().int().describe("Game dollars; negative = in debt (no purchases)."),
+  logoUrl: z.string().nullable().describe("The club's own logo, if it has one."),
   createdAt: z.string().describe("ISO 8601, UTC."),
 });
 export type Club = z.infer<typeof managerClubSchema>;
@@ -83,6 +84,7 @@ export const matchSideSchema = z.object({
   name: z.string(),
   primaryColor: z.string(),
   secondaryColor: z.string(),
+  logoUrl: z.string().nullable(),
 });
 
 export const matchSummarySchema = z.object({
@@ -134,6 +136,7 @@ export const tableRowSchema = z.object({
   name: z.string(),
   primaryColor: z.string(),
   secondaryColor: z.string(),
+  logoUrl: z.string().nullable(),
   isBot: z.boolean(),
   isMine: z.boolean(),
   played: z.number().int(),
@@ -173,7 +176,13 @@ export const lineupSchema = z.object({
   mentality: z.enum(["balanced", "attack", "defense"]),
   playerIds: z.array(z.uuid()).length(11),
   saved: z.boolean().describe("False when the club has not chosen: the best lineup is used."),
-  locked: z.boolean().describe("True once a round of the club is due: nothing can change."),
+  locked: z
+    .boolean()
+    .describe("True from five minutes before the kickoff of the next match: nothing can change."),
+  lockAt: z
+    .string()
+    .nullable()
+    .describe("The moment the lineup stops being accepted: kickoff minus 5 minutes."),
   nextKickoffAt: z.string().nullable(),
 });
 export type LineupView = z.infer<typeof lineupSchema>;
@@ -260,3 +269,12 @@ export type Market = z.infer<typeof marketSchema>;
 
 export const buyBodySchema = z.object({ playerId: z.uuid() });
 export const boughtSchema = z.object({ budget: z.number().int() });
+
+export const logoBodySchema = z.object({
+  path: z
+    .string()
+    .max(120)
+    .nullable()
+    .describe("Storage path in the avatars bucket (own folder), or null to remove the logo."),
+});
+export const logoSavedSchema = z.object({ logoUrl: z.string().nullable() });

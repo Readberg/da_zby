@@ -7518,6 +7518,13 @@
                                   "maximum": 9007199254740991,
                                   "description": "Game dollars; negative = in debt (no purchases)."
                                 },
+                                "logoUrl": {
+                                  "description": "The club's own logo, if it has one.",
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
                                 "createdAt": {
                                   "type": "string",
                                   "description": "ISO 8601, UTC."
@@ -7531,6 +7538,7 @@
                                 "primaryColor",
                                 "secondaryColor",
                                 "budget",
+                                "logoUrl",
                                 "createdAt"
                               ],
                               "additionalProperties": false
@@ -7740,13 +7748,20 @@
                                     },
                                     "secondaryColor": {
                                       "type": "string"
+                                    },
+                                    "logoUrl": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
                                     }
                                   },
                                   "required": [
                                     "clubId",
                                     "name",
                                     "primaryColor",
-                                    "secondaryColor"
+                                    "secondaryColor",
+                                    "logoUrl"
                                   ],
                                   "additionalProperties": false
                                 },
@@ -7766,13 +7781,20 @@
                                     },
                                     "secondaryColor": {
                                       "type": "string"
+                                    },
+                                    "logoUrl": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
                                     }
                                   },
                                   "required": [
                                     "clubId",
                                     "name",
                                     "primaryColor",
-                                    "secondaryColor"
+                                    "secondaryColor",
+                                    "logoUrl"
                                   ],
                                   "additionalProperties": false
                                 },
@@ -8003,6 +8025,13 @@
                           "maximum": 9007199254740991,
                           "description": "Game dollars; negative = in debt (no purchases)."
                         },
+                        "logoUrl": {
+                          "description": "The club's own logo, if it has one.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "createdAt": {
                           "type": "string",
                           "description": "ISO 8601, UTC."
@@ -8016,6 +8045,7 @@
                         "primaryColor",
                         "secondaryColor",
                         "budget",
+                        "logoUrl",
                         "createdAt"
                       ],
                       "additionalProperties": false
@@ -8441,6 +8471,12 @@
                               "secondaryColor": {
                                 "type": "string"
                               },
+                              "logoUrl": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "isBot": {
                                 "type": "boolean"
                               },
@@ -8493,6 +8529,7 @@
                               "name",
                               "primaryColor",
                               "secondaryColor",
+                              "logoUrl",
                               "isBot",
                               "isMine",
                               "played",
@@ -8643,13 +8680,20 @@
                                   },
                                   "secondaryColor": {
                                     "type": "string"
+                                  },
+                                  "logoUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "clubId",
                                   "name",
                                   "primaryColor",
-                                  "secondaryColor"
+                                  "secondaryColor",
+                                  "logoUrl"
                                 ],
                                 "additionalProperties": false
                               },
@@ -8669,13 +8713,20 @@
                                   },
                                   "secondaryColor": {
                                     "type": "string"
+                                  },
+                                  "logoUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "clubId",
                                   "name",
                                   "primaryColor",
-                                  "secondaryColor"
+                                  "secondaryColor",
+                                  "logoUrl"
                                 ],
                                 "additionalProperties": false
                               },
@@ -8861,13 +8912,20 @@
                             },
                             "secondaryColor": {
                               "type": "string"
+                            },
+                            "logoUrl": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
                             }
                           },
                           "required": [
                             "clubId",
                             "name",
                             "primaryColor",
-                            "secondaryColor"
+                            "secondaryColor",
+                            "logoUrl"
                           ],
                           "additionalProperties": false
                         },
@@ -8887,13 +8945,20 @@
                             },
                             "secondaryColor": {
                               "type": "string"
+                            },
+                            "logoUrl": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
                             }
                           },
                           "required": [
                             "clubId",
                             "name",
                             "primaryColor",
-                            "secondaryColor"
+                            "secondaryColor",
+                            "logoUrl"
                           ],
                           "additionalProperties": false
                         },
@@ -9187,7 +9252,14 @@
                         },
                         "locked": {
                           "type": "boolean",
-                          "description": "True once a round of the club is due: nothing can change."
+                          "description": "True from five minutes before the kickoff of the next match: nothing can change."
+                        },
+                        "lockAt": {
+                          "description": "The moment the lineup stops being accepted: kickoff minus 5 minutes.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         },
                         "nextKickoffAt": {
                           "type": [
@@ -9202,6 +9274,7 @@
                         "playerIds",
                         "saved",
                         "locked",
+                        "lockAt",
                         "nextKickoffAt"
                       ],
                       "additionalProperties": false
@@ -10110,6 +10183,143 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/club/logo": {
+      "put": {
+        "operationId": "managerSetLogo",
+        "summary": "Football manager: set or remove the logo of my club",
+        "description": "The logo is a picture the user uploaded to the avatars bucket (folder of the user; PNG, JPEG or WebP up to 2 MB). path null removes it. Without a logo the club is shown by its two colours.",
+        "tags": [
+          "manager"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 120
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Storage path in the avatars bucket (own folder), or null to remove the logo."
+                  }
+                },
+                "required": [
+                  "path"
+                ]
+              }
+            }
+          }
+        },
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "logoUrl": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "logoUrl"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/problem+json": {
                 "schema": {

@@ -27,7 +27,7 @@ export default async function ManagerMarketPage(props: PageProps<"/[locale]/mana
   await initLocale(props.params);
   const t = getMessages().manager.market;
   return (
-    <ManagerShell title={t.title} lead={t.lead}>
+    <ManagerShell title={t.title} lead={t.lead} faq="market">
       <Suspense fallback={<Skeleton className="h-96" />}>
         <MarketContent />
       </Suspense>

@@ -125,6 +125,8 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 
 Этап 4, часть 1 (DAZBY-147): `GET /manager/finance` — бюджет, стоимость состава, зарплата за тур и журнал операций (60 последних); `GET /manager/market` — свободные игроки лиги и открыт ли рынок; `POST /manager/market/buy` (`playerId`) — купить по номиналу (`409 manager.market_closed`, `manager.player_unavailable`, `manager.squad_full`, `manager.no_money`). У клуба есть `budget`, у игрока `nominal`. `POST /api/cron/manager` ещё раз в месяц добавляет пулы свободных игроков.
 
+Интерфейс менеджера (DAZBY-149): `PUT /manager/club/logo` (`path` в своей папке бакета `avatars` или `null`); у клуба, соперников матчей и строк таблицы есть `logoUrl`; у состава `lockAt` (приём составов закрывается за 5 минут до матча, `locked` считается по нему), `409 manager.lineup_locked` и `manager.training_locked` теперь с этого момента.
+
 ### Админка: сезоны, туры, матчи (DAZBY-63, 64)
 Все эндпоинты — только админ; изменение и удаление идут по `id` в теле.
 - `GET|POST /admin/seasons`: список (с числом клубов и туров) и создание `{ tournamentId, name, copyFromSeasonId? }` (состав можно скопировать с другого сезона). Занятое название — 409 `admin.duplicate`.
