@@ -160,3 +160,25 @@ export function generateYouth(
     attributes: makeAttributes(random, position, ovr),
   };
 }
+
+/**
+ * A free player of the monthly pool: the position, the rating (45–75, most around 60) and the age
+ * (17–36) are random, as the brief says. Depends only on the seed.
+ */
+export function generateFreeAgent(seed: string, country: CountryCode): GeneratedPlayer {
+  const random = makeRandom(seed);
+  const bank = NAME_BANKS[country];
+  const roll = random();
+  const position: Position = roll < 0.08 ? "GK" : roll < 0.43 ? "DEF" : roll < 0.78 ? "MID" : "FWD";
+  const ovr = 45 + Math.round(((random() + random() + random()) / 3) * 30);
+  const age = 17 + Math.floor(random() * 20);
+  return {
+    firstName: pick(random, bank.first),
+    lastName: pick(random, bank.last),
+    position,
+    age,
+    potential: makePotential(random, ovr, age),
+    ovr,
+    attributes: makeAttributes(random, position, ovr),
+  };
+}

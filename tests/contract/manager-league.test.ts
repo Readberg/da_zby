@@ -18,6 +18,9 @@ const saveLineup = vi.fn();
 const saveTraining = vi.fn();
 const runRounds = vi.fn();
 const requestFriendly = vi.fn();
+const getFinance = vi.fn();
+const getMarket = vi.fn();
+const buyFreeAgent = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
@@ -33,6 +36,7 @@ vi.mock("@/server/services/manager/league", () => ({
   saveTraining,
 }));
 vi.mock("@/server/services/manager/season", () => ({ runRounds, requestFriendly }));
+vi.mock("@/server/services/manager/market", () => ({ getFinance, getMarket, buyFreeAgent }));
 
 const league = await import("@/app/api/v1/manager/league/route");
 const matches = await import("@/app/api/v1/manager/matches/route");
@@ -40,6 +44,9 @@ const match = await import("@/app/api/v1/manager/match/route");
 const lineup = await import("@/app/api/v1/manager/lineup/route");
 const training = await import("@/app/api/v1/manager/training/route");
 const friendly = await import("@/app/api/v1/manager/friendly/route");
+const finance = await import("@/app/api/v1/manager/finance/route");
+const market = await import("@/app/api/v1/manager/market/route");
+const buy = await import("@/app/api/v1/manager/market/buy/route");
 const cron = await import("@/app/api/cron/manager/route");
 
 const USER = "99999999-9999-4999-8999-999999999999";
@@ -105,8 +112,21 @@ beforeEach(() => {
   });
   saveLineup.mockReset().mockResolvedValue(undefined);
   saveTraining.mockReset().mockResolvedValue(undefined);
-  runRounds.mockReset().mockResolvedValue({ played: 3, closed: 0, days: 0, opened: 0 });
+  runRounds.mockReset().mockResolvedValue({ played: 3, closed: 0, days: 0, opened: 0, pools: 0 });
   requestFriendly.mockReset().mockResolvedValue({ matchId: MATCH });
+  getFinance
+    .mockReset()
+    .mockResolvedValue({ budget: 10000, squadNominal: 20000, wagePerRound: 100, transactions: [] });
+  getMarket.mockReset().mockResolvedValue({
+    open: false,
+    matchesPlayed: 3,
+    matchesNeeded: 10,
+    budget: 10000,
+    squadSize: 20,
+    squadMax: 23,
+    players: [],
+  });
+  buyFreeAgent.mockReset().mockResolvedValue({ budget: 9000 });
 });
 
 describe("league, matches and lineup are for signed-in users", () => {
@@ -212,6 +232,7 @@ describe("POST /api/cron/manager", () => {
       closed: 0,
       days: 0,
       opened: 0,
+      pools: 0,
     });
   });
 
@@ -293,5 +314,59 @@ describe("POST /api/v1/manager/friendly", () => {
       new ApiError(409, ERROR_CODES.managerFriendlyBusy, "Conflict", "Nobody is free."),
     );
     await expectProblem(await ask(), 409, "manager.friendly_busy");
+  });
+});
+
+describe("finance and market", () => {
+  const post = (body: unknown) =>
+    apiRequest("/api/v1/manager/market/buy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+  it("are for signed-in users", async () => {
+    signedIn("guest");
+    await expectProblem(
+      await finance.GET(apiRequest("/api/v1/manager/finance")),
+      401,
+      "auth.required",
+    );
+    await expectProblem(
+      await market.GET(apiRequest("/api/v1/manager/market")),
+      401,
+      "auth.required",
+    );
+    await expectProblem(await buy.POST(post({ playerId: PLAYERS[0] })), 401, "auth.required");
+    expect(buyFreeAgent).not.toHaveBeenCalled();
+  });
+
+  it("return the money and the market in the documented shapes", async () => {
+    const money = await (await finance.GET(apiRequest("/api/v1/manager/finance"))).json();
+    expect(money.data).toMatchObject({ budget: 10000, wagePerRound: 100 });
+    const pool = await (await market.GET(apiRequest("/api/v1/manager/market"))).json();
+    expect(pool.data).toMatchObject({ open: false, matchesNeeded: 10, squadMax: 23 });
+  });
+
+  it("buys a player for the caller", async () => {
+    const response = await buy.POST(post({ playerId: PLAYERS[0] }));
+    expect(response.status).toBe(200);
+    expect((await response.json()).data).toEqual({ budget: 9000 });
+    expect(buyFreeAgent).toHaveBeenCalledWith({}, USER, PLAYERS[0]);
+  });
+
+  it("asks for a player id", async () => {
+    await expectProblem(await buy.POST(post({ playerId: "x" })), 422, "api.validation_failed");
+    expect(buyFreeAgent).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["manager.market_closed"],
+    ["manager.player_unavailable"],
+    ["manager.squad_full"],
+    ["manager.no_money"],
+  ])("answers 409 %s", async (code) => {
+    buyFreeAgent.mockRejectedValueOnce(new ApiError(409, code, "Conflict", "no"));
+    await expectProblem(await buy.POST(post({ playerId: PLAYERS[0] })), 409, code);
   });
 });

@@ -35,6 +35,7 @@ const myClub = {
   city: { id: 1, name: "Минск" },
   primaryColor: "#d32f2f",
   secondaryColor: "#f5f5f5",
+  budget: 10000,
   createdAt: "2026-11-16T10:00:00.000Z",
 };
 

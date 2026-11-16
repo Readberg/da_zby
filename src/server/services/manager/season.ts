@@ -7,6 +7,7 @@ import type { Database, Json } from "@/types/database";
 import { fetchAll } from "../paginate";
 import { computePreseasonDay } from "./effects";
 import { playAllDue, toState, type PlayerRow } from "./league";
+import { runMarketPools } from "./market";
 import { makeRandom } from "./random";
 import { generateYouth } from "./squad";
 
@@ -126,7 +127,7 @@ export async function runPreseasonDays(admin: Db, now: Date = new Date()): Promi
       const effects = computePreseasonDay({
         seed: `${league.id}:${day.toISOString()}`,
         day,
-        players: players.map((row) => toState(row, bots.has(row.club_id))),
+        players: players.map((row) => toState(row, bots.has(row.club_id ?? ""))),
       });
       const { data, error } = await admin.rpc("mgr_apply_preseason_day", {
         p_league: league.id,
@@ -192,12 +193,13 @@ export async function openReadySeasons(admin: Db): Promise<number> {
 export async function runRounds(
   admin: Db,
   now: Date = new Date(),
-): Promise<{ played: number; closed: number; days: number; opened: number }> {
+): Promise<{ played: number; closed: number; days: number; opened: number; pools: number }> {
   const played = await playAllDue(admin, now);
   const closed = await closeFinishedSeasons(admin);
   const days = await runPreseasonDays(admin, now);
   const opened = await openReadySeasons(admin);
-  return { played, closed, days, opened };
+  const pools = await runMarketPools(admin, now);
+  return { played, closed, days, opened, pools };
 }
 
 /** A friendly match with a random club of the league, at the next 10:00 Moscow time. */

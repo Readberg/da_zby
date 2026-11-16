@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getLocale, getMessages } from "@/i18n/server";
 import { formatDateTime } from "@/lib/local-time";
+import { formatMoney } from "@/lib/manager/money-format";
 import type { ManagerClubView } from "@/server/api/v1/schemas/manager";
 import { ClubColors } from "./club-colors";
 import { FriendlyButton } from "./friendly-button";
@@ -128,6 +129,21 @@ export function ClubView({
         </div>
       </div>
 
+      <p className="flex flex-wrap gap-x-6 text-muted">
+        <span>
+          {t.money.budget}:{" "}
+          <Link href="/manager/finance" className="font-semibold underline">
+            <span className={club.budget < 0 ? "text-danger" : "text-ink"}>
+              {formatMoney(club.budget, getLocale(), t.money.format)}
+            </span>
+          </Link>
+        </span>
+      </p>
+      {club.budget < 0 && (
+        <p role="alert" className="text-sm text-danger">
+          {t.money.debt}
+        </p>
+      )}
       <Preseason view={view} offsetMinutes={offsetMinutes} />
       <NextMatch view={view} offsetMinutes={offsetMinutes} />
       <Retiring view={view} />
@@ -145,6 +161,7 @@ export function ClubView({
               <TH>{t.columns.age}</TH>
               <TH className="text-right">{t.columns.overall}</TH>
               <TH className="text-right">{t.columns.real}</TH>
+              <TH className="hidden text-right sm:table-cell">{t.money.price}</TH>
             </tr>
           </THead>
           <TBody>
@@ -159,6 +176,9 @@ export function ClubView({
                 <TD>{player.age}</TD>
                 <TD className="text-right font-display text-lg text-accent">{player.overall}</TD>
                 <TD className="text-right text-muted">{player.real.toFixed(1)}</TD>
+                <TD className="hidden whitespace-nowrap text-right text-muted sm:table-cell">
+                  {formatMoney(player.nominal, getLocale(), t.money.format)}
+                </TD>
               </TR>
             ))}
           </TBody>
