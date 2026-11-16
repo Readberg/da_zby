@@ -114,6 +114,9 @@ src/server/api/v1/{schemas,dto,...}          src/server/services/*  ← вся �
 - `DELETE /api/v1/chat` (вошедший): тело `{ id }`; автор удаляет своё, админ любое; чужое — 404.
 - `PUT /api/v1/admin/chat/bans` (админ): тело `{ userId, banned }`, идемпотентно.
 
+### Футбольный менеджер (DAZBY-143, D-129)
+Все эндпоинты — для вошедшего. `GET /manager/cities` — города страны клуба и палитра цветов. `GET /manager/club` — мой клуб и состав (`club: null`, пока клуба нет; потенциал игроков не отдаётся). `POST /manager/club` (`name`, `cityId`, `primaryColor`, `secondaryColor`) — создаёт клуб и один раз генерирует стартовый состав; `409 manager.club_exists`, `409 manager.name_taken`, 10 попыток за 10 минут. `GET /manager/player?id=` — игрок моего клуба со всеми характеристиками; чужой — `404`.
+
 ### Админка: сезоны, туры, матчи (DAZBY-63, 64)
 Все эндпоинты — только админ; изменение и удаление идут по `id` в теле.
 - `GET|POST /admin/seasons`: список (с числом клубов и туров) и создание `{ tournamentId, name, copyFromSeasonId? }` (состав можно скопировать с другого сезона). Занятое название — 409 `admin.duplicate`.
