@@ -30,7 +30,7 @@ export function MatchesTable({
       <TBody>
         {matches.map((match) => (
           <TR key={match.id}>
-            <TD>{match.round}</TD>
+            <TD>{match.kind === "friendly" ? t.friendly : match.round}</TD>
             <TD className="whitespace-nowrap text-muted">
               {formatDateTime(match.kickoffAt, offsetMinutes, locale)}
             </TD>

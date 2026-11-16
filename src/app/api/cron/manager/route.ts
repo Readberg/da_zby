@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { serverEnv } from "@/lib/env.server";
 import { errorFields, log } from "@/lib/log";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { playAllDue } from "@/server/services/manager/league";
+import { runRounds } from "@/server/services/manager/season";
 
 const digest = (value: string) => createHash("sha256").update(value).digest();
 
@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   try {
-    const played = await playAllDue(createAdminClient());
-    log("info", "manager.rounds", { played });
-    return NextResponse.json({ ok: true, played });
+    const done = await runRounds(createAdminClient());
+    log("info", "manager.rounds", done);
+    return NextResponse.json({ ok: true, ...done });
   } catch (error) {
     log("error", "manager.rounds_failed", errorFields(error));
     return NextResponse.json({ ok: false }, { status: 500 });

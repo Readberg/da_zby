@@ -16,7 +16,8 @@ const getMatch = vi.fn();
 const getLineup = vi.fn();
 const saveLineup = vi.fn();
 const saveTraining = vi.fn();
-const playAllDue = vi.fn();
+const runRounds = vi.fn();
+const requestFriendly = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
@@ -30,14 +31,15 @@ vi.mock("@/server/services/manager/league", () => ({
   getLineup,
   saveLineup,
   saveTraining,
-  playAllDue,
 }));
+vi.mock("@/server/services/manager/season", () => ({ runRounds, requestFriendly }));
 
 const league = await import("@/app/api/v1/manager/league/route");
 const matches = await import("@/app/api/v1/manager/matches/route");
 const match = await import("@/app/api/v1/manager/match/route");
 const lineup = await import("@/app/api/v1/manager/lineup/route");
 const training = await import("@/app/api/v1/manager/training/route");
+const friendly = await import("@/app/api/v1/manager/friendly/route");
 const cron = await import("@/app/api/cron/manager/route");
 
 const USER = "99999999-9999-4999-8999-999999999999";
@@ -59,6 +61,7 @@ const summary = {
   round: 1,
   kickoffAt: "2026-11-18T07:00:00.000Z",
   status: "scheduled" as const,
+  kind: "league" as const,
   home: side,
   away: { ...side, clubId: "44444444-4444-4444-8444-444444444444", name: "Гранит Брест" },
   homeGoals: null,
@@ -102,7 +105,8 @@ beforeEach(() => {
   });
   saveLineup.mockReset().mockResolvedValue(undefined);
   saveTraining.mockReset().mockResolvedValue(undefined);
-  playAllDue.mockReset().mockResolvedValue(3);
+  runRounds.mockReset().mockResolvedValue({ played: 3, closed: 0, days: 0, opened: 0 });
+  requestFriendly.mockReset().mockResolvedValue({ matchId: MATCH });
 });
 
 describe("league, matches and lineup are for signed-in users", () => {
@@ -202,13 +206,19 @@ describe("POST /api/cron/manager", () => {
   it("plays the due rounds for the scheduler and says how many matches it wrote", async () => {
     const response = await call("x".repeat(32));
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ok: true, played: 3 });
+    expect(await response.json()).toEqual({
+      ok: true,
+      played: 3,
+      closed: 0,
+      days: 0,
+      opened: 0,
+    });
   });
 
   it("refuses a call without the secret or with a wrong one", async () => {
     expect((await call()).status).toBe(401);
     expect((await call("y".repeat(32))).status).toBe(401);
-    expect(playAllDue).not.toHaveBeenCalled();
+    expect(runRounds).not.toHaveBeenCalled();
   });
 });
 
@@ -255,5 +265,33 @@ describe("PUT /api/v1/manager/training", () => {
       new ApiError(409, ERROR_CODES.managerTrainingLocked, "Conflict", "The round has started."),
     );
     await expectProblem(await training.PUT(putTraining(plans)), 409, "manager.training_locked");
+  });
+});
+
+describe("POST /api/v1/manager/friendly", () => {
+  const ask = () => friendly.POST(apiRequest("/api/v1/manager/friendly", { method: "POST" }));
+
+  it("is for signed-in users", async () => {
+    signedIn("guest");
+    await expectProblem(await ask(), 401, "auth.required");
+    expect(requestFriendly).not.toHaveBeenCalled();
+  });
+
+  it("sets up a friendly for the caller", async () => {
+    const response = await ask();
+    expect(response.status).toBe(200);
+    expect((await response.json()).data).toEqual({ matchId: MATCH });
+    expect(requestFriendly).toHaveBeenCalledWith({}, USER);
+  });
+
+  it("answers 409 outside the preseason or when nobody is free", async () => {
+    requestFriendly.mockRejectedValueOnce(
+      new ApiError(409, ERROR_CODES.managerFriendlyUnavailable, "Conflict", "Preseason only."),
+    );
+    await expectProblem(await ask(), 409, "manager.friendly_unavailable");
+    requestFriendly.mockRejectedValueOnce(
+      new ApiError(409, ERROR_CODES.managerFriendlyBusy, "Conflict", "Nobody is free."),
+    );
+    await expectProblem(await ask(), 409, "manager.friendly_busy");
   });
 });

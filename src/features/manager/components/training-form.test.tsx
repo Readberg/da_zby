@@ -31,6 +31,7 @@ const player = (over: Partial<PlayerSummary>): PlayerSummary => ({
   morale: 80,
   injuredUntil: null,
   trainingFocus: null,
+  retiring: false,
   ...over,
 });
 

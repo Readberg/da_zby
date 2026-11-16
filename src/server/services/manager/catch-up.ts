@@ -1,7 +1,7 @@
 import { serverEnv } from "@/lib/env.server";
 import { errorFields, log } from "@/lib/log";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { playAllDue } from "./league";
+import { runRounds } from "./season";
 
 /**
  * Plays the rounds that are due. The scheduler does this every day at 10:00 Moscow time; this is
@@ -12,8 +12,10 @@ import { playAllDue } from "./league";
 export async function catchUpRounds(): Promise<void> {
   if (!serverEnv.SUPABASE_SECRET_KEY) return;
   try {
-    const played = await playAllDue(createAdminClient());
-    if (played > 0) log("info", "manager.catch_up", { played });
+    const done = await runRounds(createAdminClient());
+    if (done.played + done.closed + done.days + done.opened > 0) {
+      log("info", "manager.catch_up", done);
+    }
   } catch (error) {
     log("error", "manager.catch_up_failed", errorFields(error));
   }
