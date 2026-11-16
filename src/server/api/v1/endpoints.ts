@@ -1,4 +1,18 @@
+import { z } from "zod";
 import { defineEndpoint } from "./endpoint";
+import {
+  consoleActionBodySchema,
+  consoleActionResultSchema,
+  consoleChangeSchema,
+  consoleEditBodySchema,
+  consoleListQuerySchema,
+  consoleListSchema,
+  consoleRecordQuerySchema,
+  consoleRecordSchema,
+  suspiciousListSchema,
+  suspiciousReviewBodySchema,
+  suspiciousReviewedSchema,
+} from "./schemas/admin-console";
 import { marketEndpoints } from "./endpoints-market";
 import { healthSchema, openApiDocumentSchema, versionSchema } from "./schemas/system";
 import { profilePatchSchema } from "@/lib/profile-schema";
@@ -189,6 +203,80 @@ export const endpoints = {
     output: predictionsSavedSchema,
     cacheControl: "private, no-store",
     errors: [400, 401, 409, 422],
+  }),
+  adminConsoleList: defineEndpoint({
+    method: "get",
+    path: "/admin/console/records",
+    summary: "Admin console: a page of records of an entity",
+    description:
+      "Entities, searchable fields, filters and sortable columns come from the registry (src/server/admin/registry.ts). Admins and moderators.",
+    tags: ["admin"],
+    auth: "staff",
+    query: consoleListQuerySchema,
+    output: consoleListSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 403, 404, 422],
+  }),
+  adminConsoleRecord: defineEndpoint({
+    method: "get",
+    path: "/admin/console/record",
+    summary: "Admin console: one record",
+    tags: ["admin"],
+    auth: "staff",
+    query: consoleRecordQuerySchema,
+    output: consoleRecordSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 403, 404, 422],
+  }),
+  adminConsoleEdit: defineEndpoint({
+    method: "patch",
+    path: "/admin/console/record",
+    summary: "Admin console: change fields of a record",
+    description:
+      "A reason is required and the change is written to the audit log in the same transaction. The role is checked per field by the database (403 when a moderator touches an admin field).",
+    tags: ["admin"],
+    auth: "staff",
+    body: consoleEditBodySchema,
+    output: consoleChangeSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 404, 409, 422],
+  }),
+  adminConsoleAction: defineEndpoint({
+    method: "post",
+    path: "/admin/console/actions",
+    summary: "Admin console: run an action for one or many targets",
+    description:
+      "Actions: freeze_market, unfreeze_market, remove_logo (moderator); adjust_budget, make_bot, reactivate_club, set_role, delete_profile, play_rounds (admin). A reason is required; each target has its own result. Several targets only for bulk actions.",
+    tags: ["admin"],
+    auth: "staff",
+    body: consoleActionBodySchema,
+    output: consoleActionResultSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 409, 422],
+  }),
+  adminSuspicious: defineEndpoint({
+    method: "get",
+    path: "/admin/console/suspicious",
+    summary: "Admin console: the report of suspicious activity",
+    description:
+      "Soft signals from the game's own data (repeated deals, prices at the cap, young accounts that deal only with each other, the same contact). No IP, no fingerprints, no automatic action.",
+    tags: ["admin"],
+    auth: "staff",
+    query: z.object({}),
+    output: suspiciousListSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 403],
+  }),
+  adminSuspiciousReview: defineEndpoint({
+    method: "post",
+    path: "/admin/console/suspicious/review",
+    summary: "Admin console: mark a finding as reviewed",
+    tags: ["admin"],
+    auth: "staff",
+    body: suspiciousReviewBodySchema,
+    output: suspiciousReviewedSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 422],
   }),
   adminUsersList: defineEndpoint({
     method: "get",

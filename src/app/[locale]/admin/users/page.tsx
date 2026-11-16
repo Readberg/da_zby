@@ -80,7 +80,11 @@ async function UsersContent({
                 <TD>
                   <div className="flex flex-wrap items-center gap-3">
                     <span>
-                      {user.role === "admin" ? ru.admin.users.admin : ru.admin.users.user}
+                      {user.role === "admin"
+                        ? ru.admin.users.admin
+                        : user.role === "moderator"
+                          ? ru.admin.console.roles.moderator
+                          : ru.admin.users.user}
                     </span>
                     <Link
                       href={`/admin/users/${user.id}`}
@@ -90,7 +94,7 @@ async function UsersContent({
                     </Link>
                     <RoleButton
                       userId={user.id}
-                      role={user.role}
+                      role={user.role === "admin" ? "admin" : "user"}
                       nickname={user.nickname ?? ru.admin.users.noNickname}
                     />
                   </div>

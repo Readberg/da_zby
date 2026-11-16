@@ -5,7 +5,7 @@ export const adminUserSchema = z.object({
   id: z.string().describe("User id (UUID)."),
   nickname: z.string().nullable().describe("Null until onboarding is completed."),
   fullName: z.string().nullable(),
-  role: z.enum(["user", "admin"]),
+  role: z.enum(["user", "moderator", "admin"]),
   createdAt: z.string().describe("ISO 8601, UTC."),
   lastLoginAt: z.string().nullable().describe("ISO 8601, UTC."),
 });
