@@ -2,6 +2,7 @@ import { getLocale, getMessages } from "@/i18n/server";
 import { formatMoney } from "@/lib/manager/money-format";
 import type { Contracts } from "@/server/api/v1/schemas/manager-market";
 import { ContractActions } from "./contract-actions";
+import { PlayerLink } from "./player-link";
 
 /** My squad with the contracts: put a player up, offer a new contract, break one. */
 export function ContractsView({
@@ -39,7 +40,7 @@ export function ContractsView({
           >
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <p className="font-semibold">
-                {p.firstName} {p.lastName}{" "}
+                <PlayerLink id={p.id} name={`${p.firstName} ${p.lastName}`} />{" "}
                 <span className="font-normal text-muted" title={t.positions[p.position]}>
                   {t.positionShort[p.position]}, {p.age}
                 </span>

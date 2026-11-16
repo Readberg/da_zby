@@ -32,7 +32,7 @@ export default async function ManagerTradesViewPage(
   await initLocale(props.params);
   const t = getMessages().manager;
   return (
-    <ManagerShell title={t.trade.title} lead={t.trade.lead}>
+    <ManagerShell title={t.trade.title} lead={t.trade.lead} faq="trade">
       <MarketNav label={t.marketNav.label} items={marketNavItems(t.marketNav)} />
       <Suspense fallback={<Skeleton className="h-96" />}>
         <Content />

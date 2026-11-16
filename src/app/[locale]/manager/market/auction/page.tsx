@@ -32,7 +32,7 @@ export default async function ManagerAuctionViewPage(
   await initLocale(props.params);
   const t = getMessages().manager;
   return (
-    <ManagerShell title={t.auction.title} lead={t.auction.lead}>
+    <ManagerShell title={t.auction.title} lead={t.auction.lead} faq="auction">
       <MarketNav label={t.marketNav.label} items={marketNavItems(t.marketNav)} />
       <Suspense fallback={<Skeleton className="h-96" />}>
         <Content />

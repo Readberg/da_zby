@@ -32,7 +32,7 @@ export default async function ManagerContractsViewPage(
   await initLocale(props.params);
   const t = getMessages().manager;
   return (
-    <ManagerShell title={t.contracts.title} lead={t.contracts.lead}>
+    <ManagerShell title={t.contracts.title} lead={t.contracts.lead} faq="contracts">
       <MarketNav label={t.marketNav.label} items={marketNavItems(t.marketNav)} />
       <Suspense fallback={<Skeleton className="h-96" />}>
         <Content />

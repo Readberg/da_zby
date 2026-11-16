@@ -618,6 +618,68 @@ export const en: MessagesShape<typeof ru> = {
             },
           ],
         },
+        {
+          id: "auction",
+          title: "Auction: selling and buying players",
+          items: [
+            {
+              q: "How do I put a player up for sale?",
+              a: "Market → “Selling and contracts” → the “Put up for sale” button next to a player. The start price is from half to twice the nominal value of the player, the bid step is 10%, 20% or 30% (your choice). You can sell after your club has played 10 matches; at most 5 lots at a time; the squad must keep at least 17 players.",
+            },
+            {
+              q: "When are the results settled?",
+              a: "Bids are taken for a day, and deals are made once a day at 10:00 Moscow time. A lot closes at the nearest such moment, but not earlier than 12 hours after it was put up. The highest bid wins, among equal ones the earliest. There are no extensions: a bid in the last minute counts like any other. While there is no bid you can take the lot off; after the first one you cannot.",
+            },
+            {
+              q: "How much does the seller get and the buyer pay?",
+              a: "The buyer pays the whole price. The seller gets the price minus a 10% tax, but not more than twice the nominal value of the player: whatever is above burns. Money does not appear from nowhere: the difference between what the buyer paid and what the seller got leaves the game. Example: nominal 1000 $, bought for 2400 $ — the seller gets 2000 $, 400 $ burns.",
+            },
+            {
+              q: "When is the money for a bid taken?",
+              a: "Only when the results are settled. Money is not held for a bid, so you can bid on several lots at once. If by then you lack money, have no room in the squad (23 players at most) or the club is in debt, your bid is cancelled and the lot goes to the next best bid. If nobody can pay, the lot is unsold and the player stays with the seller.",
+            },
+            {
+              q: "What are the limits?",
+              a: "One deal with one club a season (a purchase or an exchange). A bought or exchanged player cannot be put up or exchanged for a week. You cannot put up a player with under half a season of contract left, or one who retires at the end of the season. In debt, bids and purchases are closed. Bots do not trade.",
+            },
+          ],
+        },
+        {
+          id: "contracts",
+          title: "Player contracts",
+          items: [
+            {
+              q: "What is a contract?",
+              a: "Every player has a contract term (the last season) and a wage per round. The wage is 0.5% of the nominal value of the player on the day of signing and does not change afterwards, even if the player grows and gets more expensive. Starting players have different terms, 1 to 3 seasons; players from the pool, academy players and bought players sign for 2 seasons.",
+            },
+            {
+              q: "How do I extend a contract?",
+              a: "Market → “Selling and contracts” → “Extend the contract”. You can offer when the contract has from half a season (19 rounds) to two seasons left, once a season for a player. The player may refuse, more often with low morale (about 10% with morale 60+, 40% at 40–59, 70% below). Then the old contract goes on. If he agrees, the new term (1–3 seasons) starts from the end of the old one, and the wage is counted from the nominal value of today.",
+            },
+            {
+              q: "What happens when a contract ends?",
+              a: "The player leaves the club for the pool of free players of the league, where any club can buy him. So that a squad does not fall apart, a club never goes below 17 players: the weakest leave, the others stay one more season. Bots renew everybody.",
+            },
+            {
+              q: "Can I break a contract?",
+              a: "Yes, a club can break the contract of any player who is not on auction. The penalty is two thirds of the wages for all the rounds left until the end of the contract; the player goes to the pool. The squad must keep at least 17 players, and you need enough money.",
+            },
+          ],
+        },
+        {
+          id: "trade",
+          title: "Exchanging players",
+          items: [
+            {
+              q: "How do I offer an exchange?",
+              a: "Market → “Exchanges”. Pick a club, one to three of your players and one to three players of that club; add money on top if you like. The other club accepts or declines; the offer lives 48 hours and then expires. You can withdraw your offer.",
+            },
+            {
+              q: "What is checked?",
+              a: "After the exchange both squads must have 17 to 23 players. One deal with one club a season. Exchanged players cannot be sold or swapped for a week; you cannot exchange players who are on auction, have under half a season of contract, or retire. The money on top is at most twice the nominal value of the players the payer receives; the receiver pays a 10% tax.",
+            },
+          ],
+        },
       ],
     },
     scheduleNote:
