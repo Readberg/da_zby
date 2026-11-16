@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getMessages } from "@/i18n/server";
 import type { LeagueView } from "@/server/api/v1/schemas/manager";
@@ -12,6 +13,14 @@ export function LeagueTable({ view }: { view: LeagueView }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <Link href="/manager/scorers" className="underline">
+          {getMessages().manager.stats.scorers.link} →
+        </Link>
+        <Link href="/manager/rating" className="underline">
+          {getMessages().manager.rating.link} →
+        </Link>
+      </div>
       <p className="text-sm text-muted">
         {t.progress
           .replace("{n}", String(league.roundsPlayed))
@@ -27,6 +36,7 @@ export function LeagueTable({ view }: { view: LeagueView }) {
             <TH className="hidden text-right sm:table-cell">{t.columns.drawn}</TH>
             <TH className="hidden text-right sm:table-cell">{t.columns.lost}</TH>
             <TH className="text-right">{t.columns.goals}</TH>
+            <TH className="hidden text-right sm:table-cell">{t.columns.elo}</TH>
             <TH className="text-right">{t.columns.points}</TH>
           </tr>
         </THead>
@@ -54,6 +64,7 @@ export function LeagueTable({ view }: { view: LeagueView }) {
               <TD className="text-right">
                 {row.goalsFor}:{row.goalsAgainst}
               </TD>
+              <TD className="hidden text-right sm:table-cell">{row.elo}</TD>
               <TD className="text-right font-display text-lg text-accent">{row.points}</TD>
             </TR>
           ))}

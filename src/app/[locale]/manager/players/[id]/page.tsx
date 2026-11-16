@@ -8,6 +8,8 @@ import { PlayerCard } from "@/features/manager/components/player-card";
 import { ApiError } from "@/server/api/v1/problem";
 import { loadMember } from "@/features/manager/load";
 import { getMyPlayer } from "@/server/services/manager/club";
+import { getPlayerStats } from "@/server/services/manager/stats";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getMessages, initLocale, messagesFor } from "@/i18n/server";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -25,13 +27,14 @@ async function PlayerContent({
   params: PageProps<"/[locale]/manager/players/[id]">["params"];
 }) {
   const { id } = await params;
-  const { supabase, offsetMinutes } = await loadMember(`/manager/players/${id}`);
+  const { user, supabase, offsetMinutes } = await loadMember(`/manager/players/${id}`);
   if (!UUID.test(id)) notFound();
   const player = await getMyPlayer(supabase, id).catch((cause: unknown) => {
     if (cause instanceof ApiError && cause.status === 404) notFound();
     throw cause;
   });
-  return <PlayerCard player={player} offsetMinutes={offsetMinutes} />;
+  const stats = await getPlayerStats(createAdminClient(), user.id, id).catch(() => null);
+  return <PlayerCard player={player} offsetMinutes={offsetMinutes} stats={stats} />;
 }
 
 export default async function PlayerPage(props: PageProps<"/[locale]/manager/players/[id]">) {

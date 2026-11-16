@@ -1,3 +1,4 @@
+import { kickoffPassed } from "@/lib/manager/time-left";
 import { getMessages } from "@/i18n/server";
 import type {
   LineupPlayerSnapshot,
@@ -49,6 +50,7 @@ function Lineup({ title, players }: { title: string; players: LineupPlayerSnapsh
 /** The score, the chronicle by minutes and the two lineups of a match. */
 export function MatchReport({ match }: { match: MatchDetail }) {
   const t = getMessages().manager.matchPage;
+  const tm = getMessages().manager;
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-1">
@@ -83,7 +85,9 @@ export function MatchReport({ match }: { match: MatchDetail }) {
             ))}
           </ol>
         ) : (
-          <p className="text-muted">{t.notPlayed}</p>
+          <p className="text-muted">
+            {kickoffPassed(match.kickoffAt) ? tm.season.resultSoon : t.notPlayed}
+          </p>
         )}
       </section>
 

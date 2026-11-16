@@ -9,6 +9,11 @@ export const healthSchema = z.object({
       .describe(
         "Whether the sign-in bot's webhook points at this site and delivers; skipped where the bot is not configured.",
       ),
+    manager: z
+      .enum(["ok", "error", "skipped"])
+      .describe(
+        "The football manager's rounds: error when a match has waited more than 30 minutes after its time (the scheduler is not working).",
+      ),
   }),
 });
 

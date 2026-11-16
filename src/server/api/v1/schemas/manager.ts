@@ -24,6 +24,11 @@ export const managerClubSchema = z.object({
   secondaryColor: z.string(),
   budget: z.number().int().describe("Game dollars; negative = in debt (no purchases)."),
   logoUrl: z.string().nullable().describe("The club's own logo, if it has one."),
+  dormant: z
+    .boolean()
+    .describe("The club rests (plays like a bot) until its owner confirms the return."),
+  elo: z.number().int().describe("Elo rating (league matches only), start 1000."),
+  eloPeak: z.number().int().describe("The highest Elo the club has had."),
   createdAt: z.string().describe("ISO 8601, UTC."),
 });
 export type Club = z.infer<typeof managerClubSchema>;
@@ -111,6 +116,8 @@ export const matchEventSchema = z.object({
   s: z.enum(["home", "away"]).optional(),
   p: z.string().optional().describe("Surname of the player."),
   a: z.string().optional().describe("Surname of the player who gave the pass."),
+  pid: z.string().optional().describe("Id of the player `p` (matches played after DAZBY-153)."),
+  aid: z.string().optional().describe("Id of the player `a`."),
 });
 export type MatchEventData = z.infer<typeof matchEventSchema>;
 
@@ -139,6 +146,7 @@ export const tableRowSchema = z.object({
   logoUrl: z.string().nullable(),
   isBot: z.boolean(),
   isMine: z.boolean(),
+  elo: z.number().int().describe("Elo rating of the club (bots too)."),
   played: z.number().int(),
   won: z.number().int(),
   drawn: z.number().int(),
@@ -227,6 +235,10 @@ export const trainingBodySchema = z.object({
 });
 export type TrainingBody = z.infer<typeof trainingBodySchema>;
 export const trainingSavedSchema = z.object({ saved: z.literal(true) });
+
+export const returnConfirmedSchema = z.object({
+  returned: z.boolean().describe("False when the club was not resting."),
+});
 
 export const friendlyCreatedSchema = z.object({ matchId: z.uuid() });
 

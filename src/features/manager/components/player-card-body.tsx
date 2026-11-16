@@ -3,7 +3,9 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { formatDateTime } from "@/lib/local-time";
 import { formatMoney } from "@/lib/manager/money-format";
 import type { Player } from "@/server/api/v1/schemas/manager";
+import type { PlayerStats } from "@/server/api/v1/schemas/manager-stats";
 import { isInjuredNow } from "../injuries";
+import { PlayerStatsBlock } from "./player-stats";
 
 function Meter({ label, value }: { label: string; value: number }) {
   return (
@@ -36,8 +38,10 @@ export function PlayerCardBody({
   locale,
   offsetMinutes,
   headingLevel = 2,
+  stats = null,
 }: {
   player: Player;
+  stats?: PlayerStats | null;
   t: Dictionary["manager"];
   locale: Locale;
   offsetMinutes: number;
@@ -104,6 +108,8 @@ export function PlayerCardBody({
           <Meter label={t.condition.morale} value={player.morale} />
         </div>
       </section>
+
+      {stats && <PlayerStatsBlock stats={stats} t={t} />}
 
       <section aria-labelledby="attributes-title" className="flex flex-col gap-3">
         <h3 id="attributes-title" className="text-lg">

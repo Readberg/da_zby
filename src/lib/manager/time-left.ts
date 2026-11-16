@@ -16,3 +16,8 @@ export const LINEUP_DEADLINE_MS = 5 * 60_000;
 export function lineupDeadline(kickoffIso: string): Date {
   return new Date(new Date(kickoffIso).getTime() - LINEUP_DEADLINE_MS);
 }
+
+/** The kickoff has passed: the match waits for its result (the league's delay, up to 12 minutes). */
+export function kickoffPassed(kickoffIso: string, now: number = Date.now()): boolean {
+  return new Date(kickoffIso).getTime() <= now;
+}
