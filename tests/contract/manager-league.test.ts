@@ -36,6 +36,9 @@ vi.mock("@/server/services/manager/league", () => ({
   saveTraining,
 }));
 vi.mock("@/server/services/manager/season", () => ({ runRounds, requestFriendly }));
+vi.mock("@/server/services/manager/rounds-lease", () => ({
+  withRoundsLease: (_admin: unknown, work: () => Promise<unknown>) => work(),
+}));
 vi.mock("@/server/services/manager/market", () => ({ getFinance, getMarket, buyFreeAgent }));
 
 const league = await import("@/app/api/v1/manager/league/route");
@@ -230,6 +233,7 @@ describe("POST /api/cron/manager", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       ok: true,
+      busy: false,
       played: 3,
       closed: 0,
       days: 0,

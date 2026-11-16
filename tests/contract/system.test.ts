@@ -9,6 +9,8 @@ const createClient = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
 const checkWebhook = vi.fn();
 vi.mock("@/server/services/webhook-health", () => ({ checkWebhook }));
+const checkManager = vi.fn();
+vi.mock("@/server/services/manager/health", () => ({ checkManager }));
 
 const health = await import("@/app/api/v1/health/route");
 const healthStrict = await import("@/app/api/v1/health/strict/route");
@@ -24,6 +26,7 @@ describe("GET /api/v1/health", () => {
   beforeEach(() => {
     createClient.mockReset();
     checkWebhook.mockReset().mockResolvedValue("skipped");
+    checkManager.mockReset().mockResolvedValue("skipped");
   });
 
   it("returns ok with a healthy database", async () => {
@@ -36,7 +39,7 @@ describe("GET /api/v1/health", () => {
     const body = await response.json();
     expect(healthSchema.parse(body.data)).toEqual({
       status: "ok",
-      checks: { database: "ok", telegramWebhook: "skipped" },
+      checks: { database: "ok", telegramWebhook: "skipped", manager: "skipped" },
     });
     expect(body.meta).toEqual({});
   });
@@ -57,6 +60,15 @@ describe("GET /api/v1/health", () => {
     expect((await response.json()).data.checks.telegramWebhook).toBe("error");
   });
 
+  it("reports overdue rounds of the manager but stays a 200 liveness probe", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ error: null }));
+    checkManager.mockResolvedValue("error");
+    const response = await health.GET(apiRequest("/api/v1/health"));
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).data.checks.manager).toBe("error");
+  });
+
   it("echoes a valid incoming X-Request-Id", async () => {
     createClient.mockResolvedValue(fakeSupabase());
     const response = await health.GET(
@@ -70,6 +82,7 @@ describe("GET /api/v1/health/strict", () => {
   beforeEach(() => {
     createClient.mockReset();
     checkWebhook.mockReset().mockResolvedValue("ok");
+    checkManager.mockReset().mockResolvedValue("skipped");
   });
 
   it("answers 200 while every check passes (a skipped check is not a failure)", async () => {
@@ -82,6 +95,7 @@ describe("GET /api/v1/health/strict", () => {
     expect((await response.json()).data.checks).toEqual({
       database: "ok",
       telegramWebhook: "skipped",
+      manager: "skipped",
     });
   });
 

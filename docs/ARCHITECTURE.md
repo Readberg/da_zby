@@ -141,3 +141,13 @@ Railway после базовой разработки: сборка `pnpm build
 - Сервер: `POST /api/v1/auth/telegram/miniapp` → `verifyInitData` (HMAC-SHA256 с ключом `HMAC("WebAppData", токен бота)`, сравнение за постоянное время, свежесть ≤ 1 час) → `prepareTelegramSession` → `verifyOtp`. Токена бота в браузер не попадает.
 - Типы и мелкие помощники: `src/lib/telegram-miniapp.ts` (`getWebApp`, `tmaHaptic`, `externalLink`, список `startapp`); CSS безопасных зон в `globals.css` под `html.tma`.
 - Telegram Web (iframe) не поддержан: нужны `frame-ancestors` для доменов Telegram и cookie `SameSite=None`.
+
+## Расчёт туров менеджера (D-129, D-138)
+
+Расчёт делает `runRounds` (`src/server/services/manager/season.ts`) в порядке: матчи → закрытие сезонов → дни предсезонки → открытие сезонов → пулы свободных игроков → окончание контрактов → закрытие торгов → просрочка обменов. Запускают его планировщик (`/api/cron/manager`, GitHub Actions 10:05–10:50 МСК) и заходы в раздел (`catchUpRounds`, страховка). Правила:
+
+- **Один запускающий**: `withRoundsLease` берёт аренду `rounds` в базе (`mgr_try_lease`, 90 с, сама истекает); кто не получил, ничего не делает.
+- **Порции**: вызов работает не дольше бюджета (`RUN_BUDGET_MS` = 22 с; cron 40 с); при исчерпании возвращает `partial: true` после матчей, остальные шаги идут следующим вызовом, порядок шагов не меняется.
+- **Смещение лиги**: матч готов к расчёту, когда `kickoff + mgr_leagues.play_delay_seconds` прошло (`mgr_due_matches`); результат детерминирован матчем и составами, от смещения не зависит.
+- **Пауза на заходах**: в памяти процесса (30 с / 2 мин) плюс `mgr_work_due` одним запросом.
+- **Сигнал**: `/api/v1/health` (`manager`), кэш минуту; уведомление админам через `mgr_alert_change`.

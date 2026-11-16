@@ -1,3 +1,4 @@
+import { kickoffPassed } from "@/lib/manager/time-left";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getLocale, getMessages } from "@/i18n/server";
 import { formatDateTime } from "@/lib/local-time";
@@ -17,6 +18,7 @@ export function MatchesTable({
   const t = getMessages().manager.matchesPage;
   if (matches.length === 0) return <p className="text-muted">{t.noMatches}</p>;
   const locale = getLocale();
+  const pending = getMessages().manager.season.resultSoon;
 
   return (
     <Table>
@@ -36,6 +38,9 @@ export function MatchesTable({
             </TD>
             <TD>
               <MatchPageLink match={match} mineId={mineId} />
+              {match.status === "scheduled" && kickoffPassed(match.kickoffAt) && (
+                <span className="block text-xs text-muted">{pending}</span>
+              )}
             </TD>
           </TR>
         ))}
