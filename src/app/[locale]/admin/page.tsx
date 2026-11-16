@@ -7,6 +7,21 @@ export default function AdminHomePage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-h3 sm:text-h2">{ru.admin.overview}</h1>
       <div className="grid gap-4 sm:grid-cols-2">
+        <Link href="/admin/data" className="group">
+          <Card title={ru.admin.nav.data} interactive>
+            <p className="text-muted">{ru.admin.home.dataHint}</p>
+          </Card>
+        </Link>
+        <Link href="/admin/suspicious" className="group">
+          <Card title={ru.admin.nav.suspicious} interactive>
+            <p className="text-muted">{ru.admin.home.suspiciousHint}</p>
+          </Card>
+        </Link>
+        <Link href="/admin/data/audit" className="group">
+          <Card title={ru.admin.nav.audit} interactive>
+            <p className="text-muted">{ru.admin.home.auditHint}</p>
+          </Card>
+        </Link>
         <Link href="/admin/tournaments" className="group relative">
           <Card title={ru.admin.nav.tournaments} interactive>
             <p className="text-muted">{ru.admin.home.tournamentsHint}</p>

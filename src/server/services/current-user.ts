@@ -54,6 +54,12 @@ export async function requireAdmin(returnTo: string): Promise<CurrentUser | null
   return user.role === "admin" ? user : null;
 }
 
+/** For the admin console: admins and moderators. What a moderator may do is checked per action. */
+export async function requireStaff(returnTo: string): Promise<CurrentUser | null> {
+  const user = await requireUser(returnTo);
+  return user.role === "admin" || user.role === "moderator" ? user : null;
+}
+
 /** For pages that need a signed-in user: guests are sent to /login and come back afterwards. */
 export async function requireUser(returnTo: string): Promise<CurrentUser> {
   const user = await getCurrentUser();

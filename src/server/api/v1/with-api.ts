@@ -15,7 +15,7 @@ export type ApiContext<Query, Body = undefined> = {
   query: Query;
   body: Body;
   supabase: SupabaseClient<Database>;
-  /** Present for `user` and `admin` endpoints. */
+  /** Present for `user`, `staff` and `admin` endpoints. */
   user: User | null;
 };
 
@@ -57,6 +57,14 @@ async function authenticate(
     const { data: isAdmin, error: rpcError } = await supabase.rpc("is_admin");
     if (rpcError || !isAdmin) {
       throw new ApiError(403, ERROR_CODES.forbidden, "Forbidden", "Admin role required.");
+    }
+  }
+
+  if (level === "staff") {
+    // Admins and moderators; what each may do is decided per action (src/server/admin/permissions.ts).
+    const { data: isStaff, error: rpcError } = await supabase.rpc("is_staff" as never);
+    if (rpcError || !isStaff) {
+      throw new ApiError(403, ERROR_CODES.forbidden, "Forbidden", "Staff role required.");
     }
   }
 
