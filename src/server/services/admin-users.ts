@@ -44,7 +44,7 @@ export async function listUsers(
       id: row.id,
       nickname: row.nickname,
       fullName: row.full_name,
-      role: row.role === "admin" ? "admin" : "user",
+      role: row.role === "admin" ? "admin" : row.role === "moderator" ? "moderator" : "user",
       createdAt: new Date(row.created_at).toISOString(),
       lastLoginAt: row.last_login_at ? new Date(row.last_login_at).toISOString() : null,
     })),

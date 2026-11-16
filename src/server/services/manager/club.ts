@@ -36,6 +36,7 @@ function toClub(row: ClubRow): Club {
     secondaryColor: row.secondary_color,
     budget: Number(row.budget),
     logoUrl: managerLogoUrl(row.logo_path),
+    dormant: row.dormant,
     createdAt: new Date(row.created_at).toISOString(),
   };
 }
@@ -254,4 +255,16 @@ export async function setClubLogo(
     throw error;
   }
   return { logoUrl: managerLogoUrl(path) };
+}
+
+/** The owner of a resting club says that he is back: the club plays with his lineup again. */
+export async function confirmReturn(admin: Db, userId: string): Promise<{ returned: boolean }> {
+  const { data, error } = await admin.rpc("mgr_confirm_return", { p_user: userId });
+  if (error) {
+    if (error.message.includes("manager.club_unknown")) {
+      throw new ApiError(404, ERROR_CODES.notFound, "Not Found", "You have no club yet.");
+    }
+    throw error;
+  }
+  return { returned: Boolean(data) };
 }

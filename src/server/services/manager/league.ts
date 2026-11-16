@@ -437,7 +437,7 @@ function sideOf(
   clubId: string,
   squads: Map<string, SquadPlayer[]>,
   saved: Map<string, Tables<"mgr_lineups">>,
-): { side: Side; snapshot: LineupPlayerSnapshot[] } | null {
+): { side: Side; snapshot: LineupPlayerSnapshot[]; auto: boolean } | null {
   const squad = squads.get(clubId) ?? [];
   const lineup = resolveLineup(squad, saved.get(clubId));
   if (!lineup) return null;
@@ -452,6 +452,8 @@ function sideOf(
   return {
     side: { players, mentality: lineup.mentality },
     snapshot: chosen.map((p) => ({ id: p.id, name: p.name, position: p.position, real: p.real })),
+    // The server picked the lineup (no saved one that fits): counted for inactive clubs.
+    auto: !lineup.saved,
   };
 }
 
@@ -500,15 +502,13 @@ export function toState(row: PlayerRow, isBot: boolean): PlayerState {
  * in one transaction, and the same match always comes out the same, because the lineups are
  * locked from kickoff and the draw is seeded by the match. Returns how many matches this call wrote.
  */
-export async function playDueMatches(admin: Db, now: Date = new Date()): Promise<number> {
-  const due = await admin
-    .from("mgr_matches")
-    .select("id, kickoff_at, kind, home_club_id, away_club_id")
-    .eq("status", "scheduled")
-    .lte("kickoff_at", now.toISOString())
-    .order("kickoff_at")
-    .order("id")
-    .limit(BATCH);
+export async function playDueMatches(
+  admin: Db,
+  now: Date = new Date(),
+  deadline: number = Infinity,
+): Promise<number> {
+  // Due = kickoff plus the delay of the league has passed (mgr_due_matches, D-138).
+  const due = await admin.rpc("mgr_due_matches", { p_now: now.toISOString(), p_limit: BATCH });
   if (due.error) throw due.error;
   if (!due.data?.length) return 0;
 
@@ -539,19 +539,21 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
     fetchAll((from, to) =>
       admin.from("mgr_lineups").select("*").in("club_id", clubIds).order("club_id").range(from, to),
     ),
-    admin.from("mgr_clubs").select("id, is_bot").in("id", clubIds),
+    admin.from("mgr_clubs").select("id, is_bot, dormant").in("id", clubIds),
   ]);
   if (clubs.error) throw clubs.error;
-  const bots = new Set((clubs.data ?? []).filter((c) => c.is_bot).map((c) => c.id));
+  // A resting club plays like a bot: picked lineup, automatic training, no money.
+  const bots = new Set((clubs.data ?? []).filter((c) => c.is_bot || c.dormant).map((c) => c.id));
   const rowsByClub = new Map<string, PlayerRow[]>();
   for (const player of players) {
     if (!player.club_id) continue;
     rowsByClub.set(player.club_id, [...(rowsByClub.get(player.club_id) ?? []), player]);
   }
-  const saved = new Map(lineups.map((l) => [l.club_id, l]));
+  const saved = new Map(lineups.filter((l) => !bots.has(l.club_id)).map((l) => [l.club_id, l]));
 
   let written = 0;
   for (const match of batch) {
+    if (Date.now() > deadline) break;
     const kickoff = new Date(match.kickoff_at);
     const rows = {
       home: rowsByClub.get(match.home_club_id) ?? [],
@@ -600,7 +602,7 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       }).map((entry) => ({ club_id: clubId, reason: entry.reason, amount: entry.amount }));
     });
 
-    const { data, error } = await admin.rpc("mgr_play_match_v2", {
+    const { data, error } = await admin.rpc("mgr_play_match_v3", {
       p_match: match.id,
       p_home_goals: result.homeGoals,
       p_away_goals: result.awayGoals,
@@ -609,6 +611,8 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       p_away_lineup: away.snapshot as unknown as Json,
       p_effects: effects as unknown as Json,
       p_money: money as unknown as Json,
+      p_home_auto: home.auto && !bots.has(match.home_club_id),
+      p_away_auto: away.auto && !bots.has(match.away_club_id),
     });
     if (error) {
       log("error", "manager.match_failed", { match: match.id, ...errorFields(error) });
@@ -620,11 +624,16 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
 }
 
 /** Plays everything that is due, batch after batch (the scheduler calls this). */
-export async function playAllDue(admin: Db, now: Date = new Date()): Promise<number> {
+export async function playAllDue(
+  admin: Db,
+  now: Date = new Date(),
+  deadline: number = Infinity,
+): Promise<number> {
   let total = 0;
   // Passes go on while they make progress: a long pause leaves many rounds, one per pass for a club.
   for (let i = 0; i < MAX_PASSES; i += 1) {
-    const written = await playDueMatches(admin, now);
+    if (Date.now() > deadline) break;
+    const written = await playDueMatches(admin, now, deadline);
     total += written;
     if (written === 0) break;
   }

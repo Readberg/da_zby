@@ -1,9 +1,10 @@
+import { DormantBanner } from "./dormant-banner";
 import Link from "next/link";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getLocale, getMessages } from "@/i18n/server";
 import { formatDateTime } from "@/lib/local-time";
 import { formatMoney } from "@/lib/manager/money-format";
-import { lineupDeadline } from "@/lib/manager/time-left";
+import { lineupDeadline, kickoffPassed } from "@/lib/manager/time-left";
 import type { ManagerClubView } from "@/server/api/v1/schemas/manager";
 import { ClubBadge } from "./club-badge";
 import { ClubKit } from "./club-kit";
@@ -109,6 +110,11 @@ function NextMatch({ view, offsetMinutes }: { view: ManagerClubView; offsetMinut
             {match.home.clubId === view.club.id ? t.hub.home : t.hub.away}
           </p>
           <MatchTitle match={match} mineId={view.club.id} />
+          {kickoffPassed(match.kickoffAt) && (
+            <p role="status" className="text-sm text-muted">
+              {t.season.resultSoon}
+            </p>
+          )}
           <dl className="grid gap-x-8 gap-y-1 text-sm sm:grid-cols-2">
             <div className="flex justify-between gap-3 sm:block">
               <dt className="text-muted">{t.timer.untilMatch}</dt>
@@ -153,6 +159,7 @@ export function ClubView({
 
   return (
     <div className="flex flex-col gap-8">
+      {club.dormant && <DormantBanner />}
       <div className="grid items-center gap-6 sm:grid-cols-[8rem_1fr]">
         <ClubKit
           primary={club.primaryColor}

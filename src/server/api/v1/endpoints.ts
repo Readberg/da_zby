@@ -1,5 +1,19 @@
+import { z } from "zod";
 import { defineEndpoint } from "./endpoint";
 import { playerStatsSchema, scorersSchema } from "@/server/api/v1/schemas/manager-stats";
+import {
+  consoleActionBodySchema,
+  consoleActionResultSchema,
+  consoleChangeSchema,
+  consoleEditBodySchema,
+  consoleListQuerySchema,
+  consoleListSchema,
+  consoleRecordQuerySchema,
+  consoleRecordSchema,
+  suspiciousListSchema,
+  suspiciousReviewBodySchema,
+  suspiciousReviewedSchema,
+} from "./schemas/admin-console";
 import { marketEndpoints } from "./endpoints-market";
 import { healthSchema, openApiDocumentSchema, versionSchema } from "./schemas/system";
 import { profilePatchSchema } from "@/lib/profile-schema";
@@ -85,6 +99,7 @@ import {
   buyBodySchema,
   financeSchema,
   friendlyCreatedSchema,
+  returnConfirmedSchema,
   logoBodySchema,
   logoSavedSchema,
   marketSchema,
@@ -190,6 +205,80 @@ export const endpoints = {
     output: predictionsSavedSchema,
     cacheControl: "private, no-store",
     errors: [400, 401, 409, 422],
+  }),
+  adminConsoleList: defineEndpoint({
+    method: "get",
+    path: "/admin/console/records",
+    summary: "Admin console: a page of records of an entity",
+    description:
+      "Entities, searchable fields, filters and sortable columns come from the registry (src/server/admin/registry.ts). Admins and moderators.",
+    tags: ["admin"],
+    auth: "staff",
+    query: consoleListQuerySchema,
+    output: consoleListSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 403, 404, 422],
+  }),
+  adminConsoleRecord: defineEndpoint({
+    method: "get",
+    path: "/admin/console/record",
+    summary: "Admin console: one record",
+    tags: ["admin"],
+    auth: "staff",
+    query: consoleRecordQuerySchema,
+    output: consoleRecordSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 403, 404, 422],
+  }),
+  adminConsoleEdit: defineEndpoint({
+    method: "patch",
+    path: "/admin/console/record",
+    summary: "Admin console: change fields of a record",
+    description:
+      "A reason is required and the change is written to the audit log in the same transaction. The role is checked per field by the database (403 when a moderator touches an admin field).",
+    tags: ["admin"],
+    auth: "staff",
+    body: consoleEditBodySchema,
+    output: consoleChangeSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 404, 409, 422],
+  }),
+  adminConsoleAction: defineEndpoint({
+    method: "post",
+    path: "/admin/console/actions",
+    summary: "Admin console: run an action for one or many targets",
+    description:
+      "Actions: freeze_market, unfreeze_market, remove_logo (moderator); adjust_budget, make_bot, reactivate_club, set_role, delete_profile, play_rounds (admin). A reason is required; each target has its own result. Several targets only for bulk actions.",
+    tags: ["admin"],
+    auth: "staff",
+    body: consoleActionBodySchema,
+    output: consoleActionResultSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 409, 422],
+  }),
+  adminSuspicious: defineEndpoint({
+    method: "get",
+    path: "/admin/console/suspicious",
+    summary: "Admin console: the report of suspicious activity",
+    description:
+      "Soft signals from the game's own data (repeated deals, prices at the cap, young accounts that deal only with each other, the same contact). No IP, no fingerprints, no automatic action.",
+    tags: ["admin"],
+    auth: "staff",
+    query: z.object({}),
+    output: suspiciousListSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 403],
+  }),
+  adminSuspiciousReview: defineEndpoint({
+    method: "post",
+    path: "/admin/console/suspicious/review",
+    summary: "Admin console: mark a finding as reviewed",
+    tags: ["admin"],
+    auth: "staff",
+    body: suspiciousReviewBodySchema,
+    output: suspiciousReviewedSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 403, 422],
   }),
   adminUsersList: defineEndpoint({
     method: "get",
@@ -741,7 +830,7 @@ export const endpoints = {
     body: lineupBodySchema,
     output: lineupSavedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
   }),
   managerSaveTraining: defineEndpoint({
     method: "put",
@@ -754,7 +843,19 @@ export const endpoints = {
     body: trainingBodySchema,
     output: trainingSavedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
+  }),
+  managerConfirmReturn: defineEndpoint({
+    method: "post",
+    path: "/manager/club/return",
+    summary: "Football manager: confirm that I am back (a resting club plays again)",
+    description:
+      "A club that played more than 40% of the season's league matches with a lineup the server picked rests from the end of the season: it plays like a bot, earns nothing and cannot trade, and keeps its place. This brings it back from the next match that is calculated. `returned` is false when the club was not resting.",
+    tags: ["manager"],
+    auth: "user",
+    output: returnConfirmedSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404, 429],
   }),
   managerRequestFriendly: defineEndpoint({
     method: "post",
@@ -766,7 +867,7 @@ export const endpoints = {
     auth: "user",
     output: friendlyCreatedSchema,
     cacheControl: "private, no-store",
-    errors: [401, 404, 409],
+    errors: [401, 404, 409, 429],
   }),
   managerFinance: defineEndpoint({
     method: "get",
@@ -803,7 +904,7 @@ export const endpoints = {
     body: buyBodySchema,
     output: boughtSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 409, 422],
+    errors: [400, 401, 404, 409, 422, 429],
   }),
   managerSetLogo: defineEndpoint({
     method: "put",
@@ -816,6 +917,6 @@ export const endpoints = {
     body: logoBodySchema,
     output: logoSavedSchema,
     cacheControl: "private, no-store",
-    errors: [400, 401, 404, 422],
+    errors: [400, 401, 404, 422, 429],
   }),
 };

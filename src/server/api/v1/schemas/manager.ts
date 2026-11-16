@@ -24,6 +24,9 @@ export const managerClubSchema = z.object({
   secondaryColor: z.string(),
   budget: z.number().int().describe("Game dollars; negative = in debt (no purchases)."),
   logoUrl: z.string().nullable().describe("The club's own logo, if it has one."),
+  dormant: z
+    .boolean()
+    .describe("The club rests (plays like a bot) until its owner confirms the return."),
   createdAt: z.string().describe("ISO 8601, UTC."),
 });
 export type Club = z.infer<typeof managerClubSchema>;
@@ -229,6 +232,10 @@ export const trainingBodySchema = z.object({
 });
 export type TrainingBody = z.infer<typeof trainingBodySchema>;
 export const trainingSavedSchema = z.object({ saved: z.literal(true) });
+
+export const returnConfirmedSchema = z.object({
+  returned: z.boolean().describe("False when the club was not resting."),
+});
 
 export const friendlyCreatedSchema = z.object({ matchId: z.uuid() });
 

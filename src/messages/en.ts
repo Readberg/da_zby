@@ -334,6 +334,13 @@ export const en: MessagesShape<typeof ru> = {
       friendlyBusy: "No club is free on that date.",
       friendlyUnavailable: "Friendlies are played in the preseason only.",
       friendlyGeneric: "Could not set up the match. Please try again.",
+      resultSoon: "The result will appear by 10:15 Moscow time.",
+      dormantTitle: "Your club is on pause: confirm that you are back",
+      dormantText:
+        "The club played more than 40% of last season's matches with an automatic lineup, so it rests: it plays like a bot, with no money, prizes or trading, but keeps its place in the league. Press the button and the club returns from the next match that is calculated.",
+      dormantConfirm: "I am back",
+      dormantSending: "Returning…",
+      dormantGeneric: "Could not bring the club back. Please try again.",
       friendlyBadge: "Friendly",
       retiringTitle: "Will retire",
       retiringText:
@@ -603,6 +610,10 @@ export const en: MessagesShape<typeof ru> = {
             {
               q: "What happens after round 38?",
               a: "The league goes into a preseason of 5 days. Every player is a year older, form, fitness and morale go back to 80, the final table stays on the screen. Real clubs get the prizes for their places. Then a new season starts with a new schedule.",
+            },
+            {
+              q: "What if I stop visiting?",
+              a: 'The club plays with an automatic lineup to the end of the season. If more than 40% of the season\'s matches were played that way, the club is put on pause at the end of the season: it plays like a bot, with no money, prizes or trading, its lots and offers are cancelled, but your place in the league is kept. When you come back you will see an "I am back" button: after it the club plays with your lineup again.',
             },
             {
               q: "When do players retire?",
