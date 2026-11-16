@@ -21,6 +21,8 @@ describe("design tokens guard (DAZBY-17)", () => {
     join("src", "app", "globals.css"),
     join("src", "app", "[locale]", "layout.tsx"),
     join("src", "lib", "og-theme.ts"),
+    // Club colours the user picks from are content, like the flags.
+    join("src", "lib", "manager", "palette.ts"),
   ];
 
   it("has no hard-coded hex colours outside the token file", () => {

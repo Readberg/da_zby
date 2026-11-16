@@ -67,6 +67,14 @@ import {
   chatMessageSchema,
   chatSendBodySchema,
 } from "./schemas/chat";
+import {
+  createClubBodySchema,
+  managerClubSchema,
+  managerCitiesSchema,
+  managerClubViewSchema,
+  playerQuerySchema,
+  playerSchema,
+} from "./schemas/manager";
 import { listMetaSchema, videoListSchema, videosQuerySchema } from "./schemas/videos";
 import {
   fixturesAppliedSchema,
@@ -579,5 +587,54 @@ export const endpoints = {
     output: chatBanSchema,
     cacheControl: "private, no-store",
     errors: [400, 401, 403, 404, 422],
+  }),
+  managerCities: defineEndpoint({
+    method: "get",
+    path: "/manager/cities",
+    summary: "Football manager: cities and colours to make a club from",
+    description:
+      "Signed-in users only. The cities of the country of the club (Belarus for now) and the colour palette.",
+    tags: ["manager"],
+    auth: "user",
+    output: managerCitiesSchema,
+    cacheControl: "private, max-age=300",
+    errors: [401],
+  }),
+  managerClub: defineEndpoint({
+    method: "get",
+    path: "/manager/club",
+    summary: "Football manager: my club and its squad",
+    description:
+      "club is null until the caller has made a club. Players come with the overall rating and the real rating; the hidden potential is never returned.",
+    tags: ["manager"],
+    auth: "user",
+    output: managerClubViewSchema,
+    cacheControl: "private, no-store",
+    errors: [401],
+  }),
+  managerCreateClub: defineEndpoint({
+    method: "post",
+    path: "/manager/club",
+    summary: "Football manager: make my club",
+    description:
+      "One club per user. The server generates the same starting squad for everyone (20 players, 2 GK / 7 DEF / 7 MID / 4 FWD, the same total rating) once; it cannot be generated again. 409 manager.club_exists for a second club, 409 manager.name_taken for a taken name (compared without case).",
+    tags: ["manager"],
+    auth: "user",
+    body: createClubBodySchema,
+    output: managerClubSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 409, 422, 429],
+  }),
+  managerPlayer: defineEndpoint({
+    method: "get",
+    path: "/manager/player",
+    summary: "Football manager: a player of my club with all attributes",
+    description: "A player of someone else's club is 404.",
+    tags: ["manager"],
+    auth: "user",
+    query: playerQuerySchema,
+    output: playerSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404, 422],
   }),
 };

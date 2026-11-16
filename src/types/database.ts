@@ -218,6 +218,187 @@ export type Database = {
           },
         ];
       };
+      mgr_cities: {
+        Row: {
+          country: string;
+          id: number;
+          name: string;
+        };
+        Insert: {
+          country: string;
+          id?: never;
+          name: string;
+        };
+        Update: {
+          country?: string;
+          id?: never;
+          name?: string;
+        };
+        Relationships: [];
+      };
+      mgr_clubs: {
+        Row: {
+          city_id: number;
+          country: string;
+          created_at: string;
+          id: string;
+          name: string;
+          primary_color: string;
+          secondary_color: string;
+          squad_seed: string;
+          user_id: string;
+        };
+        Insert: {
+          city_id: number;
+          country?: string;
+          created_at?: string;
+          id?: string;
+          name: string;
+          primary_color: string;
+          secondary_color: string;
+          squad_seed: string;
+          user_id: string;
+        };
+        Update: {
+          city_id?: number;
+          country?: string;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          primary_color?: string;
+          secondary_color?: string;
+          squad_seed?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_clubs_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_cities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_clubs_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_player_attributes: {
+        Row: {
+          attribute: string;
+          player_id: string;
+          value: number;
+        };
+        Insert: {
+          attribute: string;
+          player_id: string;
+          value: number;
+        };
+        Update: {
+          attribute?: string;
+          player_id?: string;
+          value?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_player_attributes_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_players";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_player_hidden: {
+        Row: {
+          player_id: string;
+          potential: number;
+        };
+        Insert: {
+          player_id: string;
+          potential: number;
+        };
+        Update: {
+          player_id?: string;
+          potential?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_player_hidden_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: true;
+            referencedRelation: "mgr_players";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_players: {
+        Row: {
+          academy_club_id: string | null;
+          age: number;
+          citizenship: string;
+          club_id: string;
+          created_at: string;
+          first_name: string;
+          fitness: number;
+          form: number;
+          id: string;
+          last_name: string;
+          morale: number;
+          ovr: number;
+          position: string;
+        };
+        Insert: {
+          academy_club_id?: string | null;
+          age: number;
+          citizenship: string;
+          club_id: string;
+          created_at?: string;
+          first_name: string;
+          fitness?: number;
+          form?: number;
+          id?: string;
+          last_name: string;
+          morale?: number;
+          ovr: number;
+          position: string;
+        };
+        Update: {
+          academy_club_id?: string | null;
+          age?: number;
+          citizenship?: string;
+          club_id?: string;
+          created_at?: string;
+          first_name?: string;
+          fitness?: number;
+          form?: number;
+          id?: string;
+          last_name?: string;
+          morale?: number;
+          ovr?: number;
+          position?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_players_academy_club_id_fkey";
+            columns: ["academy_club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_players_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       predictions: {
         Row: {
           away_score: number;
@@ -599,6 +780,18 @@ export type Database = {
       chat_is_banned: { Args: { p_user: string }; Returns: boolean };
       close_season: { Args: { p_season_id: string }; Returns: undefined };
       is_admin: { Args: never; Returns: boolean };
+      mgr_create_club: {
+        Args: {
+          p_city: number;
+          p_name: string;
+          p_players: Json;
+          p_primary: string;
+          p_secondary: string;
+          p_seed: string;
+          p_user: string;
+        };
+        Returns: string;
+      };
       purge_chat_messages: { Args: never; Returns: undefined };
       recalculate_season: { Args: { p_season_id: string }; Returns: undefined };
       reopen_season: { Args: { p_season_id: string }; Returns: undefined };
