@@ -83,6 +83,8 @@ import {
   buyBodySchema,
   financeSchema,
   friendlyCreatedSchema,
+  logoBodySchema,
+  logoSavedSchema,
   marketSchema,
   playerQuerySchema,
   trainingBodySchema,
@@ -774,5 +776,18 @@ export const endpoints = {
     output: boughtSchema,
     cacheControl: "private, no-store",
     errors: [400, 401, 404, 409, 422],
+  }),
+  managerSetLogo: defineEndpoint({
+    method: "put",
+    path: "/manager/club/logo",
+    summary: "Football manager: set or remove the logo of my club",
+    description:
+      "The logo is a picture the user uploaded to the avatars bucket (folder of the user; PNG, JPEG or WebP up to 2 MB). path null removes it. Without a logo the club is shown by its two colours.",
+    tags: ["manager"],
+    auth: "user",
+    body: logoBodySchema,
+    output: logoSavedSchema,
+    cacheControl: "private, no-store",
+    errors: [400, 401, 404, 422],
   }),
 };

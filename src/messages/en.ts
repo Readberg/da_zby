@@ -12,6 +12,7 @@ export const en: MessagesShape<typeof ru> = {
   },
   nav: {
     label: "Main navigation",
+    predictionsTabs: "Predictions sections",
     menu: "Menu",
     home: "Home",
     predictions: "Predictions",
@@ -389,9 +390,236 @@ export const en: MessagesShape<typeof ru> = {
         generic: "Could not buy the player. Please try again.",
       },
     },
+    kitLabel: "The kit of the club",
+    faqLink: "How the game works: FAQ",
+    positionPlural: {
+      GK: "Goalkeepers",
+      DEF: "Defenders",
+      MID: "Midfielders",
+      FWD: "Forwards",
+    },
+    playerModal: {
+      open: "Open the player card",
+      close: "Close",
+      loading: "Loading the card…",
+      failed: "The card of this player is not available.",
+    },
+    hints: { label: "Hint", more: "More in the FAQ" },
+    timer: {
+      untilMatch: "Until the match",
+      untilLock: "The lineup can be changed for",
+      days: "d",
+    },
+    logo: {
+      upload: "Upload a logo",
+      replace: "Replace the logo",
+      remove: "Remove the logo",
+      hint: "PNG, JPEG or WebP up to 2 MB. Without a logo the club is shown by its colours.",
+      errors: {
+        type: "A PNG, JPEG or WebP picture is needed.",
+        size: "The file is larger than 2 MB.",
+        empty: "The file is empty.",
+        upload: "Could not upload the logo. Please try again.",
+      },
+    },
+    board: {
+      pitch: "The pitch with the lineup",
+      bench: "Bench",
+      hint: "Drag a player with the mouse or a finger onto a player of the same position. Or tap a player, then the one he replaces.",
+      cancel: "Cancel the choice",
+    },
+    faq: {
+      title: "Game FAQ",
+      lead: "How the game works: rules, numbers and answers to common questions.",
+      nav: "FAQ sections",
+      back: "Back to the game",
+      sections: [
+        {
+          id: "start",
+          title: "Getting started",
+          items: [
+            {
+              q: "What is this game?",
+              a: "A football manager inside the Da Zabey site: you have a fictional club, you choose the lineup, the formation and the training, and the server plays the matches against the clubs of other players (and bots). There are no real clubs or players in the game.",
+            },
+            {
+              q: "How do I make a club?",
+              a: "Sign in and open the Manager section. Enter a name (up to 30 characters: letters, digits and single spaces), choose a city and two colours: the shirt and shorts on the right show the kit at once. One user has one club. There is one country for now: Belarus.",
+            },
+            {
+              q: "Why is everybody on equal terms?",
+              a: "Every club gets 20 players: 2 goalkeepers, 7 defenders, 7 midfielders and 4 forwards. The sum of their overall ratings is the same for all clubs, only the players differ. Ages: 16 players of 18 to 26 and 4 players of 27 to 35.",
+            },
+            {
+              q: "Can the squad be made again?",
+              a: "No. The squad is made once, when the club is created, so that nobody can try again and again until the best one comes up.",
+            },
+            {
+              q: "What is a league?",
+              a: "Clubs play in leagues of 20 teams. When there are not enough real clubs, bots take the places: they play their best lineup and train, but do not trade. A new club takes the place of a bot together with its points and results.",
+            },
+          ],
+        },
+        {
+          id: "squad",
+          title: "Players and ratings",
+          items: [
+            {
+              q: "What is the overall rating?",
+              a: "The average of the attributes of the player weighted for his position: reflexes, catching and rushing out matter more for a goalkeeper, shooting, dribbling and speed for a forward. The scale is 1 to 99. The rating grows with training.",
+            },
+            {
+              q: "What is the real rating?",
+              a: "The overall rating multiplied by the factors of form, fitness and morale. Each factor is from 0.85 (at zero) to 1.00 (at 100). Everybody starts at 80, so the real rating is about 91% of the overall one. It is the one that counts in a match: a tired team plays worse.",
+            },
+            {
+              q: "What is the potential?",
+              a: "The hidden limit of a player's growth. You cannot see it, but training will not lift the overall rating above it. The younger the player, the faster he grows.",
+            },
+            {
+              q: "What is a youth product of the club?",
+              a: "The club where the player was made. It does not change when the player moves to another club. The young players who take the places of retired ones are products of their club.",
+            },
+            {
+              q: "What is the nominal value?",
+              a: "The price of a player: 1000 $ × 1.12 to the power (rating − 60) × a factor of age. The factor: up to 21 ×1.3; 22–26 ×1; 27–29 ×0.8; 30–32 ×0.55; older ×0.3. A player of 60 at 24 costs 1,000 $, of 70 about 3,100 $, of 80 about 9,650 $.",
+            },
+            {
+              q: "How do I open the card of a player?",
+              a: "Click the name of a player in any section of the manager: the card opens in a window. It shows the ratings, form, fitness, morale, all the attributes and the nominal value.",
+            },
+          ],
+        },
+        {
+          id: "matches",
+          title: "Matches, lineup and table",
+          items: [
+            {
+              q: "When are the matches played?",
+              a: "One round every day at 10:00 Moscow time. A season has 38 rounds: two games with every opponent, at home and away.",
+            },
+            {
+              q: "Until when can I change the lineup?",
+              a: "Until 5 minutes before the match. After that the lineup and the training are closed until the match is over. The club page and the lineup page show timers: to the match and to the end of accepting lineups.",
+            },
+            {
+              q: "What if I do not choose a lineup?",
+              a: "The best lineup plays: the strongest players of each position, with no penalty. If a player is injured, the best fit player of the same position takes his place.",
+            },
+            {
+              q: "How do I choose the formation?",
+              a: "On the Lineup page choose the formation (4-4-2, 4-3-3, 3-5-2, 4-5-1, 5-3-2) and the tactics (balanced, attack, defence). Drag the players on the pitch with the mouse or a finger, or tap a player and then the one he replaces. A player plays only on his own position: a goalkeeper in goal, a defender in defence.",
+            },
+            {
+              q: "How is a match played?",
+              a: "The server counts attacks and shots from the real ratings of the eleven on the pitch. There is a share of chance and a small advantage for the hosts. Attack raises the chances to score and to concede, defence does the opposite. The chronicle with goals and minutes is on the page of the match.",
+            },
+            {
+              q: "How is the table counted?",
+              a: "A win is 3 points, a draw 1. With equal points the goal difference decides, then the goals scored, then the name of the club. Friendlies do not count for the table.",
+            },
+          ],
+        },
+        {
+          id: "condition",
+          title: "Form, fitness, morale, injuries",
+          items: [
+            {
+              q: "What changes after a match?",
+              a: "A player who played: form +2, fitness −6. One who did not play: form −1, fitness +5 (rest). Morale of those who played: win +2, draw 0, loss −1. A player who does not play loses 1 morale every 3 rounds. All values are from 0 to 100. So without rotation the team gets tired.",
+            },
+            {
+              q: "How do injuries happen?",
+              a: "Every player on the pitch is injured with a chance of about 1.2% a match. It lasts 1 to 21 days, mostly short. An injured player neither plays nor trains. An injury does not change the score.",
+            },
+            {
+              q: "What do the columns F, Fit, Mor show?",
+              a: "Form, fitness and morale of the player from 0 to 100. Values below 40 are red, from 70 green.",
+            },
+          ],
+        },
+        {
+          id: "training",
+          title: "Training",
+          items: [
+            {
+              q: "How do I set up the training?",
+              a: "On the Training page first choose the main training of each position: it applies to the whole line. Then, if you want, choose another attribute for a single player. The recommended training is marked. Save the changes.",
+            },
+            {
+              q: "How do players grow?",
+              a: "Training happens every round together with the match. The chance to grow by 1 depends on age (fastest up to 21, hardly at all after 30), on the room left to the potential and on the attribute itself: the higher it is, the slower it grows. The rating never goes above the potential.",
+            },
+            {
+              q: "What does training cost?",
+              a: "Training costs 3 fitness and needs fitness of at least 30. Injured players do not train. A player without a plan rests. In the preseason training works at half strength.",
+            },
+          ],
+        },
+        {
+          id: "money",
+          title: "Money",
+          items: [
+            {
+              q: "Where does the money come from?",
+              a: "Every round: +20 $ base payment, +120 $ tickets for a home match, +60 $ for a win and +20 $ for a draw. At the end of the season a prize for the place in the table: 4000 $ for the first, 200 $ for the twentieth (200 $ less for every place). Only real clubs get prizes.",
+            },
+            {
+              q: "What is the money spent on?",
+              a: "Wages every round: 0.5% of the sum of the nominal values of the players (the starting squad costs about 130 $). Buying players: the price leaves the game and goes to nobody.",
+            },
+            {
+              q: "What if I fall into debt?",
+              a: "With a budget below zero purchases are closed and wages keep being paid. You get out of debt with prizes and, when sales come, by selling players.",
+            },
+            {
+              q: "Where can I see the money?",
+              a: "On the Finances page: the budget, the worth of the squad, the wages of a round and the ledger with the balance after every operation.",
+            },
+          ],
+        },
+        {
+          id: "market",
+          title: "Market",
+          items: [
+            {
+              q: "What is the pool of free players?",
+              a: "Once a month 30 new free players appear in every league, with a random position, rating and age. The unsold players of last month go.",
+            },
+            {
+              q: "How do I buy a player?",
+              a: "On the Market page click Buy. The price is the nominal value of the player. You can buy if at least 10 matches have been played, the squad has fewer than 23 players, and the budget is not below the price and not negative.",
+            },
+          ],
+        },
+        {
+          id: "season",
+          title: "End of the season, retirement, preseason",
+          items: [
+            {
+              q: "What happens after round 38?",
+              a: "The league goes into a preseason of 5 days. Every player is a year older, form, fitness and morale go back to 80, the final table stays on the screen. Real clubs get the prizes for their places. Then a new season starts with a new schedule.",
+            },
+            {
+              q: "When do players retire?",
+              a: "A player over 33 gets a decision: at 34 the chance to retire is 50%, every next year 5% higher. The decision is for the next season: the player ends his career at its end. The club page warns you in advance.",
+            },
+            {
+              q: "Who replaces the retired?",
+              a: "A young product of the club of the same position (17–19 years old, a low rating, a high potential).",
+            },
+            {
+              q: "What is a friendly?",
+              a: "In the preseason you can play a match against a random free club of the league at the next 10:00 Moscow time. One a day at most for each club. It does not count for the table, and form, fitness and morale change half as much.",
+            },
+          ],
+        },
+      ],
+    },
     scheduleNote:
       "A season is 38 rounds, one a day at 10:00 Moscow time. You can change the lineup until the round starts; if you do not choose, the best lineup plays.",
     hub: {
+      faq: "FAQ",
       finance: "Finances",
       market: "Market",
       training: "Training",
@@ -456,6 +684,10 @@ export const en: MessagesShape<typeof ru> = {
       },
     },
     trainingPage: {
+      primary: "Main training of the position",
+      recommended: "recommended",
+      individual: "Training of the player",
+      individualMark: "different from the position",
       title: "Training",
       lead: "Choose what each player trains. Training happens every round together with the match.",
       rules:
@@ -473,6 +705,7 @@ export const en: MessagesShape<typeof ru> = {
       },
     },
     lineupPage: {
+      lockIn: "Lineups are accepted for another",
       injured: "injured until {date}",
       title: "Lineup",
       lead: "Choose the formation and eleven players, each on their own position.",
@@ -534,7 +767,16 @@ export const en: MessagesShape<typeof ru> = {
       "The real rating is the overall one adjusted for form, fitness and morale; it is the one that counts in a match.",
     academy: "Youth product of",
     citizenship: "Citizenship",
-    condition: { title: "Condition", form: "Form", fitness: "Fitness", morale: "Morale" },
+    condition: {
+      title: "Condition",
+      form: "Form",
+      fitness: "Fitness",
+      morale: "Morale",
+      overallLong: "Overall rating",
+      formShort: "F",
+      fitnessShort: "Fit",
+      moraleShort: "Mor",
+    },
     attributesTitle: "Attributes",
     attributes: {
       dribbling: "Dribbling",

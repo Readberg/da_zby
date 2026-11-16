@@ -1,7 +1,7 @@
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getMessages } from "@/i18n/server";
 import type { LeagueView } from "@/server/api/v1/schemas/manager";
-import { ClubColors } from "./club-colors";
+import { ClubBadge } from "./club-badge";
 
 /** The 20 clubs of the league, my club highlighted, bots marked. */
 export function LeagueTable({ view }: { view: LeagueView }) {
@@ -36,7 +36,12 @@ export function LeagueTable({ view }: { view: LeagueView }) {
               <TD>{index + 1}</TD>
               <TD>
                 <span className="flex items-center gap-2">
-                  <ClubColors primary={row.primaryColor} secondary={row.secondaryColor} size="sm" />
+                  <ClubBadge
+                    logoUrl={row.logoUrl}
+                    primary={row.primaryColor}
+                    secondary={row.secondaryColor}
+                    name={row.name}
+                  />
                   <span className="truncate">{row.name}</span>
                   {row.isMine && <span className="text-xs text-accent">({t.you})</span>}
                   {row.isBot && <span className="text-xs text-muted">({t.bot})</span>}

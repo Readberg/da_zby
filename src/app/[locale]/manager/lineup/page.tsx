@@ -34,7 +34,6 @@ async function LineupContent() {
       injuredNotes={notes}
       // A new lineup of the same club after a save must not keep the old selection.
       key={`${lineup.formation}-${lineup.mentality}-${lineup.playerIds.join(",")}-${lineup.saved}`}
-      t={t}
       players={view.players}
       lineup={lineup}
       until={
@@ -50,7 +49,7 @@ export default async function ManagerLineupPage(props: PageProps<"/[locale]/mana
   await initLocale(props.params);
   const t = getMessages().manager.lineupPage;
   return (
-    <ManagerShell title={t.title} lead={t.lead}>
+    <ManagerShell title={t.title} lead={t.lead} faq="matches">
       <Suspense fallback={<Skeleton className="h-96" />}>
         <LineupContent />
       </Suspense>

@@ -9,8 +9,16 @@ test.describe("league table (guest, DAZBY-126)", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "Турнирная таблица чемпионата" }),
     ).toBeVisible();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Разделы прогнозов" })
+        .getByRole("link", { name: "Таблица" }),
+    ).toHaveAttribute("aria-current", "page");
     await openMenu(page);
-    await expect(page.getByRole("banner").getByRole("link", { name: "Таблица" })).toBeVisible();
+    await expect(page.getByRole("banner").getByRole("link", { name: "Прогнозы" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     // Either the table (a season exists) or an empty state: both are valid content.
     await expect(
       page

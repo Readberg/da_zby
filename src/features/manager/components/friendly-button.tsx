@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ApiClientError, api } from "@/lib/api-client";
-import type { Dictionary } from "@/i18n/dictionaries";
+import { HelpHint } from "./help-hint";
+import { useManager } from "./manager-provider";
 
 /** Asks for a friendly match with a random club of the league (preseason only). */
-export function FriendlyButton({ t }: { t: Dictionary["manager"] }) {
+export function FriendlyButton() {
+  const { t } = useManager();
   const router = useRouter();
   const lines = t.season;
   const [busy, setBusy] = useState(false);
@@ -38,21 +40,19 @@ export function FriendlyButton({ t }: { t: Dictionary["manager"] }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className="max-w-prose text-sm text-muted">{lines.friendlyHint}</p>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={ask} loading={busy}>
-          {busy ? lines.friendlySending : lines.friendlyAsk}
-        </Button>
-        {message && (
-          <p
-            role={message.failed ? "alert" : "status"}
-            className={message.failed ? "text-sm text-danger" : "text-sm"}
-          >
-            {message.text}
-          </p>
-        )}
-      </div>
+    <div className="flex flex-wrap items-center gap-3">
+      <Button onClick={ask} loading={busy}>
+        {busy ? lines.friendlySending : lines.friendlyAsk}
+      </Button>
+      <HelpHint faq="season">{lines.friendlyHint}</HelpHint>
+      {message && (
+        <p
+          role={message.failed ? "alert" : "status"}
+          className={message.failed ? "text-sm text-danger" : "text-sm"}
+        >
+          {message.text}
+        </p>
+      )}
     </div>
   );
 }

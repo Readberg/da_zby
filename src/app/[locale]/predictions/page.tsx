@@ -16,6 +16,7 @@ import { composePredictionsPage, getMyPredictions } from "@/server/services/pred
 import { getPredictionsPublicCached } from "@/server/services/predictions.cached";
 import { getUtcOffsetMinutes } from "@/server/services/profiles";
 import { getMessages, initLocale, messagesFor, getLocale } from "@/i18n/server";
+import { PredictionsTabs } from "@/features/predictions/components/predictions-tabs";
 
 export async function generateMetadata({
   params,
@@ -138,6 +139,7 @@ export default async function PredictionsPage(props: PageProps<"/[locale]/predic
   return (
     <Container className="flex flex-col gap-6 py-8 sm:py-12 lg:py-20">
       <h1 className="text-h3 sm:text-h1">{t.predictions.title}</h1>
+      <PredictionsTabs />
       <Suspense fallback={<Skeleton className="h-96" />}>
         <PredictionsContent searchParams={props.searchParams} />
       </Suspense>

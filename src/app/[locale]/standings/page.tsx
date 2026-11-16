@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/local-time";
 import { firstParam } from "@/lib/search-params";
 import { getStandingsPageCached } from "@/server/services/standings.cached";
 import { getLocale, getMessages, initLocale, messagesFor } from "@/i18n/server";
+import { PredictionsTabs } from "@/features/predictions/components/predictions-tabs";
 
 export async function generateMetadata({
   params,
@@ -73,6 +74,7 @@ export default async function StandingsPage(props: PageProps<"/[locale]/standing
   return (
     <Container className="flex flex-col gap-6 py-8 sm:py-12 lg:py-20">
       <h1 className="text-h3 sm:text-h1">{t.standings.heading}</h1>
+      <PredictionsTabs />
       <p className="max-w-2xl text-muted">{t.standings.lead}</p>
       <Suspense fallback={<Skeleton className="h-96" />}>
         <StandingsContent searchParams={props.searchParams} />
