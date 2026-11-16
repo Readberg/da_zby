@@ -5,6 +5,15 @@
 
 ## [Не выпущено]
 
+### Добавлено
+- Футбольный менеджер, этап 2: лига из 20 клубов (боты занимают свободные места), расписание на 38 туров, матч каждый день в 10:00 по Москве, выбор расстановки и состава (автосостав без штрафа), таблица лиги, список матчей и хроника матча; пункт «Менеджер» в меню (D-130, DAZBY-144). Туры играет планировщик `manager-rounds`, при его отсутствии — первый заход в раздел.
+
+### Миграции БД
+- `20261117000000_manager_stage2`: `mgr_leagues`, `mgr_matches`, `mgr_lineups`, поля `is_bot` и `league_id` у `mgr_clubs` (обратно-совместимо), функции `mgr_join_league`, `mgr_open_league`, `mgr_save_lineup`, `mgr_record_match`.
+
+### API
+- `GET /manager/league`, `GET /manager/matches`, `GET /manager/match`, `GET`/`PUT /manager/lineup`; `GET /manager/club` дополнен `leagueNumber` и `nextMatch`; `POST /api/cron/manager` (планировщик).
+
 ## [0.34.0] — 2026-11-16
 
 ### Добавлено

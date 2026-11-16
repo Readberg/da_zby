@@ -69,7 +69,9 @@ beforeEach(() => {
   listCities
     .mockReset()
     .mockResolvedValue({ cities: [{ id: 1, name: "Минск" }], colors: ["#d32f2f"] });
-  getMyClub.mockReset().mockResolvedValue({ club: null, players: [] });
+  getMyClub
+    .mockReset()
+    .mockResolvedValue({ club: null, players: [], leagueNumber: null, nextMatch: null });
   getMyPlayer.mockReset();
   createClub.mockReset().mockResolvedValue(myClub);
 });
@@ -98,7 +100,12 @@ describe("GET /api/v1/manager/club", () => {
     const response = await club.GET(apiRequest("/api/v1/manager/club"));
     expectApiHeaders(response);
     const { data } = await response.json();
-    expect(managerClubViewSchema.parse(data)).toEqual({ club: null, players: [] });
+    expect(managerClubViewSchema.parse(data)).toEqual({
+      club: null,
+      players: [],
+      leagueNumber: null,
+      nextMatch: null,
+    });
   });
 });
 

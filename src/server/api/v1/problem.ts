@@ -25,6 +25,7 @@ export const ERROR_CODES = {
   chatNoNickname: "chat.no_nickname",
   managerClubExists: "manager.club_exists",
   managerNameTaken: "manager.name_taken",
+  managerLineupLocked: "manager.lineup_locked",
   degraded: "system.degraded",
   fixturesUnavailable: "fixtures.unavailable",
 } as const;

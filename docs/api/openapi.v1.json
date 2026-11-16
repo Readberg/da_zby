@@ -7608,11 +7608,148 @@
                             ],
                             "additionalProperties": false
                           }
+                        },
+                        "leagueNumber": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Null while the club waits for a league."
+                        },
+                        "nextMatch": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                },
+                                "round": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991,
+                                  "description": "1–38."
+                                },
+                                "kickoffAt": {
+                                  "type": "string",
+                                  "description": "ISO 8601, UTC. Matches are played at 10:00 Moscow time."
+                                },
+                                "status": {
+                                  "type": "string",
+                                  "enum": [
+                                    "scheduled",
+                                    "finished"
+                                  ]
+                                },
+                                "home": {
+                                  "type": "object",
+                                  "properties": {
+                                    "clubId": {
+                                      "type": "string",
+                                      "format": "uuid",
+                                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "primaryColor": {
+                                      "type": "string"
+                                    },
+                                    "secondaryColor": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "clubId",
+                                    "name",
+                                    "primaryColor",
+                                    "secondaryColor"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "away": {
+                                  "type": "object",
+                                  "properties": {
+                                    "clubId": {
+                                      "type": "string",
+                                      "format": "uuid",
+                                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "primaryColor": {
+                                      "type": "string"
+                                    },
+                                    "secondaryColor": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "clubId",
+                                    "name",
+                                    "primaryColor",
+                                    "secondaryColor"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "homeGoals": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "awayGoals": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "round",
+                                "kickoffAt",
+                                "status",
+                                "home",
+                                "away",
+                                "homeGoals",
+                                "awayGoals"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "The next match of the club, if any is left."
                         }
                       },
                       "required": [
                         "club",
-                        "players"
+                        "players",
+                        "leagueNumber",
+                        "nextMatch"
                       ],
                       "additionalProperties": false
                     },
@@ -8040,6 +8177,1061 @@
           },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/league": {
+      "get": {
+        "operationId": "managerLeague",
+        "summary": "Football manager: the table of my league",
+        "description": "league is null while the club waits for a league. The table counts finished matches only: 3 points for a win, 1 for a draw; ties are broken by goal difference, goals scored, then name.",
+        "tags": [
+          "manager"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "league": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                },
+                                "number": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "season": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "firstKickoffAt": {
+                                  "type": "string"
+                                },
+                                "roundsPlayed": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991,
+                                  "description": "Rounds with every match finished."
+                                },
+                                "rounds": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "number",
+                                "season",
+                                "firstKickoffAt",
+                                "roundsPlayed",
+                                "rounds"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Null while the club has no league yet."
+                        },
+                        "table": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "clubId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "primaryColor": {
+                                "type": "string"
+                              },
+                              "secondaryColor": {
+                                "type": "string"
+                              },
+                              "isBot": {
+                                "type": "boolean"
+                              },
+                              "isMine": {
+                                "type": "boolean"
+                              },
+                              "played": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "won": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "drawn": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "lost": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "goalsFor": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "goalsAgainst": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "goalDifference": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "points": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "clubId",
+                              "name",
+                              "primaryColor",
+                              "secondaryColor",
+                              "isBot",
+                              "isMine",
+                              "played",
+                              "won",
+                              "drawn",
+                              "lost",
+                              "goalsFor",
+                              "goalsAgainst",
+                              "goalDifference",
+                              "points"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "league",
+                        "table"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/matches": {
+      "get": {
+        "operationId": "managerMatches",
+        "summary": "Football manager: the matches of my club",
+        "description": "All 38 rounds of the season by round. A round is played every day at 10:00 Moscow time (07:00 UTC).",
+        "tags": [
+          "manager"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "matches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "round": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991,
+                                "description": "1–38."
+                              },
+                              "kickoffAt": {
+                                "type": "string",
+                                "description": "ISO 8601, UTC. Matches are played at 10:00 Moscow time."
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "scheduled",
+                                  "finished"
+                                ]
+                              },
+                              "home": {
+                                "type": "object",
+                                "properties": {
+                                  "clubId": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "primaryColor": {
+                                    "type": "string"
+                                  },
+                                  "secondaryColor": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "clubId",
+                                  "name",
+                                  "primaryColor",
+                                  "secondaryColor"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "away": {
+                                "type": "object",
+                                "properties": {
+                                  "clubId": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "primaryColor": {
+                                    "type": "string"
+                                  },
+                                  "secondaryColor": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "clubId",
+                                  "name",
+                                  "primaryColor",
+                                  "secondaryColor"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "homeGoals": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "awayGoals": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "round",
+                              "kickoffAt",
+                              "status",
+                              "home",
+                              "away",
+                              "homeGoals",
+                              "awayGoals"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "The matches of my club, by round."
+                        }
+                      },
+                      "required": [
+                        "matches"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/match": {
+      "get": {
+        "operationId": "managerMatch",
+        "summary": "Football manager: one match with its chronicle",
+        "description": "A match of my league. The chronicle and both lineups are empty until the match is played. A match of another league is 404.",
+        "tags": [
+          "manager"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "round": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "1–38."
+                        },
+                        "kickoffAt": {
+                          "type": "string",
+                          "description": "ISO 8601, UTC. Matches are played at 10:00 Moscow time."
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "scheduled",
+                            "finished"
+                          ]
+                        },
+                        "home": {
+                          "type": "object",
+                          "properties": {
+                            "clubId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "primaryColor": {
+                              "type": "string"
+                            },
+                            "secondaryColor": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "clubId",
+                            "name",
+                            "primaryColor",
+                            "secondaryColor"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "away": {
+                          "type": "object",
+                          "properties": {
+                            "clubId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "primaryColor": {
+                              "type": "string"
+                            },
+                            "secondaryColor": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "clubId",
+                            "name",
+                            "primaryColor",
+                            "secondaryColor"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "homeGoals": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "awayGoals": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "events": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "m": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991,
+                                "description": "Minute."
+                              },
+                              "t": {
+                                "type": "string",
+                                "enum": [
+                                  "kickoff",
+                                  "goal",
+                                  "save",
+                                  "miss",
+                                  "half_time",
+                                  "full_time"
+                                ]
+                              },
+                              "s": {
+                                "type": "string",
+                                "enum": [
+                                  "home",
+                                  "away"
+                                ]
+                              },
+                              "p": {
+                                "description": "Surname of the player.",
+                                "type": "string"
+                              },
+                              "a": {
+                                "description": "Surname of the player who gave the pass.",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "m",
+                              "t"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "The chronicle; empty before the match."
+                        },
+                        "homeLineup": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "position": {
+                                    "type": "string",
+                                    "enum": [
+                                      "GK",
+                                      "DEF",
+                                      "MID",
+                                      "FWD"
+                                    ]
+                                  },
+                                  "real": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "position",
+                                  "real"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "awayLineup": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "position": {
+                                    "type": "string",
+                                    "enum": [
+                                      "GK",
+                                      "DEF",
+                                      "MID",
+                                      "FWD"
+                                    ]
+                                  },
+                                  "real": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "position",
+                                  "real"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "round",
+                        "kickoffAt",
+                        "status",
+                        "home",
+                        "away",
+                        "homeGoals",
+                        "awayGoals",
+                        "events",
+                        "homeLineup",
+                        "awayLineup"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manager/lineup": {
+      "get": {
+        "operationId": "managerLineup",
+        "summary": "Football manager: the lineup my club plays with",
+        "description": "saved is false when the club has not chosen (or the saved lineup no longer fits the squad): the best lineup is used, without any penalty. locked is true once a round of the club is due.",
+        "tags": [
+          "manager"
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "formation": {
+                          "type": "string",
+                          "enum": [
+                            "4-4-2",
+                            "4-3-3",
+                            "3-5-2",
+                            "4-5-1",
+                            "5-3-2"
+                          ]
+                        },
+                        "mentality": {
+                          "type": "string",
+                          "enum": [
+                            "balanced",
+                            "attack",
+                            "defense"
+                          ]
+                        },
+                        "playerIds": {
+                          "minItems": 11,
+                          "maxItems": 11,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          }
+                        },
+                        "saved": {
+                          "type": "boolean",
+                          "description": "False when the club has not chosen: the best lineup is used."
+                        },
+                        "locked": {
+                          "type": "boolean",
+                          "description": "True once a round of the club is due: nothing can change."
+                        },
+                        "nextKickoffAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "formation",
+                        "mentality",
+                        "playerIds",
+                        "saved",
+                        "locked",
+                        "nextKickoffAt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "managerSaveLineup",
+        "summary": "Football manager: choose the lineup",
+        "description": "11 players of my club: one goalkeeper and the defenders, midfielders and forwards the formation needs. 409 manager.lineup_locked after the kickoff of a due round.",
+        "tags": [
+          "manager"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "formation": {
+                    "type": "string",
+                    "enum": [
+                      "4-4-2",
+                      "4-3-3",
+                      "3-5-2",
+                      "4-5-1",
+                      "5-3-2"
+                    ]
+                  },
+                  "mentality": {
+                    "type": "string",
+                    "enum": [
+                      "balanced",
+                      "attack",
+                      "defense"
+                    ]
+                  },
+                  "playerIds": {
+                    "minItems": 11,
+                    "maxItems": 11,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  }
+                },
+                "required": [
+                  "formation",
+                  "mentality",
+                  "playerIds"
+                ]
+              }
+            }
+          }
+        },
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "saved": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "saved"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/problem+json": {
                 "schema": {
