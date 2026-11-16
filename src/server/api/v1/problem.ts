@@ -23,6 +23,8 @@ export const ERROR_CODES = {
   predictionsClosed: "predictions.closed",
   chatBanned: "chat.banned",
   chatNoNickname: "chat.no_nickname",
+  managerClubExists: "manager.club_exists",
+  managerNameTaken: "manager.name_taken",
   degraded: "system.degraded",
   fixturesUnavailable: "fixtures.unavailable",
 } as const;
