@@ -137,11 +137,14 @@ describe("manager: a rival of the same league", () => {
     expect(own.error?.code).toBe(PERMISSION_DENIED);
   });
 
-  // KNOWN HOLE (DAZBY-154): mgr_clubs is readable as whole rows for the league, squad_seed included;
-  // the seed regenerates the first squad with its hidden potentials. Flip to `it` once fixed.
-  it.fails("does not expose squad_seed of other clubs", async () => {
-    const { data } = await a.from("mgr_clubs").select("squad_seed").eq("id", world.clubs.b);
-    expect(data).toEqual([]);
+  // DAZBY-154: the seed regenerates a squad with its hidden potentials; it lives in a closed table.
+  it("does not expose squad_seed of any club", async () => {
+    const { data } = await a.from("mgr_clubs").select("squad_seed");
+    expect(data!.length).toBeGreaterThan(1);
+    expect(data!.every((row) => row.squad_seed === null)).toBe(true);
+    expect((await a.from("mgr_club_seeds").select("*")).error?.code).toBe(PERMISSION_DENIED);
+    const seeds = await admin.from("mgr_club_seeds").select("club_id");
+    expect(seeds.data!.length).toBeGreaterThanOrEqual(20);
   });
 
   it("an outsider without a club sees nothing of the manager league", async () => {
