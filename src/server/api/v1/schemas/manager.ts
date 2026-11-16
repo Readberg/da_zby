@@ -111,6 +111,8 @@ export const matchEventSchema = z.object({
   s: z.enum(["home", "away"]).optional(),
   p: z.string().optional().describe("Surname of the player."),
   a: z.string().optional().describe("Surname of the player who gave the pass."),
+  pid: z.string().optional().describe("Id of the player `p` (matches played after DAZBY-153)."),
+  aid: z.string().optional().describe("Id of the player `a`."),
 });
 export type MatchEventData = z.infer<typeof matchEventSchema>;
 

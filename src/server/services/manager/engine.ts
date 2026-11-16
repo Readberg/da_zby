@@ -15,6 +15,9 @@ export type MatchEvent = {
   s?: "home" | "away";
   p?: string;
   a?: string;
+  /** Ids of the same players: the statistics count by them (the surnames are for the text). */
+  pid?: string;
+  aid?: string;
 };
 
 export type MatchResult = {
@@ -135,7 +138,8 @@ export function simulateMatch(seed: string, home: Side, away: Side): MatchResult
           t: "goal",
           s: side,
           p: surname(scorer),
-          ...(assister ? { a: surname(assister) } : {}),
+          pid: scorer.id,
+          ...(assister ? { a: surname(assister), aid: assister.id } : {}),
         });
         if (side === "home") homeGoals += 1;
         else awayGoals += 1;
@@ -145,7 +149,7 @@ export function simulateMatch(seed: string, home: Side, away: Side): MatchResult
           m: minute,
           t: random() < 0.55 ? "save" : "miss",
           s: side,
-          ...(shooter ? { p: surname(shooter) } : {}),
+          ...(shooter ? { p: surname(shooter), pid: shooter.id } : {}),
         });
       }
     }
@@ -169,7 +173,7 @@ export function simulateMatch(seed: string, home: Side, away: Side): MatchResult
         }
       }
       injuries.push({ playerId: player.id, side, days });
-      events.push({ m: 1 + Math.floor(random() * 90), t: "injury", s: side, p: surname(player) });
+      events.push({ m: 1 + Math.floor(random() * 90), t: "injury", s: side, p: surname(player), pid: player.id });
     }
   };
   hurt("home", home);
