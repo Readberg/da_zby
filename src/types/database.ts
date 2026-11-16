@@ -236,6 +236,21 @@ export type Database = {
         };
         Relationships: [];
       };
+      mgr_club_seeds: {
+        Row: {
+          club_id: string;
+          squad_seed: string;
+        };
+        Insert: {
+          club_id: string;
+          squad_seed: string;
+        };
+        Update: {
+          club_id?: string;
+          squad_seed?: string;
+        };
+        Relationships: [];
+      };
       mgr_clubs: {
         Row: {
           budget: number;
@@ -251,7 +266,7 @@ export type Database = {
           name: string;
           primary_color: string;
           secondary_color: string;
-          squad_seed: string;
+          squad_seed: string | null;
           user_id: string | null;
         };
         Insert: {
@@ -268,7 +283,7 @@ export type Database = {
           name: string;
           primary_color: string;
           secondary_color: string;
-          squad_seed: string;
+          squad_seed?: string | null;
           user_id?: string | null;
         };
         Update: {
@@ -285,7 +300,7 @@ export type Database = {
           name?: string;
           primary_color?: string;
           secondary_color?: string;
-          squad_seed?: string;
+          squad_seed?: string | null;
           user_id?: string | null;
         };
         Relationships: [

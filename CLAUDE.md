@@ -53,6 +53,7 @@ Next.js (App Router, последняя стабильная) · TypeScript `str
 ```
 pnpm dev | build | start
 pnpm lint | typecheck | test | test:e2e
+pnpm test:db        # тесты на настоящем локальном Supabase (Docker + CLI), D-141
 pnpm db:push        # supabase db push (dev)
 pnpm db:types       # генерация src/types/database.ts
 pnpm api:openapi    # перегенерация docs/api/openapi.v1.json
