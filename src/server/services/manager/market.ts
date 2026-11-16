@@ -32,7 +32,7 @@ async function myClub(supabase: Db, userId: string) {
 export async function getFinance(supabase: Db, userId: string): Promise<Finance> {
   const club = await myClub(supabase, userId);
   const [players, ledger] = await Promise.all([
-    supabase.from("mgr_players").select("ovr, age").eq("club_id", club.id),
+    supabase.from("mgr_players").select("ovr, age, wage").eq("club_id", club.id),
     supabase
       .from("mgr_transactions")
       .select("id, amount, reason, balance_after, created_at")

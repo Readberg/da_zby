@@ -1,4 +1,5 @@
 /** English interface texts (D-088); the shape is checked against the Russian dictionary. */
+import { managerMarketEn } from "./manager-market.en";
 import { ru } from "./ru";
 import type { MessagesShape } from "./types";
 
@@ -315,6 +316,7 @@ export const en: MessagesShape<typeof ru> = {
       "A win is 3 points, a draw 1. Places are split by points, goal difference and goals scored.",
   },
   manager: {
+    ...managerMarketEn,
     injuredUntil: "Injured until {date}",
     trainsLabel: "Trains",
     restLabel: "Rest",
@@ -362,6 +364,8 @@ export const en: MessagesShape<typeof ru> = {
         purchase: "Player bought",
         sale: "Player sold",
         tax: "Tax on the sale",
+        trade: "Money on top in an exchange",
+        penalty: "Contract penalty",
       },
       empty: "No operations yet. The first money comes after the first round.",
     },

@@ -233,7 +233,18 @@ export const friendlyCreatedSchema = z.object({ matchId: z.uuid() });
 export const transactionSchema = z.object({
   id: z.number().int(),
   amount: z.number().int(),
-  reason: z.enum(["base", "tickets", "premium", "wages", "prize", "purchase", "sale", "tax"]),
+  reason: z.enum([
+    "base",
+    "tickets",
+    "premium",
+    "wages",
+    "prize",
+    "purchase",
+    "sale",
+    "tax",
+    "trade",
+    "penalty",
+  ]),
   balanceAfter: z.number().int(),
   createdAt: z.string(),
 });

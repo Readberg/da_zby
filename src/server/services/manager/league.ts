@@ -596,7 +596,7 @@ export async function playDueMatches(admin: Db, now: Date = new Date()): Promise
       return roundMoney({
         home: side === "home",
         outcome: outcomeOf(own, other),
-        squad: rows[side].map((row) => ({ ovr: row.ovr, age: row.age })),
+        squad: rows[side].map((row) => ({ ovr: row.ovr, age: row.age, wage: row.wage })),
       }).map((entry) => ({ club_id: clubId, reason: entry.reason, amount: entry.amount }));
     });
 

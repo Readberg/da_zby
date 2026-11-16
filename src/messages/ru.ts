@@ -1,3 +1,4 @@
+import { managerMarketRu } from "./manager-market.ru";
 /** All interface texts. Components never hard-code user-facing strings. */
 export const ru = {
   site: {
@@ -523,6 +524,7 @@ export const ru = {
     rules: "Победа — 3 очка, ничья — 1. Места делятся по очкам, разнице мячей и забитым мячам.",
   },
   manager: {
+    ...managerMarketRu,
     injuredUntil: "Травма до {date}",
     trainsLabel: "Тренируется",
     restLabel: "Отдых",
@@ -570,6 +572,8 @@ export const ru = {
         purchase: "Покупка игрока",
         sale: "Продажа игрока",
         tax: "Налог с продажи",
+        trade: "Доплата при обмене",
+        penalty: "Неустойка за контракт",
       },
       empty: "Операций пока нет. Первые деньги придут после первого тура.",
     },
