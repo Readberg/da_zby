@@ -5,12 +5,12 @@ import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminNav } from "@/features/admin/components/admin-nav";
 import { ru } from "@/messages/ru";
-import { requireAdmin } from "@/server/services/current-user";
+import { requireStaff } from "@/server/services/current-user";
 
 export const metadata: Metadata = { title: ru.admin.title, robots: { index: false } };
 
 async function AdminGate({ children }: { children: ReactNode }) {
-  const admin = await requireAdmin("/admin");
+  const admin = await requireStaff("/admin");
   if (!admin) {
     return (
       <Container className="flex flex-col gap-3 py-10 sm:py-16">
@@ -33,7 +33,7 @@ async function AdminGate({ children }: { children: ReactNode }) {
           {ru.admin.title}
         </Link>
         <Suspense fallback={<div className="h-11" aria-hidden="true" />}>
-          <AdminNav />
+          <AdminNav role={admin.role} />
         </Suspense>
       </header>
       {children}

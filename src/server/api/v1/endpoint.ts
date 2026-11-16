@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-export type AuthLevel = "public" | "user" | "admin";
+export type AuthLevel = "public" | "user" | "staff" | "admin";
 
 /**
  * Declarative description of one API v1 endpoint. The same object drives request handling
