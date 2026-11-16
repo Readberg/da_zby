@@ -41,6 +41,8 @@ const myClub = {
   budget: 10000,
   logoUrl: null,
   dormant: false,
+  elo: 1000,
+  eloPeak: 1000,
   createdAt: "2026-11-16T10:00:00.000Z",
 };
 

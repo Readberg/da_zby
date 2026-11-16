@@ -9,6 +9,7 @@ import {
   getMatch,
   listMyMatches,
 } from "@/server/services/manager/league";
+import { getRating } from "@/server/services/manager/rating";
 import { getFinance, getMarket, runMarketPools } from "@/server/services/manager/market";
 import { serviceClient, signedInClient, type Db } from "./helpers";
 
@@ -65,6 +66,44 @@ describe("manager service queries", () => {
     expect(view.table).toHaveLength(20);
     expect(view.league?.roundsPlayed).toBe(1);
     expect(view.table.filter((row) => row.isMine)).toHaveLength(1);
+  });
+
+  it("Elo: counted once per played league match, zero-sum, shown in the table and the rating", async () => {
+    // The seeded round may have been written by the trigger or not: the backfill is safe to repeat.
+    const first = await admin.rpc("mgr_backfill_elo");
+    expect(first.error).toBeNull();
+    const again = await admin.rpc("mgr_backfill_elo");
+    expect(again.data).toBe(0);
+
+    const clubs = await admin
+      .from("mgr_clubs")
+      .select("elo, elo_peak")
+      .eq("league_id", world.leagueId);
+    expect(clubs.error).toBeNull();
+    expect(clubs.data).toHaveLength(20);
+    expect(clubs.data!.reduce((sum, c) => sum + c.elo, 0)).toBe(20 * 1000);
+    expect(clubs.data!.every((c) => c.elo_peak >= c.elo)).toBe(true);
+
+    const view = await getLeagueView(a, world.users.a.id);
+    expect(view.table.every((row) => typeof row.elo === "number")).toBe(true);
+
+    const rating = await getRating(admin, world.users.a.id, {
+      scope: "all",
+      page: 1,
+      pageSize: 50,
+    });
+    expect(rating.items.length).toBeGreaterThan(0);
+    expect(rating.items.every((row) => row.clubId !== "")).toBe(true);
+    expect(rating.mine?.rank).toBeGreaterThan(0);
+    const bots = await admin
+      .from("mgr_clubs")
+      .select("id")
+      .eq("is_bot", true)
+      .in(
+        "id",
+        rating.items.map((r) => r.clubId),
+      );
+    expect(bots.data).toEqual([]);
   });
 
   it("getLineup: a lineup of 11", async () => {

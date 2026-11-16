@@ -261,6 +261,8 @@ export type Database = {
           id: string;
           dormant: boolean;
           dormant_since: string | null;
+          elo: number;
+          elo_peak: number;
           is_bot: boolean;
           league_id: string | null;
           name: string;
@@ -278,6 +280,8 @@ export type Database = {
           id?: string;
           dormant?: boolean;
           dormant_since?: string | null;
+          elo?: number;
+          elo_peak?: number;
           is_bot?: boolean;
           league_id?: string | null;
           name: string;
@@ -295,6 +299,8 @@ export type Database = {
           id?: string;
           dormant?: boolean;
           dormant_since?: string | null;
+          elo?: number;
+          elo_peak?: number;
           is_bot?: boolean;
           league_id?: string | null;
           name?: string;
@@ -323,6 +329,65 @@ export type Database = {
             columns: ["user_id"];
             isOneToOne: true;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_elo_log: {
+        Row: {
+          after: number;
+          before: number;
+          club_id: string;
+          created_at: string;
+          match_id: string;
+        };
+        Insert: {
+          after: number;
+          before: number;
+          club_id: string;
+          created_at?: string;
+          match_id: string;
+        };
+        Update: {
+          after?: number;
+          before?: number;
+          club_id?: string;
+          created_at?: string;
+          match_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_elo_log_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mgr_elo_log_match_id_fkey";
+            columns: ["match_id"];
+            isOneToOne: false;
+            referencedRelation: "mgr_matches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mgr_elo_matches: {
+        Row: {
+          match_id: string;
+        };
+        Insert: {
+          match_id: string;
+        };
+        Update: {
+          match_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mgr_elo_matches_match_id_fkey";
+            columns: ["match_id"];
+            isOneToOne: true;
+            referencedRelation: "mgr_matches";
             referencedColumns: ["id"];
           },
         ];
@@ -1252,6 +1317,8 @@ export type Database = {
       chat_is_banned: { Args: { p_user: string }; Returns: boolean };
       close_season: { Args: { p_season_id: string }; Returns: undefined };
       is_admin: { Args: never; Returns: boolean };
+      mgr_apply_elo: { Args: { p_match: string }; Returns: boolean };
+      mgr_backfill_elo: { Args: never; Returns: number };
       mgr_join_league: { Args: { p_club: string }; Returns: string };
       mgr_my_league: { Args: never; Returns: string };
       mgr_open_league: {

@@ -30,6 +30,7 @@
 | `20261203000000_manager_dormant.sql` | Менеджер, надёжность (D-138): неактивные клубы (`mgr_clubs.dormant`, `dormant_since`; флаги автосостава `mgr_matches.home_auto`, `away_auto`), `mgr_play_match_v3`, `mgr_confirm_return`; пересозданы `mgr_close_season`, `mgr_release_expired`, `mgr_market_open` |
 | `20261210000000_admin_console.sql` | Роль `moderator`, `is_staff()`, журнал `admin_audit`, правила правки `admin_entities`/`admin_edit_rules`, заморозка торгов клуба (`market_frozen`), причина `admin` в журнале денег, функции `adm_*`, отчёт `adm_suspicious()` и `admin_reviews` (D-139, DAZBY-152) |
 | `20261130000000_manager_dev_fast_forward.sql` | **Только для разработки, удалить перед запуском**: сдвигает первые 11 туров лиг в прошлое, чтобы их сыграл планировщик (D-135) |
+| `20261240000000_manager_elo.sql` | Эло менеджера (DAZBY-155, D-142): `mgr_clubs.elo`, `elo_peak`, таблицы `mgr_elo_log` и `mgr_elo_matches`, функции `mgr_apply_elo`, `mgr_backfill_elo`, триггер на `mgr_matches`; пересозданы `mgr_close_season` (сжатие рейтинга) и `mgr_join_league` (подбор лиги) |
 | `20261230000000_manager_hide_squad_seed.sql` | **Важно (безопасность)**: зерно состава клуба переносится из читаемого соседями `mgr_clubs.squad_seed` в закрытую таблицу `mgr_club_seeds`; колонка очищена, триггер держит её пустой. |
 | `20261125000000_manager_auction.sql` | Футбольный менеджер, этап 4 (часть 2): аукцион (`mgr_auctions`, `mgr_bids`), обмен (`mgr_trades`), журнал сделок (`mgr_deals`), метка «нельзя выставить до …» (`tradable_after`), контракты игроков (`wage`, `contract_until`); функции `mgr_list_player`, `mgr_place_bid`, `mgr_settle_auction`, `mgr_cancel_auction`, `mgr_propose_trade`, `mgr_accept_trade`, `mgr_close_trade`, `mgr_expire_trades`, `mgr_extend_contract`, `mgr_terminate_contract`, `mgr_release_expired`; причины журнала `trade` и `penalty` (D-136) |
 | `20261027000100_login_tokens_locale.sql` | Язык входа на сайте для попытки входа через бота (бот отвечает на нём, DAZBY-116) |
@@ -38,6 +39,7 @@
 
 | Таблица | Назначение | Ключевые поля |
 |---|---|---|
+| `mgr_elo_log`, `mgr_elo_matches` | Эло (D-142): журнал «до/после» по матчу и клубу (`unique(match_id, club_id)`, читается по лиге) и список уже посчитанных матчей (защита от повторного счёта; переживает удаление бота). `mgr_clubs.elo`/`elo_peak` — текущий и наивысший рейтинг, старт 1000. Только матчи чемпионата, `K` 24 первые 20 матчей клуба и 16 дальше, без множителя разницы мячей; считает триггер `mgr_matches_elo` в той же транзакции, что и результат (`mgr_apply_elo`, один раз на матч); история и сбои догоняет `mgr_backfill_elo()` по порядку `kickoff_at, round`. В конце сезона `mgr_close_season` сдвигает `elo` на 20% к 1000 (пик не меняется). Записи с клиента нет | `match_id`, `club_id`, `before`, `after` |
 | `mgr_player_stats` | Статистика игрока по сезонам и клубам (D-140): матчи в основе, голы, передачи, удары, удары в створ, травмы, «сухие» матчи вратаря. Только лиговые матчи. Пишет триггер `mgr_matches_player_stats` в той же транзакции, что и результат (`mgr_record_player_stats`, один раз на матч — `mgr_stats_matches`); история заполнена `mgr_backfill_player_stats()`. Читается по лиге (`mgr_my_league()`), записи с клиента нет. Строки уходят вместе с игроком (завершил карьеру; бота заменил клуб). Представление `mgr_player_career` — сумма по сезонам | `player_id`, `season`, `club_id`, `league_id`, счётчики |
 | `profiles` | Публичный профиль (1:1 с `auth.users`) | `nickname` (citext, уникальный, NULL до онбординга), `full_name`, `contact`, `about`, `avatar_path`, `country_code`, `city`, `utc_offset_minutes` (по умолч. 180), `role` (`user`/`admin`), `created_at`, `last_login_at` |
 | `profile_private` | Приватные данные | `user_id`, `email` (видит владелец и админ) |
@@ -90,15 +92,16 @@ Storage: бакеты `avatars` (2 МБ, jpeg/png/webp, пишет владел�
 |---|---|---|
 | `mgr_save_lineup` | `stage2` → `stage3` → `lineup_deadline` | `20261121000000_manager_lineup_deadline.sql` |
 | `mgr_set_training` | `stage3` → `lineup_deadline` | `20261121000000_manager_lineup_deadline.sql` |
-| `mgr_close_season` | `season` → `economy` (призовые) → `dormant` | `20261203000000_manager_dormant.sql` |
+| `mgr_close_season` | `season` → `economy` (призовые) → `dormant` → `elo` (сжатие рейтинга) | `20261240000000_manager_elo.sql` |
 | `mgr_buy_free_agent` | `economy` → `auction` | `20261125000000_manager_auction.sql` |
 | `mgr_market_open` | `auction` → `dormant` → `admin_console` | `20261210000000_admin_console.sql` |
 | `mgr_release_expired` | `auction` → `dormant` | `20261203000000_manager_dormant.sql` |
 | `mgr_make_bot` | `profile_delete` → `dormant` | `20261203000000_manager_dormant.sql` |
 | `mgr_play_match` → `_v2` → `_v3` | `stage3` (результат и последствия) ← `economy` (`_v2`, деньги тура) ← `dormant` (`_v3`, флаги автосостава) | код зовёт `mgr_play_match_v3`; она вызывает `_v2`, та — `mgr_play_match`: правки результата — в той функции, где лежит нужная часть |
 | `mgr_record_match` | `stage2` | удалена в `20261221000000` |
+| `mgr_join_league` | `stage2` → `elo` (подбор лиги по среднему Эло реальных клубов) | `20261240000000_manager_elo.sql` |
 
-Статистика игроков (`mgr_record_player_stats`) не зависит от версии функции матча: её вызывает триггер `mgr_matches_player_stats`.
+Статистика игроков (`mgr_record_player_stats`) и Эло (`mgr_apply_elo`) не зависят от версии функции матча: их вызывают триггеры `mgr_matches_player_stats` и `mgr_matches_elo`.
 
 | Имя | Что делает |
 |---|---|

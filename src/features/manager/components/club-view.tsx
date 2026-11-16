@@ -195,6 +195,13 @@ export function ClubView({
               </span>
             </Link>
           </p>
+          <p className="text-muted">
+            <Link href="/manager/rating" className="font-semibold hover:text-accent">
+              {t.rating.clubLine
+                .replace("{elo}", String(club.elo))
+                .replace("{peak}", String(club.eloPeak))}
+            </Link>
+          </p>
           <LogoUploader userId={userId} logoUrl={club.logoUrl} />
         </div>
       </div>

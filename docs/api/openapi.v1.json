@@ -10937,6 +10937,18 @@
                                   "type": "boolean",
                                   "description": "The club rests (plays like a bot) until its owner confirms the return."
                                 },
+                                "elo": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991,
+                                  "description": "Elo rating (league matches only), start 1000."
+                                },
+                                "eloPeak": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991,
+                                  "description": "The highest Elo the club has had."
+                                },
                                 "createdAt": {
                                   "type": "string",
                                   "description": "ISO 8601, UTC."
@@ -10952,6 +10964,8 @@
                                 "budget",
                                 "logoUrl",
                                 "dormant",
+                                "elo",
+                                "eloPeak",
                                 "createdAt"
                               ],
                               "additionalProperties": false
@@ -11449,6 +11463,18 @@
                           "type": "boolean",
                           "description": "The club rests (plays like a bot) until its owner confirms the return."
                         },
+                        "elo": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Elo rating (league matches only), start 1000."
+                        },
+                        "eloPeak": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "The highest Elo the club has had."
+                        },
                         "createdAt": {
                           "type": "string",
                           "description": "ISO 8601, UTC."
@@ -11464,6 +11490,8 @@
                         "budget",
                         "logoUrl",
                         "dormant",
+                        "elo",
+                        "eloPeak",
                         "createdAt"
                       ],
                       "additionalProperties": false
@@ -12013,6 +12041,258 @@
         }
       }
     },
+    "/manager/rating": {
+      "get": {
+        "operationId": "managerRating",
+        "summary": "Football manager: rating of the real clubs by Elo",
+        "description": "Real clubs only (bots are never listed), highest Elo first, then by name. Elo counts league matches only (friendlies do not): start 1000, K 24 for the first 20 matches of a club and 16 after, no goal-difference multiplier; at the end of a season the rating is pulled 20% towards 1000. scope=league keeps my league only. mine is my place in the whole rating.",
+        "tags": [
+          "manager"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "description": "all = every real club; league = the clubs of my league.",
+            "schema": {
+              "default": "all",
+              "description": "all = every real club; league = the clubs of my league.",
+              "type": "string",
+              "enum": [
+                "all",
+                "league"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "x-auth-level": "user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "API-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "1"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "rank": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "clubId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "primaryColor": {
+                                "type": "string"
+                              },
+                              "secondaryColor": {
+                                "type": "string"
+                              },
+                              "logoUrl": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "leagueNumber": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "elo": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "eloPeak": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "isMine": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "rank",
+                              "clubId",
+                              "name",
+                              "primaryColor",
+                              "secondaryColor",
+                              "logoUrl",
+                              "leagueNumber",
+                              "elo",
+                              "eloPeak",
+                              "isMine"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Real clubs in the chosen scope (bots are never in the rating)."
+                        },
+                        "page": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "mine": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "rank": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "elo": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "required": [
+                                "rank",
+                                "elo"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "My club's place in the whole rating (all scope); null without a club."
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "total",
+                        "page",
+                        "pageSize",
+                        "mine"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/manager/league/scorers": {
       "get": {
         "operationId": "managerScorers",
@@ -12330,6 +12610,12 @@
                               "isMine": {
                                 "type": "boolean"
                               },
+                              "elo": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991,
+                                "description": "Elo rating of the club (bots too)."
+                              },
                               "played": {
                                 "type": "integer",
                                 "minimum": -9007199254740991,
@@ -12379,6 +12665,7 @@
                               "logoUrl",
                               "isBot",
                               "isMine",
+                              "elo",
                               "played",
                               "won",
                               "drawn",

@@ -27,6 +27,8 @@ export const managerClubSchema = z.object({
   dormant: z
     .boolean()
     .describe("The club rests (plays like a bot) until its owner confirms the return."),
+  elo: z.number().int().describe("Elo rating (league matches only), start 1000."),
+  eloPeak: z.number().int().describe("The highest Elo the club has had."),
   createdAt: z.string().describe("ISO 8601, UTC."),
 });
 export type Club = z.infer<typeof managerClubSchema>;
@@ -144,6 +146,7 @@ export const tableRowSchema = z.object({
   logoUrl: z.string().nullable(),
   isBot: z.boolean(),
   isMine: z.boolean(),
+  elo: z.number().int().describe("Elo rating of the club (bots too)."),
   played: z.number().int(),
   won: z.number().int(),
   drawn: z.number().int(),

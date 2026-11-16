@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { defineEndpoint } from "./endpoint";
+import { ratingQuerySchema, ratingSchema } from "@/server/api/v1/schemas/manager-rating";
 import { playerStatsSchema, scorersSchema } from "@/server/api/v1/schemas/manager-stats";
 import {
   consoleActionBodySchema,
@@ -755,6 +756,19 @@ export const endpoints = {
     auth: "user",
     query: playerQuerySchema,
     output: playerStatsSchema,
+    cacheControl: "private, no-store",
+    errors: [401, 404, 422],
+  }),
+  managerRating: defineEndpoint({
+    method: "get",
+    path: "/manager/rating",
+    summary: "Football manager: rating of the real clubs by Elo",
+    description:
+      "Real clubs only (bots are never listed), highest Elo first, then by name. Elo counts league matches only (friendlies do not): start 1000, K 24 for the first 20 matches of a club and 16 after, no goal-difference multiplier; at the end of a season the rating is pulled 20% towards 1000. scope=league keeps my league only. mine is my place in the whole rating.",
+    tags: ["manager"],
+    auth: "user",
+    query: ratingQuerySchema,
+    output: ratingSchema,
     cacheControl: "private, no-store",
     errors: [401, 404, 422],
   }),
