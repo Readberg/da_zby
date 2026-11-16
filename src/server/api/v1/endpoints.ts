@@ -1,4 +1,5 @@
 import { defineEndpoint } from "./endpoint";
+import { marketEndpoints } from "./endpoints-market";
 import { healthSchema, openApiDocumentSchema, versionSchema } from "./schemas/system";
 import { profilePatchSchema } from "@/lib/profile-schema";
 import {
@@ -101,6 +102,7 @@ import {
 
 /** Registry of all API v1 endpoints: route handlers and the OpenAPI document both read it. */
 export const endpoints = {
+  ...marketEndpoints,
   health: defineEndpoint({
     method: "get",
     path: "/health",
