@@ -89,9 +89,11 @@ export default async function setup(project: TestProject) {
           p_away_auto: false,
         })
       : null;
-    throw new Error(
-      `DIAG played 0: due=${JSON.stringify(due.error ?? due.data?.length)} probe=${JSON.stringify(probe)}`,
+    process.stderr.write(
+      `DIAG played 0: due=${JSON.stringify(due.error ?? due.data?.length)} probe=${JSON.stringify(probe)}
+`,
     );
+    process.exit(1);
   }
 
   // The prediction tournament: one match two days ahead.
