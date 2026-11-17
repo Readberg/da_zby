@@ -35,7 +35,7 @@
 | `20261230000000_manager_hide_squad_seed.sql` | **Важно (безопасность)**: зерно состава клуба переносится из читаемого соседями `mgr_clubs.squad_seed` в закрытую таблицу `mgr_club_seeds`; колонка очищена, триггер держит её пустой. |
 | `20261125000000_manager_auction.sql` | Футбольный менеджер, этап 4 (часть 2): аукцион (`mgr_auctions`, `mgr_bids`), обмен (`mgr_trades`), журнал сделок (`mgr_deals`), метка «нельзя выставить до …» (`tradable_after`), контракты игроков (`wage`, `contract_until`); функции `mgr_list_player`, `mgr_place_bid`, `mgr_settle_auction`, `mgr_cancel_auction`, `mgr_propose_trade`, `mgr_accept_trade`, `mgr_close_trade`, `mgr_expire_trades`, `mgr_extend_contract`, `mgr_terminate_contract`, `mgr_release_expired`; причины журнала `trade` и `penalty` (D-136) |
 | `20261027000100_login_tokens_locale.sql` | Язык входа на сайте для попытки входа через бота (бот отвечает на нём, DAZBY-116) |
-| `20261250000000_manager_rating_index.sql` | Менеджер: индекс `mgr_clubs_rating_idx` (Эло, имя, id) для рейтинга менеджеров (DAZBY-160) |
+| `20261250000000_manager_rating_index.sql` | Менеджер: индекс `mgr_clubs_rating_idx` (Эло, имя, id) для рейтинга менеджеров и триггер `mgr_clubs_check_logo` (путь логотипа той же формы, что принимает `mgr_set_logo`, в том числе при правке из админки) (DAZBY-160) |
 
 ## Таблицы
 
