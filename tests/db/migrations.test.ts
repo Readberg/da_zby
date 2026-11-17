@@ -26,6 +26,7 @@ describe("migrations on a clean database", () => {
 describe("grants audit", () => {
   const ALLOWED_TO_AUTHENTICATED = new Set([
     "is_admin",
+    "is_staff",
     "can_predict",
     "tour_deadline",
     "mgr_my_league",

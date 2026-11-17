@@ -63,38 +63,18 @@ export default async function setup(project: TestProject) {
     .eq("id", clubs[0]!)
     .single();
   const leagueId = clubRow!.league_id!;
-  const { data: league } = await admin
-    .from("mgr_leagues")
-    .select("first_kickoff_at")
-    .eq("id", leagueId)
-    .single();
   // One round of the league is played by the real engine, as the scheduler would.
-  const at = new Date(new Date(league!.first_kickoff_at).getTime() + 3_600_000);
-  const played = await playAllDue(admin, at);
-  if (played === 0) {
-    // Diagnostics: the service swallows the error of a match, show it here.
-    const due = await admin.rpc("mgr_due_matches", { p_now: at.toISOString(), p_limit: 5 });
-    const first = due.data?.[0];
-    const probe = first
-      ? await admin.rpc("mgr_play_match_v3", {
-          p_match: first.id,
-          p_home_goals: 1,
-          p_away_goals: 0,
-          p_events: [],
-          p_home_lineup: [],
-          p_away_lineup: [],
-          p_effects: [],
-          p_money: [],
-          p_home_auto: false,
-          p_away_auto: false,
-        })
-      : null;
-    process.stderr.write(
-      `DIAG played 0: due=${JSON.stringify(due.error ?? due.data?.length)} probe=${JSON.stringify(probe)}
-`,
-    );
-    process.exit(1);
-  }
+  // The database checks the kickoff against its own clock: the first round moves into the past.
+  const past = new Date(Date.now() - 86_400_000).toISOString();
+  const moved = await admin
+    .from("mgr_matches")
+    .update({ kickoff_at: past })
+    .eq("league_id", leagueId)
+    .eq("round", 1)
+    .select("id");
+  if (moved.error || !moved.data?.length) throw new Error("db-tests: the first round did not move");
+  const played = await playAllDue(admin, new Date());
+  if (played === 0) throw new Error("db-tests: the seeded round was not played");
 
   // The prediction tournament: one match two days ahead.
   const { data: t } = await admin
