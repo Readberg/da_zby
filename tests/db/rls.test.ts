@@ -112,6 +112,15 @@ describe("manager: a rival of the same league", () => {
     expect(error?.code === PERMISSION_DENIED || data?.length === 0).toBe(true);
   });
 
+  // A real column of each table: the database checks the column before the privilege.
+  const WRITABLE_COLUMN = {
+    mgr_clubs: { budget: 1 },
+    mgr_players: { age: 20 },
+    mgr_lineups: { formation: "4-4-2" },
+    mgr_transactions: { amount: 1 },
+    mgr_trades: { cash: 1 },
+  } as const;
+
   it("cannot write any manager table", async () => {
     for (const table of [
       "mgr_clubs",
@@ -125,7 +134,7 @@ describe("manager: a rival of the same league", () => {
       const key = table === "mgr_lineups" ? "club_id" : "id";
       const upd = await a
         .from(table)
-        .update({ [key]: crypto.randomUUID() } as never)
+        .update(WRITABLE_COLUMN[table] as never)
         .not(key as never, "is", null);
       expect(upd.error?.code, `update ${table}`).toBe(PERMISSION_DENIED);
       const del = await a
