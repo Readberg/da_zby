@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, type PointerEvent } from "react";
+import { useState, type PointerEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Label, Select } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
@@ -24,12 +24,9 @@ import { isInjuredNow } from "../injuries";
 import { Countdown } from "./countdown";
 import { useManager } from "./manager-provider";
 import { PlayerLink } from "./player-link";
+import { usePlayerDrag, type DropTarget } from "./use-player-drag";
 
 const GROUPS: Position[] = ["GK", "DEF", "MID", "FWD"];
-/** A touch or a mouse has to move this far before it is a drag and not a click. */
-const DRAG_THRESHOLD = 8;
-
-type Drag = { id: string; x: number; y: number };
 
 function Chip({
   player,
@@ -124,13 +121,16 @@ export function LineupForm({
     assign(lineup.formation, lineup.playerIds, pitchPlayers),
   );
   const [selected, setSelected] = useState<string | null>(null);
-  const [drag, setDrag] = useState<Drag | null>(null);
   const [locked, setLocked] = useState(lineup.locked);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(lineup.saved);
   const [message, setMessage] = useState<{ text: string; failed: boolean } | null>(null);
-  const press = useRef<{ id: string; x: number; y: number; active: boolean } | null>(null);
-  const justDragged = useRef(false);
+
+  const { drag, onPointerDown, onPointerMove, onPointerUp, consumeClick } = usePlayerDrag({
+    disabled: (id) => locked || Boolean(playerOf.get(id)?.injured),
+    onStart: () => setSelected(null),
+    onDrop: drop,
+  });
 
   const slots = pitchSlots(formation);
   const bench = benchOf(assignment, pitchPlayers);
@@ -150,10 +150,7 @@ export function LineupForm({
   /** A click on a player: select him, or, when somebody is selected, put the selected one in his place. */
   function choose(playerId: string) {
     if (locked) return;
-    if (justDragged.current) {
-      justDragged.current = false;
-      return;
-    }
+    if (consumeClick()) return;
     if (!selected || selected === playerId) {
       setSelected(selected === playerId ? null : playerId);
       return;
@@ -174,41 +171,13 @@ export function LineupForm({
     setSelected(null);
   }
 
-  function onPointerDown(event: PointerEvent<HTMLButtonElement>, id: string) {
-    if (locked || playerOf.get(id)?.injured) return;
-    press.current = { id, x: event.clientX, y: event.clientY, active: false };
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  }
-
-  function onPointerMove(event: PointerEvent<HTMLButtonElement>) {
-    const current = press.current;
-    if (!current) return;
-    if (
-      !current.active &&
-      Math.hypot(event.clientX - current.x, event.clientY - current.y) > DRAG_THRESHOLD
-    ) {
-      current.active = true;
-      setSelected(null);
-    }
-    if (current.active) setDrag({ id: current.id, x: event.clientX, y: event.clientY });
-  }
-
-  function onPointerUp(event: PointerEvent<HTMLButtonElement>) {
-    const current = press.current;
-    press.current = null;
-    if (!current?.active) return;
-    justDragged.current = true;
-    setTimeout(() => (justDragged.current = false), 0);
-    setDrag(null);
-    const under = document.elementFromPoint(event.clientX, event.clientY);
-    const slotEl = under?.closest<HTMLElement>("[data-slot]");
-    const chipEl = under?.closest<HTMLElement>("[data-chip-player]");
-    if (slotEl?.dataset.slot) {
-      move(slotEl.dataset.slot, current.id);
-    } else if (chipEl?.dataset.chipPlayer && chipEl.dataset.chipPlayer !== current.id) {
+  function drop(id: string, target: DropTarget) {
+    if (target.slot) {
+      move(target.slot, id);
+    } else if (target.player && target.player !== id) {
       // Dropped on a player of the bench: he takes the place of the dragged one.
-      const own = slotOf(assignment, current.id);
-      if (own) move(own, chipEl.dataset.chipPlayer);
+      const own = slotOf(assignment, id);
+      if (own) move(own, target.player);
     }
   }
 
