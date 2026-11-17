@@ -400,7 +400,7 @@ export function LineupForm({
 
       <div className="flex flex-wrap items-center gap-3">
         <Button onClick={save} loading={saving} disabled={!complete || locked}>
-          {saving ? lines.saving : lines.save}
+          {saving ? lines.saving : saved ? lines.sendOther : lines.save}
         </Button>
         {selected && (
           <button

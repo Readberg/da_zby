@@ -2,7 +2,7 @@ import { getLocale, getMessages } from "@/i18n/server";
 import { formatDateTime } from "@/lib/local-time";
 import { formatMoney } from "@/lib/manager/money-format";
 import type { Auctions, Lot } from "@/server/api/v1/schemas/manager-market";
-import { BidForm } from "./bid-form";
+import { BidDialog } from "./bid-dialog";
 import { CancelLotButton } from "./cancel-lot-button";
 
 function LotCard({
@@ -68,8 +68,14 @@ function LotCard({
         <CancelLotButton t={t} auctionId={lot.id} disabled={lot.bidCount > 0} />
       ) : (
         <>
-          <p className="text-xs text-muted">{lines.minBid.replace("{n}", money(lot.minBid))}</p>
-          <BidForm t={t} auctionId={lot.id} minBid={lot.minBid} disabled={cannotBid} />
+          <BidDialog
+            t={t}
+            auctionId={lot.id}
+            playerName={`${player.firstName} ${player.lastName}`}
+            minBidText={money(lot.minBid)}
+            minBid={lot.minBid}
+            disabled={cannotBid}
+          />
         </>
       )}
     </li>
