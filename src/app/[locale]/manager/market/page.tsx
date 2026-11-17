@@ -8,7 +8,8 @@ import { marketNavItems } from "@/features/manager/components/market-nav-items";
 import { MarketView } from "@/features/manager/components/market-view";
 import { loadMember, orMakeClub } from "@/features/manager/load";
 import { catchUpRounds } from "@/server/services/manager/catch-up";
-import { getMarket } from "@/server/services/manager/market";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAuctions } from "@/server/services/manager/auction";
 import { getMessages, initLocale, messagesFor } from "@/i18n/server";
 
 export async function generateMetadata({
@@ -19,10 +20,10 @@ export async function generateMetadata({
 }
 
 async function MarketContent() {
-  const { user, supabase } = await loadMember("/manager/market");
+  const { user, offsetMinutes } = await loadMember("/manager/market");
   after(catchUpRounds);
-  const market = await orMakeClub(() => getMarket(supabase, user.id));
-  return <MarketView market={market} />;
+  const auctions = await orMakeClub(() => getAuctions(createAdminClient(), user.id));
+  return <MarketView auctions={auctions} offsetMinutes={offsetMinutes} />;
 }
 
 export default async function ManagerMarketPage(props: PageProps<"/[locale]/manager/market">) {

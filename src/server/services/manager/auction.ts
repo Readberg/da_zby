@@ -80,7 +80,10 @@ export async function getAuctions(admin: Db, userId: string): Promise<Auctions> 
     admin
       .from("mgr_clubs")
       .select("id, name")
-      .in("id", [...new Set(rows.map((r) => r.seller_club_id))]),
+      .in(
+        "id",
+        [...new Set(rows.map((r) => r.seller_club_id))].filter((id): id is string => id !== null),
+      ),
     admin
       .from("mgr_bids")
       .select("auction_id, amount")
@@ -116,7 +119,8 @@ export async function getAuctions(admin: Db, userId: string): Promise<Auctions> 
         overall: player.ovr,
       },
       sellerClubId: row.seller_club_id,
-      sellerName: nameById.get(row.seller_club_id) ?? "",
+      sellerName: row.seller_club_id ? (nameById.get(row.seller_club_id) ?? "") : "",
+      pool: row.seller_club_id === null,
       mine: row.seller_club_id === club.id,
       nominal: Number(row.nominal),
       startPrice: Number(row.start_price),
@@ -177,12 +181,15 @@ export async function cancelLot(
   return { cancelled: data === true };
 }
 
-/** Settles every lot whose tick has come; each in its own transaction, written once. */
+/** At most this many lots are settled in one call; the rest stay due and go on the next call (D-138). */
+export const SETTLE_BATCH = 100;
+
+/** Settles the lots whose tick has come, in a batch; each in its own transaction, written once. */
 export async function settleDueAuctions(admin: Db): Promise<number> {
   const due = await admin.rpc("mgr_due_auctions");
   if (due.error) throw due.error;
   let settled = 0;
-  for (const id of due.data ?? []) {
+  for (const id of (due.data ?? []).slice(0, SETTLE_BATCH)) {
     const { data, error } = await admin.rpc("mgr_settle_auction", { p_auction: id });
     if (error) {
       log("error", "manager.settle_failed", { auction: id, ...errorFields(error) });
@@ -191,4 +198,14 @@ export async function settleDueAuctions(admin: Db): Promise<number> {
     if (data) settled += 1;
   }
   return settled;
+}
+
+/** Puts the free players of the pool who have no lot up (new pool, unsold yesterday, released). Idempotent. */
+export async function listPoolLots(admin: Db): Promise<number> {
+  const { data, error } = await admin.rpc("mgr_list_pool", {});
+  if (error) {
+    log("error", "manager.pool_list_failed", errorFields(error));
+    return 0;
+  }
+  return data ?? 0;
 }

@@ -52,6 +52,11 @@ const RULES: Record<string, Rule> = {
     "Your club already has the best bid.",
   ],
   "manager.has_bids": [409, ERROR_CODES.managerHasBids, "A lot with a bid cannot be taken off."],
+  "manager.pool_by_bids": [
+    409,
+    ERROR_CODES.managerPoolByBids,
+    "Free players of the pool are bought by bids on the auction.",
+  ],
   "manager.no_money": [
     409,
     ERROR_CODES.managerNoMoney,

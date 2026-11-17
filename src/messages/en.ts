@@ -378,28 +378,11 @@ export const en: MessagesShape<typeof ru> = {
     },
     market: {
       title: "Market",
-      lead: "Free players of your league: 30 new ones every month, the unsold ones of last month go. A player costs his nominal value, the money leaves the game.",
+      lead: "Free players of your league: 30 new ones every month, the unsold ones of last month go. Each goes up for bids with the nominal value as the start price: the highest bid wins, the money leaves the game.",
       closed: "The market opens after {n} played matches: {played} played.",
       budget: "Budget",
       squad: "{n} of {max} in the squad",
-      empty: "No free players yet: a new batch comes at the start of the month.",
-      columns: {
-        player: "Player",
-        position: "Pos.",
-        age: "Age",
-        overall: "Rating",
-        price: "Price",
-      },
-      buy: "Buy",
-      buying: "Buying…",
-      bought: "Player bought.",
-      errors: {
-        closed: "The market is still closed.",
-        unavailable: "The player is no longer for sale.",
-        full: "The squad already has 23 players.",
-        noMoney: "Not enough money (or the club is in debt).",
-        generic: "Could not buy the player. Please try again.",
-      },
+      empty: "No free players up for bids yet: a new batch comes at the start of the month.",
     },
     kitLabel: "The kit of the club",
     faqLink: "How the game works: FAQ",
@@ -600,11 +583,11 @@ export const en: MessagesShape<typeof ru> = {
           items: [
             {
               q: "What is the pool of free players?",
-              a: "Once a month 30 new free players appear in every league, with a random position, rating and age. The unsold players of last month go.",
+              a: "Once a month 30 new free players appear in every league, with a random position, rating and age. Each one goes up for bids at once. The unsold players of last month go.",
             },
             {
-              q: "How do I buy a player?",
-              a: "On the Market page click Buy. The price is the nominal value of the player. You can buy if at least 10 matches have been played, the squad has fewer than 23 players, and the budget is not below the price and not negative.",
+              q: "How do I buy a free player?",
+              a: "On the Market page place a bid of at least the start price (the nominal value of the player). Results are settled once a day at 10:00 Moscow time: the highest bid wins, the earliest on a tie. The money is taken when the results are settled and is not frozen for a bid; if it is not enough, or the squad is full (23), the bid is cancelled and the player goes to the next one. You can bid if at least 10 matches have been played and the budget is not below the bid and not negative. A player nobody bid on is put up again the next day, and goes at the start of the month.",
             },
           ],
         },
@@ -674,7 +657,7 @@ export const en: MessagesShape<typeof ru> = {
             },
             {
               q: "What happens when a contract ends?",
-              a: "The player leaves the club for the pool of free players of the league, where any club can buy him. So that a squad does not fall apart, a club never goes below 17 players: the weakest leave, the others stay one more season. Bots renew everybody.",
+              a: "The player leaves the club for the pool of free players of the league, where the clubs of the league can bid on him. So that a squad does not fall apart, a club never goes below 17 players: the weakest leave, the others stay one more season. Bots renew everybody.",
             },
             {
               q: "Can I break a contract?",

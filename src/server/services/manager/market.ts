@@ -104,7 +104,7 @@ export async function getMarket(supabase: Db, userId: string): Promise<Market> {
   };
 }
 
-/** Buys a free player at his nominal value; the database checks the market, the room and the money. */
+/** Obsolete since D-146: the pool is bought by bids; the database answers manager.pool_by_bids (409). */
 export async function buyFreeAgent(
   admin: Db,
   userId: string,
@@ -117,6 +117,12 @@ export async function buyFreeAgent(
   if (!error) return { budget: Number(data) };
   const message = error.message;
   const conflict = (code: string, detail: string) => new ApiError(409, code, "Conflict", detail);
+  if (message.includes("manager.pool_by_bids")) {
+    throw conflict(
+      ERROR_CODES.managerPoolByBids,
+      "Free players of the pool are bought by bids on the auction.",
+    );
+  }
   if (message.includes("manager.market_closed")) {
     throw conflict(ERROR_CODES.managerMarketClosed, "The market opens after 10 played matches.");
   }

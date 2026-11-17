@@ -1,6 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/server/api/v1/problem";
-import { cancelLot, getAuctions, listPlayer, placeBid, settleDueAuctions } from "./auction";
+import {
+  SETTLE_BATCH,
+  cancelLot,
+  getAuctions,
+  listPlayer,
+  listPoolLots,
+  placeBid,
+  settleDueAuctions,
+} from "./auction";
 import { marketError } from "./market-errors";
 
 /** A query that answers with `data` (and `count`) whatever is chained on it. */
@@ -82,6 +90,26 @@ describe("getAuctions", () => {
     expect(mine).toMatchObject({ mine: true, bestBid: 1200, minBid: 1440 });
     expect(leading).toMatchObject({ leading: true, myBid: 1000, minBid: 1200 });
     expect(first?.endsAt).toBe("2026-11-25T07:00:00.000Z");
+  });
+
+  it("shows a lot of the pool without a seller", async () => {
+    const auctions = await getAuctions(
+      client({
+        mgr_clubs: chain([], undefined, CLUB),
+        mgr_matches: chain(null, 12),
+        mgr_players: chain([player], 20),
+        mgr_auctions: chain([lot({ seller_club_id: null })]),
+        mgr_bids: chain([]),
+      }),
+      "u1",
+    );
+    expect(auctions.lots[0]).toMatchObject({
+      pool: true,
+      sellerClubId: null,
+      sellerName: "",
+      mine: false,
+      minBid: 1000,
+    });
   });
 
   it("is closed before 10 played matches and has no lots without a league", async () => {
@@ -191,6 +219,15 @@ describe("settleDueAuctions", () => {
     ]);
   });
 
+  it("settles a batch at most, the rest wait for the next call", async () => {
+    const ids = Array.from({ length: SETTLE_BATCH + 5 }, (_, i) => `a${i}`);
+    const rpc = vi.fn(async (name: string) =>
+      name === "mgr_due_auctions" ? { data: ids, error: null } : { data: "unsold", error: null },
+    );
+    expect(await settleDueAuctions(client({}, rpc))).toBe(SETTLE_BATCH);
+    expect(rpc).toHaveBeenCalledTimes(SETTLE_BATCH + 1);
+  });
+
   it("goes on with the next lot when one fails", async () => {
     const rpc = vi.fn(async (name: string, args?: { p_auction: string }) => {
       if (name === "mgr_due_auctions") return { data: ["a1", "a2"], error: null };
@@ -199,5 +236,18 @@ describe("settleDueAuctions", () => {
         : { data: "sold", error: null };
     });
     expect(await settleDueAuctions(client({}, rpc))).toBe(1);
+  });
+});
+
+describe("listPoolLots", () => {
+  it("asks the database to put the free players up and counts the new lots", async () => {
+    const rpc = vi.fn(async () => ({ data: 3, error: null }));
+    expect(await listPoolLots(client({}, rpc))).toBe(3);
+    expect(rpc).toHaveBeenCalledWith("mgr_list_pool", {});
+  });
+
+  it("does not stop the scheduler when it fails", async () => {
+    const rpc = vi.fn(async () => ({ data: null, error: { message: "boom" } }));
+    expect(await listPoolLots(client({}, rpc))).toBe(0);
   });
 });
