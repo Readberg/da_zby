@@ -122,15 +122,16 @@ describe("manager: a rival of the same league", () => {
     ] as const) {
       const ins = await a.from(table).insert({} as never);
       expect(ins.error?.code, `insert ${table}`).toBe(PERMISSION_DENIED);
+      const key = table === "mgr_lineups" ? "club_id" : "id";
       const upd = await a
         .from(table)
-        .update({ [table === "mgr_lineups" ? "club_id" : "id"]: crypto.randomUUID() } as never)
-        .not("id" as never, "is", null);
+        .update({ [key]: crypto.randomUUID() } as never)
+        .not(key as never, "is", null);
       expect(upd.error?.code, `update ${table}`).toBe(PERMISSION_DENIED);
       const del = await a
         .from(table)
         .delete()
-        .not("id" as never, "is", null);
+        .not(key as never, "is", null);
       expect(del.error?.code, `delete ${table}`).toBe(PERMISSION_DENIED);
     }
     const own = await a.from("mgr_players").update({ ovr: 99 }).eq("club_id", world.clubs.a);
