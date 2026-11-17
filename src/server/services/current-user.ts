@@ -9,6 +9,8 @@ export type CurrentUser = {
   nickname: string | null;
   avatarPath: string | null;
   role: string;
+  /** The time zone offset of the profile, in minutes from UTC. */
+  utcOffsetMinutes?: number;
 };
 
 /**
@@ -23,7 +25,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("nickname, avatar_path, role")
+    .select("nickname, avatar_path, role, utc_offset_minutes")
     .eq("id", data.user.id)
     .maybeSingle();
 
@@ -33,6 +35,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     nickname: profile?.nickname ?? null,
     avatarPath: profile?.avatar_path ?? null,
     role: profile?.role ?? "user",
+    utcOffsetMinutes: profile?.utc_offset_minutes ?? 180,
   };
 });
 
