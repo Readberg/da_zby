@@ -148,6 +148,9 @@ export const tableRowSchema = z.object({
   isBot: z.boolean(),
   isMine: z.boolean(),
   elo: z.number().int().describe("Elo rating of the club (bots too)."),
+  form: z
+    .array(z.enum(["W", "D", "L"]))
+    .describe("The last 5 results of the club in the league, oldest first."),
   played: z.number().int(),
   won: z.number().int(),
   drawn: z.number().int(),

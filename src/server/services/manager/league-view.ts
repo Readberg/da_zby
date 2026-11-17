@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { FALLBACK_COLORS } from "@/lib/manager/palette";
 import { ROUNDS } from "@/lib/manager/schedule";
 import { managerLogoUrl } from "@/lib/manager/logo-url";
-import { computeTable } from "@/lib/manager/table";
+import { computeForm, computeTable } from "@/lib/manager/table";
 import { ApiError, ERROR_CODES } from "@/server/api/v1/problem";
 import type {
   LeagueView,
@@ -159,6 +159,16 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
       awayGoals: m.away_goals ?? 0,
     })),
   );
+  const form = computeForm(
+    [...finished]
+      .sort((a, b) => a.round - b.round)
+      .map((m) => ({
+        homeClubId: m.home_club_id,
+        awayClubId: m.away_club_id,
+        homeGoals: m.home_goals ?? 0,
+        awayGoals: m.away_goals ?? 0,
+      })),
+  );
   const info = new Map((clubs.data ?? []).map((c) => [c.id, c]));
 
   // A round counts as played when all 10 of its matches are finished.
@@ -195,6 +205,7 @@ export async function getLeagueView(supabase: Db, userId: string): Promise<Leagu
         isBot: c?.is_bot ?? false,
         elo: c?.elo ?? 1000,
         isMine: row.clubId === club.id,
+        form: form.get(row.clubId) ?? [],
       };
     }),
   };

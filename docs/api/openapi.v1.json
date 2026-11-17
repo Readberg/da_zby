@@ -12616,6 +12616,18 @@
                                 "maximum": 9007199254740991,
                                 "description": "Elo rating of the club (bots too)."
                               },
+                              "form": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "W",
+                                    "D",
+                                    "L"
+                                  ]
+                                },
+                                "description": "The last 5 results of the club in the league, oldest first."
+                              },
                               "played": {
                                 "type": "integer",
                                 "minimum": -9007199254740991,
@@ -12666,6 +12678,7 @@
                               "isBot",
                               "isMine",
                               "elo",
+                              "form",
                               "played",
                               "won",
                               "drawn",

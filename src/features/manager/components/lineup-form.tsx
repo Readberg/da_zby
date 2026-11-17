@@ -100,11 +100,14 @@ export function LineupForm({
   players,
   lineup,
   until,
+  lockText = null,
   injuredNotes = {},
 }: {
   players: PlayerSummary[];
   lineup: LineupView;
   until: string | null;
+  /** When the lineup stops being accepted, already formatted for the user. */
+  lockText?: string | null;
   injuredNotes?: Record<string, string>;
 }) {
   const { t } = useManager();
@@ -203,7 +206,12 @@ export function LineupForm({
         json: { formation, mentality, playerIds: lineupIds(formation, assignment) },
       });
       setSaved(true);
-      setMessage({ text: lines.savedOk, failed: false });
+      setMessage({
+        text: lockText
+          ? `${lines.savedOk} ${lines.closesAt.replace("{date}", lockText)}`
+          : lines.savedOk,
+        failed: false,
+      });
       router.refresh();
     } catch (cause) {
       const code = cause instanceof ApiClientError ? cause.problem.code : null;
