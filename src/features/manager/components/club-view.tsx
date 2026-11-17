@@ -1,6 +1,5 @@
 import { DormantBanner } from "./dormant-banner";
 import Link from "next/link";
-import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getLocale, getMessages } from "@/i18n/server";
 import { formatDateTime } from "@/lib/local-time";
 import { formatMoney } from "@/lib/manager/money-format";
@@ -14,15 +13,8 @@ import { HelpHint } from "./help-hint";
 import { LogoUploader } from "./logo-uploader";
 import { MatchTitle } from "./match-link";
 import { PlayerLink } from "./player-link";
-
-/** A number of the state of a player (0–100): red when low, green when high. */
-function Condition({ value }: { value: number }) {
-  return (
-    <span className={value < 40 ? "text-danger" : value >= 70 ? "text-success-ink" : "text-ink"}>
-      {value}
-    </span>
-  );
-}
+import { SendLineupButton } from "./send-lineup-button";
+import { SquadTable } from "./squad-table";
 
 /** The preseason: no matches of the league, a friendly instead, and the end date. */
 function Preseason({ view, offsetMinutes }: { view: ManagerClubView; offsetMinutes: number }) {
@@ -127,6 +119,11 @@ function NextMatch({ view, offsetMinutes }: { view: ManagerClubView; offsetMinut
               <dd className="font-display text-2xl">{deadline && <Countdown to={deadline} />}</dd>
             </div>
           </dl>
+          {!kickoffPassed(deadline ?? match.kickoffAt) && (
+            <SendLineupButton
+              lockText={deadline ? formatDateTime(deadline, offsetMinutes, getLocale()) : null}
+            />
+          )}
           <Link
             href="/manager/lineup"
             className="w-fit text-sm font-semibold text-accent hover:underline"
@@ -220,58 +217,7 @@ export function ClubView({
           {t.squadTitle}
         </h3>
         <p className="text-sm text-muted">{t.squadCount.replace("{n}", String(players.length))}</p>
-        <Table>
-          <THead>
-            <tr>
-              <TH>{t.columns.player}</TH>
-              <TH>{t.columns.position}</TH>
-              <TH>{t.columns.age}</TH>
-              <TH className="text-right" title={t.condition.overallLong}>
-                {t.columns.overall}
-              </TH>
-              <TH className="text-right" title={t.playerReal}>
-                {t.columns.real}
-              </TH>
-              <TH className="text-right" title={t.condition.form}>
-                {t.condition.formShort}
-              </TH>
-              <TH className="text-right" title={t.condition.fitness}>
-                {t.condition.fitnessShort}
-              </TH>
-              <TH className="text-right" title={t.condition.morale}>
-                {t.condition.moraleShort}
-              </TH>
-              <TH className="hidden text-right lg:table-cell">{t.money.price}</TH>
-            </tr>
-          </THead>
-          <TBody>
-            {players.map((player) => (
-              <TR key={player.id}>
-                <TD>
-                  <PlayerLink id={player.id} name={`${player.firstName} ${player.lastName}`}>
-                    {player.firstName} {player.lastName}
-                  </PlayerLink>
-                </TD>
-                <TD title={t.positions[player.position]}>{t.positionShort[player.position]}</TD>
-                <TD>{player.age}</TD>
-                <TD className="text-right font-display text-lg text-accent">{player.overall}</TD>
-                <TD className="text-right text-muted">{player.real.toFixed(1)}</TD>
-                <TD className="text-right">
-                  <Condition value={player.form} />
-                </TD>
-                <TD className="text-right">
-                  <Condition value={player.fitness} />
-                </TD>
-                <TD className="text-right">
-                  <Condition value={player.morale} />
-                </TD>
-                <TD className="hidden whitespace-nowrap text-right text-muted lg:table-cell">
-                  {formatMoney(player.nominal, locale, t.money.format)}
-                </TD>
-              </TR>
-            ))}
-          </TBody>
-        </Table>
+        <SquadTable players={players} />
       </section>
     </div>
   );
