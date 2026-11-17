@@ -124,7 +124,7 @@ describe("manager: a rival of the same league", () => {
       expect(ins.error?.code, `insert ${table}`).toBe(PERMISSION_DENIED);
       const upd = await a
         .from(table)
-        .update({ id: crypto.randomUUID() } as never)
+        .update({ [table === "mgr_lineups" ? "club_id" : "id"]: crypto.randomUUID() } as never)
         .not("id" as never, "is", null);
       expect(upd.error?.code, `update ${table}`).toBe(PERMISSION_DENIED);
       const del = await a
