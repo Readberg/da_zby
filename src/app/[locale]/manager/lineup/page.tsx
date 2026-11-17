@@ -36,6 +36,7 @@ async function LineupContent() {
       key={`${lineup.formation}-${lineup.mentality}-${lineup.playerIds.join(",")}-${lineup.saved}`}
       players={view.players}
       lineup={lineup}
+      lockText={lineup.lockAt ? formatDateTime(lineup.lockAt, offsetMinutes, getLocale()) : null}
       until={
         lineup.nextKickoffAt
           ? formatDateTime(lineup.nextKickoffAt, offsetMinutes, getLocale())

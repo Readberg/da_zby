@@ -1,5 +1,5 @@
 import type { Position } from "@/lib/manager/attributes";
-import type { Mentality } from "@/lib/manager/formations";
+import { mentalityLevel, type Mentality } from "@/lib/manager/formations";
 import { makeRandom } from "./random";
 
 export type SidePlayer = { id: string; name: string; position: Position; real: number };
@@ -42,13 +42,21 @@ const INJURY_DAYS: [days: number, weight: number][] = [
   [21, 2],
 ];
 
+/**
+ * How far one step of the mentality moves the attack up and the defence down (D-145). The effect
+ * grows faster than a step towards the extremes: the bus hardly concedes and hardly scores, all out
+ * attack scores a lot and concedes a lot. Temporary values, set while the balance is worked out.
+ */
+const MENTALITY_SHIFT: Record<number, number> = { 0: 0, 1: 4, 2: 10, 3: 20 };
+
 /** What a team has in each line, from the real ratings of the eleven on the pitch. */
 function strength(side: Side) {
   const mean = (position: Position, fallback: number) => {
     const line = side.players.filter((p) => p.position === position);
     return line.length ? line.reduce((sum, p) => sum + p.real, 0) / line.length : fallback;
   };
-  const shift = side.mentality === "attack" ? 3 : side.mentality === "defense" ? -3 : 0;
+  const level = mentalityLevel(side.mentality);
+  const shift = Math.sign(level) * MENTALITY_SHIFT[Math.abs(level)]!;
   const forward = mean("FWD", 40);
   const middle = mean("MID", 40);
   return {

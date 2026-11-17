@@ -118,12 +118,25 @@
                                 "additionalProperties": false
                               },
                               "sellerClubId": {
-                                "type": "string",
-                                "format": "uuid",
-                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "null for a lot of the monthly pool (no seller)."
                               },
                               "sellerName": {
-                                "type": "string"
+                                "type": "string",
+                                "description": "Empty for a lot of the pool."
+                              },
+                              "pool": {
+                                "type": "boolean",
+                                "description": "A free player of the monthly pool: no seller, the start price is his nominal value."
                               },
                               "mine": {
                                 "type": "boolean",
@@ -196,6 +209,7 @@
                               "player",
                               "sellerClubId",
                               "sellerName",
+                              "pool",
                               "mine",
                               "nominal",
                               "startPrice",
@@ -12616,6 +12630,18 @@
                                 "maximum": 9007199254740991,
                                 "description": "Elo rating of the club (bots too)."
                               },
+                              "form": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "W",
+                                    "D",
+                                    "L"
+                                  ]
+                                },
+                                "description": "The last 5 results of the club in the league, oldest first."
+                              },
                               "played": {
                                 "type": "integer",
                                 "minimum": -9007199254740991,
@@ -12666,6 +12692,7 @@
                               "isBot",
                               "isMine",
                               "elo",
+                              "form",
                               "played",
                               "won",
                               "drawn",
@@ -13363,19 +13390,30 @@
                         "formation": {
                           "type": "string",
                           "enum": [
+                            "3-4-3",
+                            "3-5-2",
+                            "3-4-1-2",
                             "4-4-2",
                             "4-3-3",
-                            "3-5-2",
                             "4-5-1",
-                            "5-3-2"
+                            "4-2-3-1",
+                            "4-1-4-1",
+                            "4-4-1-1",
+                            "5-3-2",
+                            "5-4-1",
+                            "5-2-3"
                           ]
                         },
                         "mentality": {
                           "type": "string",
                           "enum": [
+                            "bus",
+                            "defensive",
+                            "cautious",
                             "balanced",
-                            "attack",
-                            "defense"
+                            "offensive",
+                            "attacking",
+                            "all_out"
                           ]
                         },
                         "playerIds": {
@@ -13482,19 +13520,30 @@
                   "formation": {
                     "type": "string",
                     "enum": [
+                      "3-4-3",
+                      "3-5-2",
+                      "3-4-1-2",
                       "4-4-2",
                       "4-3-3",
-                      "3-5-2",
                       "4-5-1",
-                      "5-3-2"
+                      "4-2-3-1",
+                      "4-1-4-1",
+                      "4-4-1-1",
+                      "5-3-2",
+                      "5-4-1",
+                      "5-2-3"
                     ]
                   },
                   "mentality": {
                     "type": "string",
                     "enum": [
+                      "bus",
+                      "defensive",
+                      "cautious",
                       "balanced",
-                      "attack",
-                      "defense"
+                      "offensive",
+                      "attacking",
+                      "all_out"
                     ]
                   },
                   "playerIds": {
@@ -14350,8 +14399,8 @@
     "/manager/market/buy": {
       "post": {
         "operationId": "managerBuy",
-        "summary": "Football manager: buy a free player at his nominal value",
-        "description": "409 manager.market_closed before 10 played matches, 409 manager.player_unavailable when the player is gone or from another league, 409 manager.squad_full with 23 players, 409 manager.no_money when the budget is below the price or negative. The price is paid out of the game (it goes to nobody).",
+        "summary": "Football manager: buy a free player at his nominal value (obsolete)",
+        "description": "Obsolete since D-146: the free players of the pool are bought by bids (POST /manager/auctions/bid on the lots without a seller), this call always answers 409 manager.pool_by_bids. Kept for old clients. Before: 409 manager.market_closed before 10 played matches, 409 manager.player_unavailable when the player is gone or from another league, 409 manager.squad_full with 23 players, 409 manager.no_money when the budget is below the price or negative. The price is paid out of the game (it goes to nobody).",
         "tags": [
           "manager"
         ],

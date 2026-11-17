@@ -123,6 +123,7 @@ describe("buyFreeAgent", () => {
     ["manager.player_unavailable", 409, "manager.player_unavailable"],
     ["manager.squad_full", 409, "manager.squad_full"],
     ["manager.no_money", 409, "manager.no_money"],
+    ["manager.pool_by_bids", 409, "manager.pool_by_bids"],
     ["manager.club_unknown", 404, "api.not_found"],
   ])("maps the database refusal %s to %i", async (message, status, code) => {
     const rpc = vi.fn(async () => ({ data: null, error: { message } }));

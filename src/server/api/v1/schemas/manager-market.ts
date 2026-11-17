@@ -16,8 +16,13 @@ export const lotPlayerSchema = z.object({
 export const lotSchema = z.object({
   id: z.uuid(),
   player: lotPlayerSchema,
-  sellerClubId: z.uuid(),
-  sellerName: z.string(),
+  sellerClubId: z.uuid().nullable().describe("null for a lot of the monthly pool (no seller)."),
+  sellerName: z.string().describe("Empty for a lot of the pool."),
+  pool: z
+    .boolean()
+    .describe(
+      "A free player of the monthly pool: no seller, the start price is his nominal value.",
+    ),
   mine: z.boolean().describe("My club put the player up."),
   nominal: z.number().int().describe("The nominal value of the player."),
   startPrice: z.number().int(),

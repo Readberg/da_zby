@@ -7,7 +7,7 @@ import type { Database, Json } from "@/types/database";
 import { fetchAll } from "../paginate";
 import { computePreseasonDay } from "./effects";
 import { playAllDue, toState, type PlayerRow } from "./league";
-import { settleDueAuctions } from "./auction";
+import { listPoolLots, settleDueAuctions } from "./auction";
 import { releaseExpiredContracts } from "./contracts";
 import { runMarketPools } from "./market";
 import { makeRandom } from "./random";
@@ -234,6 +234,7 @@ export async function runRounds(
   // The market (D-136): contracts that are over, the lots whose tick has come, the offers out of time.
   const released = await releaseExpiredContracts(admin);
   const settled = await settleDueAuctions(admin);
+  await listPoolLots(admin);
   const expired = await expireTrades(admin);
   return { played, closed, days, opened, pools, released, settled, expired, partial: false };
 }

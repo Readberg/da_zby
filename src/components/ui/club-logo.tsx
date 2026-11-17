@@ -17,10 +17,7 @@ export function ClubLogo({
   size?: number;
   className?: string;
 }) {
-  const frame = cx(
-    "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md",
-    className,
-  );
+  const frame = cx("inline-flex shrink-0 items-center justify-center rounded-md", className);
   const style = { width: size, height: size };
 
   if (src) {

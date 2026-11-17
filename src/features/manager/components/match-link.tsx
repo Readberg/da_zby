@@ -30,10 +30,56 @@ export function MatchTitle({ match, mineId }: { match: MatchSummary; mineId?: st
   );
 }
 
-export function MatchPageLink({ match, mineId }: { match: MatchSummary; mineId?: string }) {
+/**
+ * The same match as a row of a list: the home club, the score and the away club stand in the same
+ * columns whatever the length of the names (a long name is cut, the full one is in the tooltip).
+ */
+export function MatchRowTitle({ match, mineId }: { match: MatchSummary; mineId?: string }) {
+  const side = (club: MatchSummary["home"], align: "end" | "start") => (
+    <span
+      className={`flex min-w-0 items-center gap-2 ${align === "end" ? "flex-row-reverse text-right" : ""}`}
+    >
+      <ClubBadge
+        logoUrl={club.logoUrl}
+        primary={club.primaryColor}
+        secondary={club.secondaryColor}
+        name={club.name}
+      />
+      <span
+        title={club.name}
+        className={club.clubId === mineId ? "truncate font-bold" : "truncate"}
+      >
+        {club.name}
+      </span>
+    </span>
+  );
+  const score =
+    match.homeGoals === null || match.awayGoals === null
+      ? "–"
+      : `${match.homeGoals} : ${match.awayGoals}`;
+  return (
+    <span className="grid grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,1fr)] items-center gap-2">
+      {side(match.home, "end")}
+      <span className="text-center font-display text-lg text-accent">{score}</span>
+      {side(match.away, "start")}
+    </span>
+  );
+}
+
+export function MatchPageLink({
+  match,
+  mineId,
+  rows = false,
+}: {
+  match: MatchSummary;
+  mineId?: string;
+  /** Lay the title out for a list: fixed columns. */
+  rows?: boolean;
+}) {
+  const Title = rows ? MatchRowTitle : MatchTitle;
   return (
     <Link href={`/manager/matches/${match.id}`} className="hover:underline">
-      <MatchTitle match={match} mineId={mineId} />
+      <Title match={match} mineId={mineId} />
     </Link>
   );
 }

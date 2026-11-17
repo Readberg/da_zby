@@ -599,7 +599,7 @@ export type Database = {
           id: string;
           league_id: string;
           player_id: string;
-          seller_club_id: string;
+          seller_club_id: string | null;
           start_price: number;
           step_percent: number;
           nominal: number;
@@ -617,7 +617,7 @@ export type Database = {
           id?: string;
           league_id: string;
           player_id: string;
-          seller_club_id: string;
+          seller_club_id?: string | null;
           start_price: number;
           step_percent: number;
           nominal: number;
@@ -1350,6 +1350,7 @@ export type Database = {
       mgr_close_season: { Args: { p_league: string; p_replacements: Json }; Returns: boolean };
       mgr_leagues_to_close: { Args: never; Returns: string[] };
       mgr_leagues_to_open: { Args: never; Returns: string[] };
+      mgr_list_pool: { Args: { p_league?: string }; Returns: number };
       mgr_open_season: { Args: { p_league: string; p_matches: Json }; Returns: boolean };
       mgr_request_friendly: { Args: { p_opponent?: string; p_user: string }; Returns: string };
       mgr_add_pool: {

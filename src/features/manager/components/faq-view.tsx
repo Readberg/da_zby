@@ -1,4 +1,5 @@
 import { getMessages } from "@/i18n/server";
+import { FaqNav } from "./faq-nav";
 
 /**
  * The FAQ of the game: the sections are listed in a navigation next to (on a phone: above) the
@@ -8,20 +9,11 @@ export function FaqView() {
   const t = getMessages().manager.faq;
   return (
     <div className="grid gap-8 lg:grid-cols-[14rem_1fr]">
-      <nav aria-label={t.nav} className="lg:sticky lg:top-24 lg:self-start">
-        <ul className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:flex-col lg:gap-1 lg:overflow-visible">
-          {t.sections.map((section) => (
-            <li key={section.id} className="shrink-0">
-              <a
-                href={`#${section.id}`}
-                className="inline-flex min-h-10 items-center rounded-sm border border-line bg-surface px-3 text-sm font-semibold transition-colors hover:bg-surface-hover hover:text-accent lg:w-full lg:border-transparent lg:bg-transparent"
-              >
-                {section.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <FaqNav
+        label={t.nav}
+        topLabel={t.top}
+        sections={t.sections.map(({ id, title }) => ({ id, title }))}
+      />
 
       <div className="flex flex-col gap-10">
         {t.sections.map((section) => (

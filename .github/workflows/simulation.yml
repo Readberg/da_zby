@@ -1,0 +1,48 @@
+name: simulation
+
+# Simulation of three rounds on a real local Supabase stack (DAZBY-162): 45 clubs in three leagues, the
+# invariants of the game after each round. Not required for merge; no production secrets.
+on:
+  pull_request:
+    branches: [dev, main]
+    paths: ["tests/sim/**", "vitest.sim.config.ts", ".github/workflows/simulation.yml"]
+  schedule:
+    - cron: "47 2 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: simulation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase (applies every migration to an empty database)
+        run: supabase start -x realtime,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Run the simulation
+        run: |
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          export DB_TEST_URL="$API_URL" DB_TEST_ANON_KEY="$ANON_KEY" DB_TEST_SERVICE_KEY="$SERVICE_ROLE_KEY"
+          pnpm exec vitest run -c vitest.sim.config.ts
+
+      - name: Database log on failure
+        if: failure()
+        run: docker logs supabase_db_da_zby 2>&1 | tail -n 150
+
+      - name: Stop
+        if: always()
+        run: supabase stop --no-backup

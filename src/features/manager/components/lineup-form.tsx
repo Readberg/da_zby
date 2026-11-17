@@ -7,7 +7,12 @@ import { Label, Select } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { cx } from "@/lib/cx";
 import type { Position } from "@/lib/manager/attributes";
-import { FORMATIONS, MENTALITIES, type Formation, type Mentality } from "@/lib/manager/formations";
+import {
+  FORMATION_GROUPS,
+  MENTALITIES,
+  type Formation,
+  type Mentality,
+} from "@/lib/manager/formations";
 import {
   assign,
   benchOf,
@@ -95,11 +100,14 @@ export function LineupForm({
   players,
   lineup,
   until,
+  lockText = null,
   injuredNotes = {},
 }: {
   players: PlayerSummary[];
   lineup: LineupView;
   until: string | null;
+  /** When the lineup stops being accepted, already formatted for the user. */
+  lockText?: string | null;
   injuredNotes?: Record<string, string>;
 }) {
   const { t } = useManager();
@@ -198,7 +206,12 @@ export function LineupForm({
         json: { formation, mentality, playerIds: lineupIds(formation, assignment) },
       });
       setSaved(true);
-      setMessage({ text: lines.savedOk, failed: false });
+      setMessage({
+        text: lockText
+          ? `${lines.savedOk} ${lines.closesAt.replace("{date}", lockText)}`
+          : lines.savedOk,
+        failed: false,
+      });
       router.refresh();
     } catch (cause) {
       const code = cause instanceof ApiClientError ? cause.problem.code : null;
@@ -264,10 +277,17 @@ export function LineupForm({
             disabled={locked}
             onChange={(event) => changeFormation(event.target.value as Formation)}
           >
-            {FORMATIONS.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
+            {FORMATION_GROUPS.map((group) => (
+              <optgroup
+                key={group.defenders}
+                label={lines.formationGroup.replace("{n}", String(group.defenders))}
+              >
+                {group.formations.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </Select>
         </div>
@@ -288,6 +308,7 @@ export function LineupForm({
               </option>
             ))}
           </Select>
+          <p className="text-xs text-muted">{lines.mentalityHint}</p>
         </div>
       </div>
 

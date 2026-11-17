@@ -65,3 +65,25 @@ export function computeTable(clubs: TableClub[], matches: TableMatch[]): TableRo
       (names.get(a.clubId) ?? "").localeCompare(names.get(b.clubId) ?? "", "ru"),
   );
 }
+
+export type FormResult = "W" | "D" | "L";
+
+/** The result of a match for one side. */
+export function resultFor(scored: number, conceded: number): FormResult {
+  return scored > conceded ? "W" : scored === conceded ? "D" : "L";
+}
+
+/** The last `limit` results of every club, oldest first; `matches` must be in play order. */
+export function computeForm(matches: TableMatch[], limit = 5): Map<string, FormResult[]> {
+  const form = new Map<string, FormResult[]>();
+  const push = (id: string, result: FormResult) => {
+    const list = form.get(id) ?? [];
+    list.push(result);
+    form.set(id, list.length > limit ? list.slice(-limit) : list);
+  };
+  for (const m of matches) {
+    push(m.homeClubId, resultFor(m.homeGoals, m.awayGoals));
+    push(m.awayClubId, resultFor(m.awayGoals, m.homeGoals));
+  }
+  return form;
+}

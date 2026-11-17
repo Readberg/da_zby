@@ -1,18 +1,70 @@
 import type { Position } from "./attributes";
 
-/** Lineup rules of the football manager (D-129): one goalkeeper and ten outfield players. */
-export const FORMATIONS = ["4-4-2", "4-3-3", "3-5-2", "4-5-1", "5-3-2"] as const;
-export type Formation = (typeof FORMATIONS)[number];
+/**
+ * Lineup rules of the football manager (D-129, D-145): one goalkeeper and ten outfield players.
+ * Each formation lists its rows from the own goal to the opponent's: the pitch draws them as they
+ * are (4-2-3-1 has two midfield rows), the engine and the database only count the players of each
+ * position (DEF / MID / FWD).
+ */
+const LAYOUT = {
+  "3-4-3": { DEF: [3], MID: [4], FWD: [3] },
+  "3-5-2": { DEF: [3], MID: [5], FWD: [2] },
+  "3-4-1-2": { DEF: [3], MID: [4, 1], FWD: [2] },
+  "4-4-2": { DEF: [4], MID: [4], FWD: [2] },
+  "4-3-3": { DEF: [4], MID: [3], FWD: [3] },
+  "4-5-1": { DEF: [4], MID: [5], FWD: [1] },
+  "4-2-3-1": { DEF: [4], MID: [2, 3], FWD: [1] },
+  "4-1-4-1": { DEF: [4], MID: [1, 4], FWD: [1] },
+  "4-4-1-1": { DEF: [4], MID: [4], FWD: [1, 1] },
+  "5-3-2": { DEF: [5], MID: [3], FWD: [2] },
+  "5-4-1": { DEF: [5], MID: [4], FWD: [1] },
+  "5-2-3": { DEF: [5], MID: [2], FWD: [3] },
+} as const satisfies Record<string, Record<"DEF" | "MID" | "FWD", readonly number[]>>;
 
-export const MENTALITIES = ["balanced", "attack", "defense"] as const;
+export type Formation = keyof typeof LAYOUT;
+/** In the order of the choice list: grouped by the number of defenders. */
+export const FORMATIONS = Object.keys(LAYOUT) as Formation[];
+
+/** The formations of each group of the choice list: by the number of defenders. */
+export const FORMATION_GROUPS: { defenders: number; formations: Formation[] }[] = [3, 4, 5].map(
+  (defenders) => ({
+    defenders,
+    formations: FORMATIONS.filter((f) => LAYOUT[f].DEF[0] === defenders),
+  }),
+);
+
+/** The rows of a position on the pitch, from the own goal forward. */
+export function formationRows(formation: Formation, position: "DEF" | "MID" | "FWD"): number[] {
+  return [...LAYOUT[formation][position]];
+}
+
+/**
+ * The mentality (D-145): seven steps from -3 (park the bus) to +3 (all out attack). The scale of the
+ * effect is in the engine (temporary, set while the balance is worked out).
+ */
+export const MENTALITIES = [
+  "bus",
+  "defensive",
+  "cautious",
+  "balanced",
+  "offensive",
+  "attacking",
+  "all_out",
+] as const;
 export type Mentality = (typeof MENTALITIES)[number];
+
+/** -3 … +3: how far the mentality leans to the attack. */
+export function mentalityLevel(mentality: Mentality): number {
+  return MENTALITIES.indexOf(mentality) - 3;
+}
 
 export const LINEUP_SIZE = 11;
 
 /** How many players of each position a formation needs. */
 export function formationCounts(formation: Formation): Record<Position, number> {
-  const [def, mid, fwd] = formation.split("-").map(Number) as [number, number, number];
-  return { GK: 1, DEF: def, MID: mid, FWD: fwd };
+  const sum = (rows: readonly number[]) => rows.reduce((a, b) => a + b, 0);
+  const layout = LAYOUT[formation];
+  return { GK: 1, DEF: sum(layout.DEF), MID: sum(layout.MID), FWD: sum(layout.FWD) };
 }
 
 export type RatedPlayer = { id: string; position: Position; real: number };

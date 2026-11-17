@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FORMATIONS, MENTALITIES } from "@/lib/manager/formations";
 import { CLUB_COLORS } from "@/lib/manager/palette";
 
 /** Letters (Latin, Cyrillic) and digits; single spaces between words; at most 30 characters. */
@@ -147,6 +148,9 @@ export const tableRowSchema = z.object({
   isBot: z.boolean(),
   isMine: z.boolean(),
   elo: z.number().int().describe("Elo rating of the club (bots too)."),
+  form: z
+    .array(z.enum(["W", "D", "L"]))
+    .describe("The last 5 results of the club in the league, oldest first."),
   played: z.number().int(),
   won: z.number().int(),
   drawn: z.number().int(),
@@ -180,8 +184,8 @@ export const leagueViewSchema = z.object({
 export type LeagueView = z.infer<typeof leagueViewSchema>;
 
 export const lineupSchema = z.object({
-  formation: z.enum(["4-4-2", "4-3-3", "3-5-2", "4-5-1", "5-3-2"]),
-  mentality: z.enum(["balanced", "attack", "defense"]),
+  formation: z.enum(FORMATIONS),
+  mentality: z.enum(MENTALITIES),
   playerIds: z.array(z.uuid()).length(11),
   saved: z.boolean().describe("False when the club has not chosen: the best lineup is used."),
   locked: z
@@ -196,8 +200,8 @@ export const lineupSchema = z.object({
 export type LineupView = z.infer<typeof lineupSchema>;
 
 export const lineupBodySchema = z.object({
-  formation: z.enum(["4-4-2", "4-3-3", "3-5-2", "4-5-1", "5-3-2"]),
-  mentality: z.enum(["balanced", "attack", "defense"]),
+  formation: z.enum(FORMATIONS),
+  mentality: z.enum(MENTALITIES),
   playerIds: z.array(z.uuid()).length(11, "Choose 11 players."),
 });
 export type LineupBody = z.infer<typeof lineupBodySchema>;
