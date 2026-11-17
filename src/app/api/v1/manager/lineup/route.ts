@@ -1,3 +1,4 @@
+import { log } from "@/lib/log";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { endpoints } from "@/server/api/v1/endpoints";
 import { enforceLimit } from "@/server/services/manager/limits";
@@ -11,5 +12,11 @@ export const GET = withApi(endpoints.managerLineup, async ({ supabase, user }) =
 export const PUT = withApi(endpoints.managerSaveLineup, async ({ request, user, body }) => {
   enforceLimit(request, user!.id, "lineup");
   await saveLineup(createAdminClient(), user!.id, body);
+  // The log of lineups: who sent what and when (a replaced lineup shows up as a second line).
+  log("info", "manager.lineup_sent", {
+    userId: user!.id,
+    formation: body.formation,
+    mentality: body.mentality,
+  });
   return { data: { saved: true as const } };
 });

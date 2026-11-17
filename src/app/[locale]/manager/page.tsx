@@ -35,7 +35,21 @@ async function ManagerContent() {
   // The scheduler plays the rounds; a visit after kickoff is the safety net.
   after(catchUpRounds);
 
-  if (view.club) return <ClubView view={view} offsetMinutes={offsetMinutes} userId={user.id} />;
+  if (view.club) {
+    const { data: sent } = await supabase
+      .from("mgr_lineups")
+      .select("updated_at")
+      .eq("club_id", view.club.id)
+      .maybeSingle();
+    return (
+      <ClubView
+        view={view}
+        offsetMinutes={offsetMinutes}
+        userId={user.id}
+        lineupSentAt={sent?.updated_at ?? null}
+      />
+    );
+  }
   return (
     <section aria-labelledby="create-title" className="flex flex-col gap-4">
       <div className="flex items-center gap-3">

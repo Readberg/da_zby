@@ -70,7 +70,15 @@ function Retiring({ view }: { view: ManagerClubView }) {
 }
 
 /** The next match of my club: when, against whom, and the two timers (to the match, to the lineup deadline). */
-function NextMatch({ view, offsetMinutes }: { view: ManagerClubView; offsetMinutes: number }) {
+function NextMatch({
+  view,
+  offsetMinutes,
+  sentAt,
+}: {
+  view: ManagerClubView;
+  offsetMinutes: number;
+  sentAt: string | null;
+}) {
   const t = getMessages().manager;
   const match = view.nextMatch;
   if (!view.club) return null;
@@ -122,6 +130,7 @@ function NextMatch({ view, offsetMinutes }: { view: ManagerClubView; offsetMinut
           {!kickoffPassed(deadline ?? match.kickoffAt) && (
             <SendLineupButton
               lockText={deadline ? formatDateTime(deadline, offsetMinutes, getLocale()) : null}
+              sentText={sentAt ? formatDateTime(sentAt, offsetMinutes, getLocale()) : null}
             />
           )}
           <Link
@@ -143,10 +152,13 @@ export function ClubView({
   view,
   offsetMinutes,
   userId,
+  lineupSentAt = null,
 }: {
   view: ManagerClubView;
   offsetMinutes: number;
   userId: string;
+  /** When the club last sent a lineup (ISO), or null if it never did. */
+  lineupSentAt?: string | null;
 }) {
   const t = getMessages().manager;
   const locale = getLocale();
@@ -209,7 +221,7 @@ export function ClubView({
         </p>
       )}
       <Preseason view={view} offsetMinutes={offsetMinutes} />
-      <NextMatch view={view} offsetMinutes={offsetMinutes} />
+      <NextMatch view={view} offsetMinutes={offsetMinutes} sentAt={lineupSentAt} />
       <Retiring view={view} />
 
       <section aria-labelledby="squad-title" className="flex flex-col gap-3">

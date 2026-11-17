@@ -10,13 +10,23 @@ import { useManager } from "./manager-provider";
 /**
  * «Send the lineup»: confirms the lineup of the next match as chosen by the owner. It takes the
  * current one (the saved one, or the automatic one that would play) and saves it through the same
- * API as the lineup page, then tells until when lineups are accepted.
+ * API as the lineup page, then tells until when lineups are accepted. Once a lineup is sent, the
+ * button turns into «send another lineup», which opens the lineup page where a new one replaces it.
  */
-export function SendLineupButton({ lockText }: { lockText: string | null }) {
+export function SendLineupButton({
+  lockText,
+  sentText,
+}: {
+  lockText: string | null;
+  /** When the saved lineup was sent, already formatted; null if the club never sent one. */
+  sentText: string | null;
+}) {
   const { t } = useManager();
   const router = useRouter();
   const lines = t.lineupPage;
   const [sending, setSending] = useState(false);
+  const [justSent, setJustSent] = useState(false);
+  const sent = justSent || sentText !== null;
   const [message, setMessage] = useState<{ text: string; failed: boolean } | null>(null);
 
   async function send() {
@@ -36,6 +46,7 @@ export function SendLineupButton({ lockText }: { lockText: string | null }) {
           playerIds: current.playerIds,
         },
       });
+      setJustSent(true);
       setMessage({
         text: lockText
           ? `${lines.savedOk} ${lines.closesAt.replace("{date}", lockText)}`
@@ -57,9 +68,13 @@ export function SendLineupButton({ lockText }: { lockText: string | null }) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={send} loading={sending}>
-          {sending ? lines.saving : lines.sendNow}
-        </Button>
+        {sent ? (
+          <Button onClick={() => router.push("/manager/lineup")}>{lines.sendOther}</Button>
+        ) : (
+          <Button onClick={send} loading={sending}>
+            {sending ? lines.saving : lines.sendNow}
+          </Button>
+        )}
         {message && (
           <p
             role={message.failed ? "alert" : "status"}
@@ -69,7 +84,10 @@ export function SendLineupButton({ lockText }: { lockText: string | null }) {
           </p>
         )}
       </div>
-      <p className="text-xs text-muted">{lines.sendNote}</p>
+      <p className="text-xs text-muted">
+        {sent ? (sentText ? lines.sentAt.replace("{date}", sentText) : "") : lines.sendNote}
+        {sent ? ` ${lines.sendOtherNote}` : ""}
+      </p>
     </div>
   );
 }
