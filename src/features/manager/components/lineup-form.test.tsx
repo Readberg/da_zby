@@ -157,6 +157,18 @@ describe("LineupForm: the pitch", () => {
     expect(onPitch("ИгрокDEF4")).toBe(true);
   });
 
+  it("groups the formations by the number of defenders", () => {
+    form();
+    const select = screen.getByLabelText(t.lineupPage.formation);
+    const groups = within(select).getAllByRole("group");
+    expect(groups.map((g) => g.getAttribute("label"))).toEqual([
+      t.lineupPage.formationGroup.replace("{n}", "3"),
+      t.lineupPage.formationGroup.replace("{n}", "4"),
+      t.lineupPage.formationGroup.replace("{n}", "5"),
+    ]);
+    expect(within(groups[1]!).getByRole("option", { name: "4-2-3-1" })).toBeInTheDocument();
+  });
+
   it("keeps an injured player on the bench and cannot choose him", () => {
     form({ ...base, playerIds: base.playerIds.filter((id) => id !== "FWD-1") }, [
       { id: "FWD-3", injuredUntil: new Date(Date.now() + 86_400_000).toISOString() },
@@ -169,12 +181,12 @@ describe("LineupForm: saving", () => {
   it("saves the eleven in the order of the places", async () => {
     form();
     const user = userEvent.setup();
-    await user.selectOptions(screen.getByLabelText(t.lineupPage.mentality), "attack");
+    await user.selectOptions(screen.getByLabelText(t.lineupPage.mentality), "attacking");
     await user.click(screen.getByRole("button", { name: t.lineupPage.save }));
     await waitFor(() => expect(refresh).toHaveBeenCalled());
     expect(api).toHaveBeenCalledWith("/manager/lineup", {
       method: "PUT",
-      json: { formation: "4-4-2", mentality: "attack", playerIds: base.playerIds },
+      json: { formation: "4-4-2", mentality: "attacking", playerIds: base.playerIds },
     });
     expect(screen.getByRole("status")).toHaveTextContent(t.lineupPage.savedOk);
   });

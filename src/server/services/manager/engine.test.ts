@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { autoLineup, formationCounts, FORMATIONS, lineupFits } from "@/lib/manager/formations";
+import {
+  autoLineup,
+  formationCounts,
+  FORMATIONS,
+  lineupFits,
+  MENTALITIES,
+} from "@/lib/manager/formations";
 import { buildSchedule, firstKickoff, LEAGUE_SIZE, ROUNDS } from "@/lib/manager/schedule";
 import { computeTable } from "@/lib/manager/table";
 import { simulateMatch, type Side, type SidePlayer } from "./engine";
@@ -77,21 +83,26 @@ describe("simulateMatch", () => {
     expect(weak).toBeGreaterThan(0);
   });
 
-  it("makes an attacking side score more and concede more", () => {
-    let attackFor = 0;
-    let attackAgainst = 0;
-    let balancedFor = 0;
-    let balancedAgainst = 0;
-    for (let i = 0; i < 600; i += 1) {
-      const a = simulateMatch(`ment-${i}`, side(55, "attack"), side(55));
-      const b = simulateMatch(`ment-${i}`, side(55), side(55));
-      attackFor += a.homeGoals;
-      attackAgainst += a.awayGoals;
-      balancedFor += b.homeGoals;
-      balancedAgainst += b.awayGoals;
+  it("scores and concedes more with every step of the mentality", () => {
+    const totals = MENTALITIES.map((mentality) => {
+      let scored = 0;
+      let conceded = 0;
+      for (let i = 0; i < 1500; i += 1) {
+        const r = simulateMatch(`ment-${i}`, side(55, mentality), side(55));
+        scored += r.homeGoals;
+        conceded += r.awayGoals;
+      }
+      return { scored, conceded };
+    });
+    for (let i = 1; i < totals.length; i += 1) {
+      expect(totals[i]!.scored).toBeGreaterThan(totals[i - 1]!.scored);
+      expect(totals[i]!.conceded).toBeGreaterThan(totals[i - 1]!.conceded);
     }
-    expect(attackFor).toBeGreaterThan(balancedFor);
-    expect(attackAgainst).toBeGreaterThan(balancedAgainst);
+  });
+
+  it("is the same match for the same seed and mentality", () => {
+    const run = () => simulateMatch("same", side(55, "all_out"), side(55, "bus"));
+    expect(run()).toEqual(run());
   });
 });
 
@@ -200,6 +211,10 @@ describe("formations", () => {
 
   it("needs 1 GK and the line counts of the formation", () => {
     expect(formationCounts("4-3-3")).toEqual({ GK: 1, DEF: 4, MID: 3, FWD: 3 });
+    expect(formationCounts("4-2-3-1")).toEqual({ GK: 1, DEF: 4, MID: 5, FWD: 1 });
+    expect(formationCounts("3-4-1-2")).toEqual({ GK: 1, DEF: 3, MID: 5, FWD: 2 });
+    expect(formationCounts("4-4-1-1")).toEqual({ GK: 1, DEF: 4, MID: 4, FWD: 2 });
+    expect(formationCounts("5-2-3")).toEqual({ GK: 1, DEF: 5, MID: 2, FWD: 3 });
     for (const formation of FORMATIONS) {
       const c = formationCounts(formation);
       expect(c.GK + c.DEF + c.MID + c.FWD).toBe(11);

@@ -42,6 +42,44 @@ describe("pitchSlots", () => {
   });
 });
 
+describe("pitchSlots: formations with several rows", () => {
+  const rowsOf = (formation: Parameters<typeof pitchSlots>[0], position: string) => {
+    const ys = new Map<number, number>();
+    for (const s of pitchSlots(formation).filter((p) => p.position === position)) {
+      ys.set(s.y, (ys.get(s.y) ?? 0) + 1);
+    }
+    return [...ys.entries()].sort((a, b) => b[0] - a[0]).map(([, n]) => n);
+  };
+
+  it("draws the rows of the formation from the own goal forward", () => {
+    expect(rowsOf("4-2-3-1", "MID")).toEqual([2, 3]);
+    expect(rowsOf("4-1-4-1", "MID")).toEqual([1, 4]);
+    expect(rowsOf("3-4-1-2", "MID")).toEqual([4, 1]);
+    expect(rowsOf("4-4-1-1", "FWD")).toEqual([1, 1]);
+    expect(rowsOf("4-4-2", "MID")).toEqual([4]);
+  });
+
+  it("keeps the lines in order and every place inside the pitch, with unique ids", () => {
+    for (const formation of FORMATIONS) {
+      const slots = pitchSlots(formation);
+      expect(new Set(slots.map((s) => s.id)).size).toBe(11);
+      const lowest = (p: string) =>
+        Math.min(...slots.filter((s) => s.position === p).map((s) => s.y));
+      const highest = (p: string) =>
+        Math.max(...slots.filter((s) => s.position === p).map((s) => s.y));
+      expect(highest("DEF")).toBeLessThan(slots.find((s) => s.position === "GK")!.y);
+      expect(lowest("DEF")).toBeGreaterThan(highest("MID"));
+      expect(lowest("MID")).toBeGreaterThan(highest("FWD"));
+      for (const s of slots) {
+        expect(s.x).toBeGreaterThan(0);
+        expect(s.x).toBeLessThan(100);
+        expect(s.y).toBeGreaterThan(0);
+        expect(s.y).toBeLessThan(100);
+      }
+    }
+  });
+});
+
 describe("assign", () => {
   it("takes the preferred players first, then the best of the position", () => {
     const assignment = assign("4-4-2", ["DEF5", "GK1"], squad);

@@ -223,12 +223,12 @@ describe("resolveLineup", () => {
   it("uses the saved lineup while it fits the squad", () => {
     const saved = {
       formation: "4-4-2",
-      mentality: "attack",
+      mentality: "offensive",
       player_ids: [...pick("GK", 1), ...pick("DEF", 4), ...pick("MID", 4), ...pick("FWD", 2)],
     };
     expect(resolveLineup(squad, saved)).toMatchObject({
       formation: "4-4-2",
-      mentality: "attack",
+      mentality: "offensive",
       saved: true,
     });
   });
@@ -245,7 +245,7 @@ describe("resolveLineup", () => {
     const hurtSquad = squad.map((p) => (p.id === hurt ? { ...p, injured: true } : p));
     const lineup = resolveLineup(hurtSquad, {
       formation: "4-4-2",
-      mentality: "attack",
+      mentality: "offensive",
       player_ids: ids,
     });
     expect(lineup?.saved).toBe(true);

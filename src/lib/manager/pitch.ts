@@ -1,5 +1,5 @@
 import type { Position } from "./attributes";
-import { formationCounts, type Formation } from "./formations";
+import { formationRows, type Formation } from "./formations";
 
 /**
  * The lineup on the pitch: 11 places (a goalkeeper and the lines of the formation) that a player
@@ -22,16 +22,29 @@ export type Assignment = Record<string, string>;
 const LINE_Y: Record<Position, number> = { GK: 88, DEF: 67, MID: 44, FWD: 20 };
 const ORDER: Position[] = ["GK", "DEF", "MID", "FWD"];
 
+/** Distance between two rows of the same line (4-2-3-1 has two midfield rows), in percent. */
+const ROW_STEP = 11;
+
 export function pitchSlots(formation: Formation): Slot[] {
-  const counts = formationCounts(formation);
-  return ORDER.flatMap((position) =>
-    Array.from({ length: counts[position] }, (_, index) => ({
-      id: `${position}-${index}`,
-      position,
-      x: Math.round(((index + 1) / (counts[position] + 1)) * 1000) / 10,
-      y: LINE_Y[position],
-    })),
-  );
+  const slots: Slot[] = [{ id: "GK-0", position: "GK", x: 50, y: LINE_Y.GK }];
+  for (const position of ["DEF", "MID", "FWD"] as const) {
+    const rows = formationRows(formation, position);
+    let index = 0;
+    rows.forEach((count, row) => {
+      // The first row is the one nearer to the own goal (lower on the pitch).
+      const y = LINE_Y[position] + ((rows.length - 1) / 2 - row) * ROW_STEP;
+      for (let i = 0; i < count; i += 1) {
+        slots.push({
+          id: `${position}-${index}`,
+          position,
+          x: Math.round(((i + 1) / (count + 1)) * 1000) / 10,
+          y,
+        });
+        index += 1;
+      }
+    });
+  }
+  return slots;
 }
 
 const best = (a: PitchPlayer, b: PitchPlayer) => b.real - a.real || a.id.localeCompare(b.id);
