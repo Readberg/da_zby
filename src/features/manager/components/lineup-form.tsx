@@ -7,7 +7,12 @@ import { Label, Select } from "@/components/ui/field";
 import { ApiClientError, api } from "@/lib/api-client";
 import { cx } from "@/lib/cx";
 import type { Position } from "@/lib/manager/attributes";
-import { FORMATIONS, MENTALITIES, type Formation, type Mentality } from "@/lib/manager/formations";
+import {
+  FORMATION_GROUPS,
+  MENTALITIES,
+  type Formation,
+  type Mentality,
+} from "@/lib/manager/formations";
 import {
   assign,
   benchOf,
@@ -272,10 +277,17 @@ export function LineupForm({
             disabled={locked}
             onChange={(event) => changeFormation(event.target.value as Formation)}
           >
-            {FORMATIONS.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
+            {FORMATION_GROUPS.map((group) => (
+              <optgroup
+                key={group.defenders}
+                label={lines.formationGroup.replace("{n}", String(group.defenders))}
+              >
+                {group.formations.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </Select>
         </div>
@@ -296,6 +308,7 @@ export function LineupForm({
               </option>
             ))}
           </Select>
+          <p className="text-xs text-muted">{lines.mentalityHint}</p>
         </div>
       </div>
 

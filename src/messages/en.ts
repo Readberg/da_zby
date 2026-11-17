@@ -520,11 +520,11 @@ export const en: MessagesShape<typeof ru> = {
             },
             {
               q: "How do I choose the formation?",
-              a: "On the Lineup page choose the formation (4-4-2, 4-3-3, 3-5-2, 4-5-1, 5-3-2) and the tactics (balanced, attack, defence). Drag the players on the pitch with the mouse or a finger, or tap a player and then the one he replaces. A player plays only on his own position: a goalkeeper in goal, a defender in defence.",
+              a: "On the Lineup page choose the formation (12 formations, grouped by the number of defenders: 3, 4 or 5) and the mentality (seven steps, from “Park the bus” to “All out attack”). The formation changes where the players stand on the pitch; only the number of defenders, midfielders and forwards affects the match. Drag the players on the pitch with the mouse or a finger, or tap a player and then the one he replaces. A player plays only on his own position: a goalkeeper in goal, a defender in defence.",
             },
             {
               q: "How is a match played?",
-              a: "The server counts attacks and shots from the real ratings of the eleven on the pitch. There is a share of chance and a small advantage for the hosts. Attack raises the chances to score and to concede, defence does the opposite. The chronicle with goals and minutes is on the page of the match.",
+              a: "The server counts attacks and shots from the real ratings of the eleven on the pitch. There is a share of chance and a small advantage for the hosts. The more attacking the mentality, the more chances to score and to concede; the more defensive, the opposite. The chronicle with goals and minutes is on the page of the match.",
             },
             {
               q: "How is the table counted?",
@@ -843,8 +843,19 @@ export const en: MessagesShape<typeof ru> = {
       title: "Lineup",
       lead: "Choose the formation and eleven players, each on their own position.",
       formation: "Formation",
-      mentality: "Tactics",
-      mentalities: { balanced: "Balanced", attack: "Attack", defense: "Defence" },
+      formationGroup: "{n} defenders",
+      mentality: "Mentality",
+      mentalityHint:
+        "The bolder the mentality, the more chances for you and for the opponent: “Park the bus” hardly concedes but hardly scores, “All out attack” scores a lot and concedes a lot.",
+      mentalities: {
+        bus: "Park the bus",
+        defensive: "Defensive",
+        cautious: "Cautious",
+        balanced: "Balanced",
+        offensive: "Offensive",
+        attacking: "Attacking",
+        all_out: "All out attack",
+      },
       need: "Needed: 1 goalkeeper, {def} defenders, {mid} midfielders, {fwd} forwards.",
       selected: "Selected {n} of 11",
       save: "Submit lineup",
