@@ -846,7 +846,8 @@ export const en: MessagesShape<typeof ru> = {
       sendNow: "Submit lineup",
       sendOther: "Submit another lineup",
       sentAt: "Lineup submitted {date}.",
-      sendOtherNote: "A new lineup replaces the submitted one; you can change it until lineups close.",
+      sendOtherNote:
+        "A new lineup replaces the submitted one; you can change it until lineups close.",
       sendNote: "Saves the current lineup; without it the best automatic lineup plays.",
       saving: "Submitting…",
       savedOk: "Lineup submitted.",
