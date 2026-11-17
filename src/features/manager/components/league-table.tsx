@@ -3,6 +3,7 @@ import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { getMessages } from "@/i18n/server";
 import type { LeagueView } from "@/server/api/v1/schemas/manager";
 import { ClubBadge } from "./club-badge";
+import { FormBadges } from "./form-badges";
 
 /** The 20 clubs of the league, my club highlighted, bots marked. */
 export function LeagueTable({ view }: { view: LeagueView }) {
@@ -37,6 +38,7 @@ export function LeagueTable({ view }: { view: LeagueView }) {
             <TH className="hidden text-right sm:table-cell">{t.columns.lost}</TH>
             <TH className="text-right">{t.columns.goals}</TH>
             <TH className="hidden text-right sm:table-cell">{t.columns.elo}</TH>
+            <TH className="hidden sm:table-cell">{t.columns.form}</TH>
             <TH className="text-right">{t.columns.points}</TH>
           </tr>
         </THead>
@@ -65,6 +67,9 @@ export function LeagueTable({ view }: { view: LeagueView }) {
                 {row.goalsFor}:{row.goalsAgainst}
               </TD>
               <TD className="hidden text-right sm:table-cell">{row.elo}</TD>
+              <TD className="hidden whitespace-nowrap sm:table-cell">
+                <FormBadges results={row.form} />
+              </TD>
               <TD className="text-right font-display text-lg text-accent">{row.points}</TD>
             </TR>
           ))}

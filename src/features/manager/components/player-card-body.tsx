@@ -5,6 +5,7 @@ import { formatMoney } from "@/lib/manager/money-format";
 import type { Player } from "@/server/api/v1/schemas/manager";
 import type { PlayerStats } from "@/server/api/v1/schemas/manager-stats";
 import { isInjuredNow } from "../injuries";
+import { HelpHint } from "./help-hint";
 import { PlayerStatsBlock } from "./player-stats";
 
 function Meter({ label, value }: { label: string; value: number }) {
@@ -86,15 +87,17 @@ export function PlayerCardBody({
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-line bg-surface p-5">
-          <p className="text-sm uppercase tracking-widest text-muted">{t.playerOverall}</p>
-          <p className="font-display text-5xl text-accent">{player.overall}</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex items-baseline justify-between gap-2 rounded-lg border border-line bg-surface px-4 py-3">
+          <p className="text-xs uppercase tracking-widest text-muted">{t.playerOverall}</p>
+          <p className="font-display text-3xl text-accent">{player.overall}</p>
         </div>
-        <div className="rounded-lg border border-line bg-surface p-5">
-          <p className="text-sm uppercase tracking-widest text-muted">{t.playerReal}</p>
-          <p className="font-display text-5xl">{player.real.toFixed(1)}</p>
-          <p className="mt-1 text-sm text-muted">{t.realHint}</p>
+        <div className="flex items-baseline justify-between gap-2 rounded-lg border border-line bg-surface px-4 py-3">
+          <p className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted">
+            {t.playerReal}
+            <HelpHint faq="squad">{t.realHint}</HelpHint>
+          </p>
+          <p className="font-display text-3xl">{player.real.toFixed(1)}</p>
         </div>
       </div>
 
