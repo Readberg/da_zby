@@ -40,8 +40,12 @@ function LotCard({
       </div>
 
       <p className="text-sm text-muted">
-        {lot.mine ? lines.mine : `${lines.columns.seller}: ${lot.sellerName}`} ·{" "}
-        {lines.columns.ends}: {formatDateTime(lot.endsAt, offsetMinutes, locale)}
+        {lot.pool
+          ? lines.poolLot
+          : lot.mine
+            ? lines.mine
+            : `${lines.columns.seller}: ${lot.sellerName}`}{" "}
+        · {lines.columns.ends}: {formatDateTime(lot.endsAt, offsetMinutes, locale)}
       </p>
 
       <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
@@ -72,7 +76,8 @@ function LotCard({
   );
 }
 
-function LotList({
+/** The lots as cards; the auction page and the pool page (the market) both use it. */
+export function LotList({
   lots,
   auctions,
   offsetMinutes,
@@ -105,7 +110,7 @@ export function AuctionView({
   const lines = t.auction;
   const locale = getLocale();
   const money = (n: number) => formatMoney(n, locale, t.money.format);
-  const others = auctions.lots.filter((lot) => !lot.mine);
+  const others = auctions.lots.filter((lot) => !lot.mine && !lot.pool);
   const mine = auctions.lots.filter((lot) => lot.mine);
   const bids = auctions.lots.filter((lot) => lot.myBid !== null);
 

@@ -11,6 +11,11 @@ test.describe("the football manager for a guest", () => {
     await expect(page).toHaveURL(/\/login\?next=%2Fmanager/);
   });
 
+  test("sends a guest from the market (the pool by bids) to the login page", async ({ page }) => {
+    await page.goto("/manager/market");
+    await expect(page).toHaveURL(/\/login\?next=%2Fmanager%2Fmarket/);
+  });
+
   test("refuses the API without a session", async ({ request }) => {
     const response = await request.get("/api/v1/manager/club");
     expect(response.status()).toBe(401);

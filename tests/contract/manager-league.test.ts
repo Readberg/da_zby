@@ -371,6 +371,7 @@ describe("finance and market", () => {
     ["manager.player_unavailable"],
     ["manager.squad_full"],
     ["manager.no_money"],
+    ["manager.pool_by_bids"],
   ])("answers 409 %s", async (code) => {
     buyFreeAgent.mockRejectedValueOnce(new ApiError(409, code, "Conflict", "no"));
     await expectProblem(await buy.POST(post({ playerId: PLAYERS[0] })), 409, code);

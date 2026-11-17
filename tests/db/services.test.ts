@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { getContracts } from "@/server/services/manager/contracts";
 import { releaseExpiredContracts } from "@/server/services/manager/contracts";
-import { getAuctions, settleDueAuctions } from "@/server/services/manager/auction";
+import { getAuctions, listPoolLots, settleDueAuctions } from "@/server/services/manager/auction";
 import { getMyClub, getMyPlayer, listCities } from "@/server/services/manager/club";
 import {
   getLeagueView,
@@ -10,7 +10,12 @@ import {
   listMyMatches,
 } from "@/server/services/manager/league";
 import { getRating } from "@/server/services/manager/rating";
-import { getFinance, getMarket, runMarketPools } from "@/server/services/manager/market";
+import {
+  buyFreeAgent,
+  getFinance,
+  getMarket,
+  runMarketPools,
+} from "@/server/services/manager/market";
 import { serviceClient, signedInClient, type Db } from "./helpers";
 
 // The queries of the manager service layer against the real PostgREST and a seeded league
@@ -123,6 +128,17 @@ describe("manager service queries", () => {
     const market = await getMarket(a, world.users.a.id);
     expect(market.players.length).toBeGreaterThan(0);
     expect(market.open).toBe(false);
+    // D-146: every free player is a lot without a seller; a second call makes nothing; no instant buy.
+    const pool = (await getAuctions(admin, world.users.a.id)).lots.filter((lot) => lot.pool);
+    expect(pool.length).toBeGreaterThan(0);
+    expect(pool.every((lot) => lot.sellerClubId === null && lot.bidCount === 0)).toBe(true);
+    expect(await listPoolLots(admin)).toBe(0);
+    await expect(
+      buyFreeAgent(admin, world.users.a.id, market.players[0]!.id),
+    ).rejects.toMatchObject({
+      status: 409,
+      code: "manager.pool_by_bids",
+    });
 
     const lots = await getAuctions(admin, world.users.a.id);
     expect(Array.isArray(lots.lots)).toBe(true);

@@ -100,6 +100,7 @@ beforeEach(() => {
         player,
         sellerClubId: ID2,
         sellerName: "Торпедо",
+        pool: false,
         mine: false,
         nominal: 1000,
         startPrice: 1000,

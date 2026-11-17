@@ -33,6 +33,7 @@ export const ERROR_CODES = {
   managerPlayerUnavailable: "manager.player_unavailable",
   managerSquadFull: "manager.squad_full",
   managerNoMoney: "manager.no_money",
+  managerPoolByBids: "manager.pool_by_bids",
   managerPriceInvalid: "manager.price_invalid",
   managerStepInvalid: "manager.step_invalid",
   managerPlayerLocked: "manager.player_locked",

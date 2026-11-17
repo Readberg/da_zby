@@ -40,6 +40,7 @@ export const managerMarketEn: MessagesShape<typeof managerMarketRu> = {
     bidding: "Bidding…",
     placed: "Bid placed.",
     mine: "Your lot",
+    poolLot: "Free player: no seller",
     cancel: "Take off",
     cancelling: "Taking off…",
     cancelled: "Lot taken off.",

@@ -37,6 +37,7 @@ export const managerMarketRu = {
     bidding: "Ставим…",
     placed: "Ставка принята.",
     mine: "Ваш лот",
+    poolLot: "Свободный игрок: продавца нет",
     cancel: "Снять с торгов",
     cancelling: "Снимаем…",
     cancelled: "Лот снят.",

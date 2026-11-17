@@ -242,9 +242,9 @@ export const managerEndpoints = {
   managerBuy: defineEndpoint({
     method: "post",
     path: "/manager/market/buy",
-    summary: "Football manager: buy a free player at his nominal value",
+    summary: "Football manager: buy a free player at his nominal value (obsolete)",
     description:
-      "409 manager.market_closed before 10 played matches, 409 manager.player_unavailable when the player is gone or from another league, 409 manager.squad_full with 23 players, 409 manager.no_money when the budget is below the price or negative. The price is paid out of the game (it goes to nobody).",
+      "Obsolete since D-146: the free players of the pool are bought by bids (POST /manager/auctions/bid on the lots without a seller), this call always answers 409 manager.pool_by_bids. Kept for old clients. Before: 409 manager.market_closed before 10 played matches, 409 manager.player_unavailable when the player is gone or from another league, 409 manager.squad_full with 23 players, 409 manager.no_money when the budget is below the price or negative. The price is paid out of the game (it goes to nobody).",
     tags: ["manager"],
     auth: "user",
     body: buyBodySchema,
