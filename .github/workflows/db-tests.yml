@@ -1,0 +1,65 @@
+name: db-tests
+
+# Tests on a real local Supabase stack: migrations from scratch, RLS, grants, service queries (D-141).
+# Not required for merge yet; no production secrets (the stack is local and throw-away).
+on:
+  pull_request:
+    branches: [dev, main, "integration/**"]
+    paths:
+      [
+        "supabase/**",
+        "src/server/**",
+        "src/lib/**",
+        "tests/db/**",
+        ".github/workflows/db-tests.yml",
+      ]
+  push:
+    branches: [dev, main, "integration/**"]
+    paths:
+      [
+        "supabase/**",
+        "src/server/**",
+        "src/lib/**",
+        "tests/db/**",
+        ".github/workflows/db-tests.yml",
+      ]
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: db-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  db-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase (applies every migration to an empty database)
+        run: supabase start -x realtime,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Run db tests
+        run: |
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          export DB_TEST_URL="$API_URL" DB_TEST_ANON_KEY="$ANON_KEY" DB_TEST_SERVICE_KEY="$SERVICE_ROLE_KEY"
+          pnpm exec vitest run -c vitest.db.config.ts
+
+      - name: Database log on failure
+        if: failure()
+        run: docker logs supabase_db_da_zby 2>&1 | tail -n 150
+
+      - name: Stop
+        if: always()
+        run: supabase stop --no-backup

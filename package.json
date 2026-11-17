@@ -1,6 +1,6 @@
 {
   "name": "da-zby",
-  "version": "0.39.0",
+  "version": "0.40.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,6 +11,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:db": "tsx scripts/test-db.ts",
     "test:e2e": "playwright test",
     "db:push": "tsx scripts/db.ts push",
     "db:types": "tsx scripts/db.ts types && prettier --write src/types/database.ts",

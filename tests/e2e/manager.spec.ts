@@ -16,6 +16,16 @@ test.describe("the football manager for a guest", () => {
     expect(response.status()).toBe(401);
   });
 
+  test("sends a guest from the rating page to the login page and refuses its API", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/manager/rating");
+    await expect(page).toHaveURL(/\/login\?next=%2Fmanager%2Frating/);
+    const response = await request.get("/api/v1/manager/rating");
+    expect(response.status()).toBe(401);
+  });
+
   test("keeps the section out of search results", async ({ request }) => {
     const sitemap = await request.get("/sitemap.xml");
     if (sitemap.ok()) expect(await sitemap.text()).not.toContain("/manager");
