@@ -7,6 +7,17 @@ import { memberClub } from "./auction";
 
 type Db = SupabaseClient<Database>;
 
+/** A value in a PostgREST filter: in double quotes, `"` and `\` escaped with a backslash. */
+export function pgrstQuote(value: string): string {
+  return `"${value.replace(/[\\"]/g, "\\$&")}"`;
+}
+
+/** The clubs above a club in the rating: higher Elo, then the name, then the id (the same order as the list). */
+export function aboveFilter(club: { elo: number; name: string; id: string }): string {
+  const name = pgrstQuote(club.name);
+  return `elo.gt.${club.elo},and(elo.eq.${club.elo},name.lt.${name}),and(elo.eq.${club.elo},name.eq.${name},id.lt.${club.id})`;
+}
+
 /**
  * The rating of the real clubs by Elo (bots are not in it), with their league. Read with the service
  * role after the caller is known: the rating is open to every manager, the rest of other leagues is not.
@@ -43,9 +54,7 @@ export async function getRating(admin: Db, userId: string, query: RatingQuery): 
     .select("id", { count: "exact", head: true })
     .eq("is_bot", false)
     .not("league_id", "is", null)
-    .or(
-      `elo.gt.${mine.data.elo},and(elo.eq.${mine.data.elo},name.lt."${mine.data.name.replace(/"/g, '""')}"),and(elo.eq.${mine.data.elo},name.eq."${mine.data.name.replace(/"/g, '""')}",id.lt.${me.id})`,
-    );
+    .or(aboveFilter({ elo: mine.data.elo, name: mine.data.name, id: me.id }));
   if (above.error) throw above.error;
 
   return {

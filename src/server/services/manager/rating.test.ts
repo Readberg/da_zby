@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "@/server/api/v1/problem";
-import { getRating } from "./rating";
+import { aboveFilter, getRating, pgrstQuote } from "./rating";
 
 const ME = { id: "c2", name: "Мой", elo: 1100, league_id: "league-1" };
 const ROWS = [
@@ -88,5 +88,17 @@ describe("getRating", () => {
     await expect(
       getRating(db, "u1", { scope: "all", page: 1, pageSize: 50 }),
     ).rejects.toBeInstanceOf(ApiError);
+  });
+});
+
+describe("the filter of clubs above mine", () => {
+  it("quotes a value and escapes quotes and backslashes", () => {
+    expect(pgrstQuote("Динамо")).toBe('"Динамо"');
+    expect(pgrstQuote('a"b\\c')).toBe('"a\\"b\\\\c"');
+  });
+
+  it("keeps a name with special characters inside one quoted value", () => {
+    const filter = aboveFilter({ elo: 1000, name: 'x"),id.gt.0,and(name.eq."', id: "c1" });
+    expect(filter).toContain('name.lt."x\\"),id.gt.0,and(name.eq.\\""');
   });
 });
