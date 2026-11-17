@@ -8,12 +8,7 @@ import { requireProfile } from "@/server/services/current-user";
 export async function loadMember(returnTo: string) {
   const user = await requireProfile(returnTo);
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("utc_offset_minutes")
-    .eq("id", user.id)
-    .maybeSingle();
-  return { user, supabase, offsetMinutes: data?.utc_offset_minutes ?? 180 };
+  return { user, supabase, offsetMinutes: user.utcOffsetMinutes ?? 180 };
 }
 
 /** Runs a query of the section; a visitor with no club yet is sent to the page that makes one. */

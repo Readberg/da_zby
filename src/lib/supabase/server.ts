@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { publicEnv } from "@/lib/env";
+import { log } from "@/lib/log";
 import type { Database } from "@/types/database";
 
 /**
@@ -12,6 +13,23 @@ import type { Database } from "@/types/database";
  * With `accessToken` (an external API client's `Authorization: Bearer`) the queries are made as that
  * user instead of the cookie session, so RLS sees the same person that `getUser(token)` verified.
  */
+/** A request to Supabase slower than this is written to the log (the path only, never the query). */
+export const SLOW_QUERY_MS = 1500;
+
+/** `fetch` that logs slow calls to Supabase, so a slow page can be traced to the call behind it. */
+export async function timedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const started = Date.now();
+  try {
+    return await fetch(input, init);
+  } finally {
+    const ms = Date.now() - started;
+    if (ms >= SLOW_QUERY_MS) {
+      const url = new URL(input instanceof Request ? input.url : String(input));
+      log("warn", "supabase.slow", { ms, method: init?.method ?? "GET", path: url.pathname });
+    }
+  }
+}
+
 export async function createClient(accessToken?: string) {
   // A session check reads the clock (token expiry). That is request-time work: say so, otherwise
   // Next.js reports an unstable value while prerendering for every signed-in page (DAZBY-129).
@@ -22,9 +40,10 @@ export async function createClient(accessToken?: string) {
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
     publicEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
-      ...(accessToken
-        ? { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
-        : {}),
+      global: {
+        fetch: timedFetch,
+        ...(accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {}),
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
