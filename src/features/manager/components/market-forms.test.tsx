@@ -14,6 +14,7 @@ vi.mock("@/lib/api-client", async (original) => ({
 }));
 
 const { BidForm } = await import("./bid-form");
+const { BidDialog } = await import("./bid-dialog");
 const { CancelLotButton } = await import("./cancel-lot-button");
 const { TradeButtons } = await import("./trade-buttons");
 const { ContractActions } = await import("./contract-actions");
@@ -50,6 +51,25 @@ describe("BidForm", () => {
   it("cannot be sent when the club cannot bid", () => {
     render(<BidForm t={t} auctionId="a1" minBid={1200} disabled />);
     expect(screen.getByRole("button", { name: t.auction.bid })).toBeDisabled();
+  });
+});
+
+describe("BidDialog", () => {
+  it("opens the bid form in a window after the button is pressed", async () => {
+    render(
+      <BidDialog
+        t={t}
+        auctionId="a1"
+        playerName="Ivan Petrov"
+        minBidText="$1,200"
+        minBid={1200}
+        disabled={false}
+      />,
+    );
+    expect(screen.queryByLabelText(t.auction.amountLabel)).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: t.auction.bid }));
+    expect(screen.getByRole("dialog", { name: "Ivan Petrov" })).toBeInTheDocument();
+    expect(screen.getByLabelText(t.auction.amountLabel)).toHaveValue(1200);
   });
 });
 
