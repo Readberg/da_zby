@@ -72,7 +72,7 @@ export async function checkManager(deps: Deps = {}): Promise<ManagerState> {
     if (await (deps.changed ?? announcedChange)(state)) {
       await (deps.notify ?? tellAdmins)(
         state === "error"
-          ? "⚠️ Менеджер: матчи тура не рассчитаны больше 30 минут после времени. Проверьте планировщик (manager-rounds) и CRON_SECRET."
+          ? "⚠️ Менеджер: матчи или торги не рассчитаны больше 30 минут после времени. Проверьте планировщик (manager-rounds) и CRON_SECRET."
           : "✅ Менеджер: расчёт туров снова работает.",
       );
     }
