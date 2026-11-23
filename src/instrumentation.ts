@@ -22,7 +22,7 @@ export async function onRequestError(
 }
 
 // Runs once when the server starts: fail fast with a readable message on bad configuration and
-// keep the login bot's webhook pointed at this site.
+// start the football manager's round timer and keep the login bot's webhook pointed at this site.
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
@@ -31,6 +31,10 @@ export async function register() {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const isLocal = !siteUrl || /\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(siteUrl);
+  if (process.env.NODE_ENV === "production" && !isLocal && serverEnv.SUPABASE_SECRET_KEY) {
+    const { startRoundsTicker } = await import("./server/services/manager/ticker");
+    startRoundsTicker();
+  }
   if (process.env.NODE_ENV !== "production" || isLocal || !serverEnv.TELEGRAM_BOT_TOKEN) return;
 
   try {
